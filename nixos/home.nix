@@ -22,6 +22,28 @@
     vscode
   ];
 
+  # Configure Git declaratively
+  programs.git = {
+    enable = true;
+    userName = "Chris Esplin";
+    userEmail = "chris@chrisesplin.com";
+    defaultBranch = "master";
+    core.editor = "vim";
+    credential.helper = "cache";
+    aliases = {
+      co = "checkout";
+      br = "branch";
+      ci = "commit";
+      st = "status";
+      lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+      nuke = "!git branch | grep -v \"master\" | xargs git branch -D";
+      upstream = "!git push -u origin HEAD";
+      new = "co -b";
+      remove = "br -D";
+      "remove-remote" = "push origin --delete";
+    };
+  };
+
   # Configure Zsh
   programs.zsh = {
     enable = true;
