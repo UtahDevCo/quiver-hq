@@ -17,15 +17,22 @@
   users.users.chris = {
     isNormalUser = true;
     description = "Chris";
+    uid = 1001;
     extraGroups = [ "wheel" "networkmanager" ];
   };
   users.defaultUserShell = pkgs.zsh;
+
+  security.sudo = {
+    enable = true;
+    wheelNeedsPassword = false;
+  };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # Enable flakes and the new nix command
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.sandbox = false;
 
   # Enable Zsh system-wide
   programs.zsh.enable = true;
@@ -40,7 +47,11 @@
     curl
     htop
     nix-ld
+    tailscale
   ];
+
+  # Enable Tailscale service
+  services.tailscale.enable = true;
 
   # Hook in Home Manager and tell it to use our home.nix
   home-manager = {

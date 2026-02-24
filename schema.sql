@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS missions (
+    id TEXT PRIMARY KEY,
+    status TEXT NOT NULL,
+    goal TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS mission_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mission_id TEXT NOT NULL,
+    entry TEXT NOT NULL,
+    metadata TEXT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (mission_id) REFERENCES missions(id)
+);
