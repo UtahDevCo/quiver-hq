@@ -12,7 +12,7 @@
       User = "chris";
       WorkingDirectory = "/home/chris/dev/quiver-hq";
       # We use a wrapper script to load 1Password secrets before starting
-      ExecStart = "${pkgs.bash}/bin/bash -c 'source /home/chris/.zshrc; exec /home/chris/dev/quiver-hq/controller'";
+      ExecStart = "${pkgs.zsh}/bin/zsh -c 'source /home/chris/.zshrc; exec /home/chris/dev/quiver-hq/bin/controller'";
       Restart = "always";
       RestartSec = "10";
     };
@@ -24,6 +24,7 @@
       git
       bash
       coreutils
+      zsh
     ];
   };
 }

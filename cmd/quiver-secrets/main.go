@@ -235,7 +235,7 @@ func hydrateFile(tmplPath string, secrets map[string]map[string]string) error {
 		envLines = append(envLines, line) // Keep template if not found
 	}
 
-	envPath := filepath.Join(filepath.Dir(tmplPath), ".env")
+	envPath := filepath.Join(filepath.Dir(tmplPath), ".env.local")
 	if err := os.WriteFile(envPath, []byte(strings.Join(envLines, "\n")), 0600); err != nil {
 		return err
 	}

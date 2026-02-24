@@ -15,6 +15,7 @@ import (
 	"github.com/chrisesplin/quiver-hq/internal/manager"
 	"github.com/chrisesplin/quiver-hq/internal/projects"
 	"github.com/google/generative-ai-go/genai"
+	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 )
 
@@ -23,6 +24,11 @@ func main() {
 	defer stop()
 
 	rootDir, _ := os.Getwd()
+
+	// Load .env.local if it exists
+	if err := godotenv.Load(".env.local"); err != nil {
+		log.Println("No .env.local found or error loading it, proceeding with env/1Password")
+	}
 
 	// 1. Load Secrets
 	apiKey := getSecret("GEMINI_API_KEY")
