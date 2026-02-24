@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/chrisesplin/quiver-hq/internal/db"
@@ -17,7 +18,8 @@ func main() {
 	}
 	defer database.Close()
 
-	mgr := manager.NewManager(database)
+	rootDir, _ := os.Getwd()
+	mgr := manager.NewManager(database, rootDir)
 
 	ctx := context.Background()
 	missionID := "test-run-2"
