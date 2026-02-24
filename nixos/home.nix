@@ -68,7 +68,7 @@
 
       # 1. Setup Path
       export GOPATH=$HOME/go
-      export PATH=$GOPATH/bin:$PATH
+      export PATH=$HOME/dev/quiver-hq/bin:$GOPATH/bin:$PATH
 
       # 2. Fetch API Keys with 1Password
       if [[ -z "$GEMINI_API_KEY" ]]; then
