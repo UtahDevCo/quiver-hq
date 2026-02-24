@@ -1,0 +1,3 @@
+[submodule "projects/wiley"]
+	path = projects/wiley
+	url = git@github.com:UtahDevCo/wiley.git
