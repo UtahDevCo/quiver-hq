@@ -12,90 +12,115 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const itemName = "quiver-hq"
+
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: quiver-secrets [ingest|hydrate] [path]")
+		fmt.Println("Usage: quiver-secrets [ingest|hydrate] [path1] [path2] ...")
 		os.Exit(1)
 	}
 
 	command := os.Args[1]
-	path := "."
-	if len(os.Args) > 2 {
-		path = os.Args[2]
+	paths := os.Args[2:]
+	if len(paths) == 0 {
+		paths = []string{"."}
 	}
 
-	switch command {
-	case "ingest":
-		if err := ingest(path); err != nil {
-			log.Fatalf("ingest failed: %v", err)
+	for _, path := range paths {
+		absPath, err := filepath.Abs(path)
+		if err != nil {
+			log.Fatalf("failed to get absolute path for %s: %v", path, err)
 		}
-	case "hydrate":
-		if err := hydrate(path); err != nil {
-			log.Fatalf("hydrate failed: %v", err)
+
+		switch command {
+		case "ingest":
+			if err := ingestBatch(absPath); err != nil {
+				log.Fatalf("ingest failed for %s: %v", path, err)
+			}
+		case "hydrate":
+			if err := hydrateRecursive(absPath); err != nil {
+				log.Fatalf("hydrate failed for %s: %v", path, err)
+			}
+		default:
+			fmt.Printf("Unknown command: %s\n", command)
+			os.Exit(1)
 		}
-	default:
-		fmt.Printf("Unknown command: %s\n", command)
-		os.Exit(1)
 	}
 }
 
-func ingest(path string) error {
-	envFiles := []string{".env", ".env.local", ".env.development"}
-	var envPath string
-	for _, f := range envFiles {
-		p := filepath.Join(path, f)
-		if _, err := os.Stat(p); err == nil {
-			envPath = p
-			break
+func ingestBatch(rootPath string) error {
+	var envFiles []string
+	err := filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && info.Name() == ".env.local" {
+			envFiles = append(envFiles, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	if len(envFiles) == 0 {
+		fmt.Printf("No .env.local files found in %s\n", rootPath)
+		return nil
+	}
+
+	// Ensure item exists
+	checkCmd := exec.Command("op", "item", "get", itemName, "--format", "json")
+	if err := checkCmd.Run(); err != nil {
+		fmt.Printf("Creating 1Password item '%s' as API Credential...\n", itemName)
+		createCmd := exec.Command("op", "item", "create", "--category", "API Credential", "--title", itemName)
+		if out, err := createCmd.CombinedOutput(); err != nil {
+			return fmt.Errorf("failed to create 1Password item: %v\nOutput: %s", err, string(out))
 		}
 	}
 
-	if envPath == "" {
-		return fmt.Errorf("no .env file found in %s", path)
+	for _, envPath := range envFiles {
+		if err := ingestFile(rootPath, envPath); err != nil {
+			fmt.Printf("Warning: failed to ingest %s: %v\n", envPath, err)
+		}
 	}
 
+	return nil
+}
+
+func ingestFile(rootPath, envPath string) error {
 	env, err := godotenv.Read(envPath)
 	if err != nil {
 		return err
 	}
 
-	itemName := filepath.Base(filepath.Dir(envPath))
-	if itemName == "." || itemName == "/" {
-		wd, _ := os.Getwd()
-		itemName = filepath.Base(wd)
+	// Calculate relative path for the section name
+	relPath, err := filepath.Rel(rootPath, filepath.Dir(envPath))
+	if err != nil {
+		return err
 	}
 
-	fmt.Printf("Ingesting %s into 1Password item '%s'...\n", envPath, itemName)
+	// Include the base of the root path for more context (e.g., "tools/apps/gtd" instead of "apps/gtd")
+	sectionName := filepath.Join(filepath.Base(rootPath), relPath)
+	// Clean up the path (remove trailing slashes, dots)
+	sectionName = filepath.Clean(sectionName)
+	// Replace periods with underscores to avoid 'op' syntax errors (e.g., "utahdevco.com" -> "utahdevco_com")
+	sectionName = strings.ReplaceAll(sectionName, ".", "_")
 
-	// Build 'op' command to create/edit item
-	// For simplicity, we'll use 'op item create --template' or similar.
-	// Actually, 'op item create --category "Secure Note" --title itemName'
-	// and then add fields.
-	
-	// Check if item exists
-	checkCmd := exec.Command("op", "item", "get", itemName, "--format", "json")
-	exists := checkCmd.Run() == nil
+	fmt.Printf("Ingesting %s into 1Password item '%s' section '%s'...\n", envPath, itemName, sectionName)
 
-	args := []string{"item"}
-	if exists {
-		args = append(args, "edit", itemName)
-	} else {
-		args = append(args, "create", "--category", "Secure Note", "--title", itemName)
-	}
-
+	args := []string{"item", "edit", itemName}
 	for k, v := range env {
-		args = append(args, fmt.Sprintf("%s=%s", k, v))
+		// Syntax: [section.]field=value
+		args = append(args, fmt.Sprintf("%s.%s=%s", sectionName, k, v))
 	}
 
 	cmd := exec.Command("op", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to run 'op': %v", err)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("failed to run 'op item edit': %v\nOutput: %s", err, string(out))
 	}
 
-	// Create .env.tmpl
-	tmplPath := filepath.Join(path, ".env.tmpl")
+	// Create/Update .env.tmpl
+	tmplPath := filepath.Join(filepath.Dir(envPath), ".env.tmpl")
 	tmplFile, err := os.Create(tmplPath)
 	if err != nil {
 		return err
@@ -103,34 +128,27 @@ func ingest(path string) error {
 	defer tmplFile.Close()
 
 	for k := range env {
-		fmt.Fprintf(tmplFile, "%s={{ .%s }}\n", k, k)
+		// New format: KEY={{ .SectionName.KEY }}
+		fmt.Fprintf(tmplFile, "%s={{ .%s.%s }}\n", k, sectionName, k)
 	}
 
-	fmt.Printf("Created template at %s\n", tmplPath)
+	fmt.Printf("Created/Updated template at %s\n", tmplPath)
 	return nil
 }
 
 type OpItem struct {
 	Fields []struct {
-		Label string `json:"label"`
-		Value string `json:"value"`
+		Label   string `json:"label"`
+		Value   string `json:"value"`
+		Section struct {
+			Label string `json:"label"`
+		} `json:"section"`
 	} `json:"fields"`
 }
 
-func hydrate(path string) error {
-	tmplPath := filepath.Join(path, ".env.tmpl")
-	if _, err := os.Stat(tmplPath); err != nil {
-		return fmt.Errorf(".env.tmpl not found at %s", tmplPath)
-	}
-
-	itemName := filepath.Base(filepath.Dir(tmplPath))
-	if itemName == "." || itemName == "/" {
-		wd, _ := os.Getwd()
-		itemName = filepath.Base(wd)
-	}
-
-	fmt.Printf("Hydrating .env from 1Password item '%s'...\n", itemName)
-
+func hydrateRecursive(rootPath string) error {
+	// Fetch 1Password item once
+	fmt.Printf("Fetching 1Password item '%s'...\n", itemName)
 	cmd := exec.Command("op", "item", "get", itemName, "--format", "json")
 	output, err := cmd.Output()
 	if err != nil {
@@ -142,11 +160,35 @@ func hydrate(path string) error {
 		return err
 	}
 
-	secrets := make(map[string]string)
+	// Map of section -> key -> value
+	secrets := make(map[string]map[string]string)
 	for _, f := range item.Fields {
-		secrets[f.Label] = f.Value
+		section := f.Section.Label
+		if section == "" {
+			section = "unsectioned"
+		}
+		if _, ok := secrets[section]; !ok {
+			secrets[section] = make(map[string]string)
+		}
+		secrets[section][f.Label] = f.Value
 	}
 
+	// Find all .env.tmpl files
+	return filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && info.Name() == ".env.tmpl" {
+			if err := hydrateFile(path, secrets); err != nil {
+				fmt.Printf("Warning: failed to hydrate %s: %v\n", path, err)
+			}
+		}
+		return nil
+	})
+}
+
+func hydrateFile(tmplPath string, secrets map[string]map[string]string) error {
+	fmt.Printf("Hydrating %s...\n", tmplPath)
 	tmplContent, err := os.ReadFile(tmplPath)
 	if err != nil {
 		return err
@@ -155,7 +197,8 @@ func hydrate(path string) error {
 	lines := strings.Split(string(tmplContent), "\n")
 	var envLines []string
 	for _, line := range lines {
-		if strings.TrimSpace(line) == "" {
+		line = strings.TrimSpace(line)
+		if line == "" {
 			continue
 		}
 		parts := strings.SplitN(line, "=", 2)
@@ -165,17 +208,34 @@ func hydrate(path string) error {
 		key := parts[0]
 		valTmpl := parts[1]
 
-		// Simple replacement for {{ .KEY }}
-		secretKey := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(valTmpl, "{{ ."), " }}"))
-		if val, ok := secrets[secretKey]; ok {
-			envLines = append(envLines, fmt.Sprintf("%s=%s", key, val))
+		// Format: {{ .SectionName.KEY }}
+		// Remove {{ . and }}
+		content := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(valTmpl, "{{ ."), " }}"))
+		
+		// Split into Section and Key
+		dotParts := strings.SplitN(content, ".", 2)
+		var section, secretKey string
+		if len(dotParts) == 2 {
+			section = dotParts[0]
+			secretKey = dotParts[1]
 		} else {
-			fmt.Printf("Warning: Secret %s not found in 1Password\n", secretKey)
-			envLines = append(envLines, line) // Keep template if not found? Or leave empty?
+			// Backward compatibility or unsectioned
+			section = "unsectioned"
+			secretKey = content
 		}
+
+		if sec, ok := secrets[section]; ok {
+			if val, ok := sec[secretKey]; ok {
+				envLines = append(envLines, fmt.Sprintf("%s=%s", key, val))
+				continue
+			}
+		}
+
+		fmt.Printf("Warning: Secret %s.%s not found in 1Password\n", section, secretKey)
+		envLines = append(envLines, line) // Keep template if not found
 	}
 
-	envPath := filepath.Join(path, ".env")
+	envPath := filepath.Join(filepath.Dir(tmplPath), ".env")
 	if err := os.WriteFile(envPath, []byte(strings.Join(envLines, "\n")), 0600); err != nil {
 		return err
 	}
