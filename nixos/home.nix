@@ -25,22 +25,24 @@
   # Configure Git declaratively
   programs.git = {
     enable = true;
-    userName = "Chris Esplin";
-    userEmail = "chris@chrisesplin.com";
-    defaultBranch = "master";
-    core.editor = "vim";
-    credential.helper = "cache";
-    aliases = {
-      co = "checkout";
-      br = "branch";
-      ci = "commit";
-      st = "status";
-      lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
-      nuke = "!git branch | grep -v \"master\" | xargs git branch -D";
-      upstream = "!git push -u origin HEAD";
-      new = "co -b";
-      remove = "br -D";
-      "remove-remote" = "push origin --delete";
+    settings = {
+      user.name = "Chris Esplin";
+      user.email = "chris@chrisesplin.com";
+      init.defaultBranch = "master";
+      core.editor = "vim";
+      credential.helper = "cache";
+      alias = {
+        co = "checkout";
+        br = "branch";
+        ci = "commit";
+        st = "status";
+        lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+        nuke = "!git branch | grep -v \"master\" | xargs git branch -D";
+        upstream = "!git push -u origin HEAD";
+        new = "co -b";
+        remove = "br -D";
+        "remove-remote" = "push origin --delete";
+      };
     };
   };
 
@@ -56,12 +58,13 @@
 
     initContent = ''
       # 0. Ensure basic system tools are in PATH immediately
-      export PATH="/run/current-system/sw/bin:$HOME/.nix-profile/bin:$PATH"
+      export PATH="$HOME/bin:$HOME/.nix-profile/bin:$PATH"
 
       alias ll="ls -al"
-      alias reload='(cd /home/chris/dev/quiver-hq && sudo nixos-rebuild switch --flake .#quiver-wsl)'
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
       alias opsignin='eval $(op signin)'
+      alias qlogs='journalctl -u quiver-controller -f'
+      alias qrestart='sudo systemctl restart quiver-controller'
 
       # 1. Setup Path
       export GOPATH=$HOME/go
@@ -69,7 +72,7 @@
 
       # 2. Fetch API Keys with 1Password
       if [[ -z "$GEMINI_API_KEY" ]]; then
-          export GEMINI_API_KEY=$(op read "op://Personal/GEMINI_API_KEY/password" 2>/dev/null)
+          export GEMINI_API_KEY=$(op read "op://Personal/quiver-hq/GEMINI_API_KEY" 2>/dev/null)
       fi
 
       # 3. Setup direnv
