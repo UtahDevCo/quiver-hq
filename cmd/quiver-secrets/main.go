@@ -70,7 +70,15 @@ func ingestBatch(rootPath string) error {
 
 	// Ensure item exists
 	checkCmd := exec.Command("op", "item", "get", itemName, "--format", "json")
-	if err := checkCmd.Run(); err != nil {
+	checkOut, err := checkCmd.CombinedOutput()
+	if err != nil {
+		// Only create the item if it genuinely doesn't exist. Any other error
+		// (e.g. duplicate items, auth failure) should be surfaced to the user
+		// rather than silently creating yet another duplicate.
+		outStr := string(checkOut)
+		if !strings.Contains(outStr, "isn't an item") && !strings.Contains(outStr, "not found") {
+			return fmt.Errorf("unexpected error checking 1Password item '%s': %v\nOutput: %s", itemName, err, outStr)
+		}
 		fmt.Printf("Creating 1Password item '%s' as API Credential...\n", itemName)
 		createCmd := exec.Command("op", "item", "create", "--category", "API Credential", "--title", itemName)
 		if out, err := createCmd.CombinedOutput(); err != nil {
@@ -103,6 +111,8 @@ func ingestFile(rootPath, envPath string) error {
 	sectionName := filepath.Join(filepath.Base(rootPath), relPath)
 	// Clean up the path (remove trailing slashes, dots)
 	sectionName = filepath.Clean(sectionName)
+	// Normalize path separators to forward slashes (Windows uses backslashes which 'op' treats as escape chars)
+	sectionName = filepath.ToSlash(sectionName)
 	// Replace periods with underscores to avoid 'op' syntax errors (e.g., "utahdevco.com" -> "utahdevco_com")
 	sectionName = strings.ReplaceAll(sectionName, ".", "_")
 
