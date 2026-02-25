@@ -1,3 +1,18 @@
 [submodule "projects/wiley"]
 	path = projects/wiley
 	url = git@github.com:UtahDevCo/wiley.git
+[submodule "projects/job-harvester"]
+	path = projects/job-harvester
+	url = git@github.com:UtahDevCo/job-harvester.git
+[submodule "projects/tools"]
+	path = projects/tools
+	url = git@github.com:UtahDevCo/tools.git
+[submodule "projects/trikin"]
+	path = projects/trikin
+	url = git@github.com:UtahDevCo/trikin.co.git
+[submodule "projects/quiver-photos-v2"]
+	path = projects/quiver-photos-v2
+	url = git@github.com:deltaepsilon/quiver-photos-v2.git
+[submodule "projects/therapyanimalhub.com"]
+	path = projects/therapyanimalhub.com
+	url = git@github.com:deltaepsilon/therapyanimalhub.com.git
