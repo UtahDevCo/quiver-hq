@@ -161,6 +161,37 @@ Use this workflow to install a completely new NixOS system (e.g., a new WSL inst
 
 After the installation is complete and you reboot, the new system will be running the exact configuration defined in this repository.
 
+### 3. Migrating a Project (Submodule Integration)
+
+To migrate an existing project into the Quiver HQ ecosystem for management via the Mission Controller:
+
+1.  **Add the Submodule**:
+    Add the project as a git submodule within the `projects/` directory.
+    ```bash
+    cd dev/quiver-hq
+    git submodule add <git-url> projects/<project-name>
+    ```
+
+2.  **Ingest Secrets** (Optional):
+    If the project uses `.env` files, you can manage them via 1Password.
+    - Create or move your local secrets to `.env.local` within the project directory.
+    - Run the ingestion tool:
+      ```bash
+      ./bin/quiver-secrets ingest projects/<project-name>
+      ```
+    - This pushes the secrets to the `quiver-hq` item in 1Password and generates a `.env.tmpl` file.
+
+3.  **Commit & Push**:
+    Commit the new submodule, the `.gitmodules` file, and any generated `.env.tmpl` files.
+    ```bash
+    git add .
+    git commit -m "feat: migrate <project-name> to Quiver HQ"
+    git push
+    ```
+
+4.  **Verification**:
+    The Mission Controller will automatically detect the new project (via the `Scanner`) and include it in the `/mission start` autocomplete options in Discord.
+
 ## Configuration Recommendations
 
 Your configuration is well-structured. Here are a few recommendations to make it even more robust and portable.
