@@ -1,10 +1,22 @@
 # /home/chris/dev/quiver-hq/nixos/home.nix
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 
 {
   # Set your username and home directory
   home.username = "chris";
   home.homeDirectory = "/home/chris";
+
+  home.file = {
+    ".marks/dev".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev";
+    ".marks/hq".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq";
+    ".marks/j".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/job-harvester";
+    ".marks/jh".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/job-harvester";
+    ".marks/tah".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/therapyanimalhub.com";
+    ".marks/tk".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/trikin";
+    ".marks/v2".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/quiver-photos-v2";
+    ".marks/v3".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/quiver-photos-v2";
+    ".marks/w".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/wiley";
+  };
 
   nixpkgs.config.allowUnfree = true;
 

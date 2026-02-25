@@ -157,16 +157,17 @@ type OpItem struct {
 }
 
 func hydrateRecursive(rootPath string) error {
-	// Fetch 1Password item once
-	fmt.Printf("Fetching 1Password item '%s'...\n", itemName)
-	cmd := exec.Command("op", "item", "get", itemName, "--format", "json")
-	output, err := cmd.Output()
-	if err != nil {
-		return fmt.Errorf("failed to get item from 1Password: %v", err)
-	}
+        // Fetch 1Password item once
+        fmt.Printf("Fetching 1Password item '%s'...\n", itemName)
+        cmd := exec.Command("op", "item", "get", itemName, "--format", "json")
+        output, err := cmd.CombinedOutput()
+        if err != nil {
+                return fmt.Errorf("failed to get item from 1Password: %v\nOutput: %s", err, string(output))
+        }
 
-	var item OpItem
-	if err := json.Unmarshal(output, &item); err != nil {
+                var item OpItem
+
+                if err := json.Unmarshal(output, &item); err != nil {
 		return err
 	}
 
