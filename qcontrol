@@ -1,0 +1,55 @@
+#!/bin/bash
+# qcontrol - Management script for Quiver Controller
+
+PROJECT_ROOT="/home/chris/dev/quiver-hq"
+BINARY="$PROJECT_ROOT/controller"
+LOG_FILE="$PROJECT_ROOT/controller.log"
+ENV_FILE="$PROJECT_ROOT/.env.local"
+
+case "$1" in
+    start)
+        if pgrep -x "controller" > /dev/null; then
+            echo "Controller is already running."
+        else
+            echo "Starting Quiver Controller..."
+            if [ -f "$ENV_FILE" ]; then
+                export $(grep -v '^#' "$ENV_FILE" | xargs)
+            fi
+            nohup "$BINARY" > "$LOG_FILE" 2>&1 &
+            echo "Started with PID $!"
+        fi
+        ;;
+    stop)
+        echo "Stopping Quiver Controller..."
+        pkill -x "controller" && echo "Stopped." || echo "Not running."
+        ;;
+    restart)
+        $0 stop
+        sleep 1
+        $0 start
+        ;;
+    status)
+        if pgrep -a "controller" > /dev/null; then
+            echo "Controller is running:"
+            pgrep -a "controller"
+        else
+            echo "Controller is stopped."
+        fi
+        ;;
+    logs)
+        tail -f "$LOG_FILE"
+        ;;
+    linger-enable)
+        echo "Enabling linger for user $USER..."
+        sudo loginctl enable-linger "$USER"
+        echo "Linger enabled. User services will now persist after logout."
+        ;;
+    linger-disable)
+        echo "Disabling linger for user $USER..."
+        sudo loginctl disable-linger "$USER"
+        echo "Linger disabled."
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status|logs|linger-enable|linger-disable}"
+        exit 1
+esac

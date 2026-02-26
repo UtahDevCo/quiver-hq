@@ -25,8 +25,9 @@
     git 
     direnv 
     nix-direnv 
-    nodejs_22 
+    nodejs_24
     gh 
+    github-copilot-cli
     google-cloud-sdk 
     gemini-cli
     _1password-cli

@@ -1,0 +1,16 @@
+[Unit]
+Description=Quiver HQ Controller Bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/chris/dev/quiver-hq
+# Note: systemd EnvironmentFile is strict about formatting (no exports, etc)
+# If .env.local has 'export' keywords, we might need a different approach
+EnvironmentFile=/home/chris/dev/quiver-hq/.env.local
+ExecStart=/home/chris/dev/quiver-hq/controller
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

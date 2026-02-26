@@ -56,7 +56,7 @@ func main() {
 	// 4. Initialize Discord
 	var bot *discord.Bot
 	if discordToken != "" {
-		bot, err = discord.NewBot(discordToken, mgr, scanner)
+		bot, err = discord.NewBot(discordToken, mgr, scanner, database)
 		if err != nil {
 			log.Printf("Warning: failed to initialize Discord bot: %v", err)
 		} else {

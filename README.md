@@ -113,6 +113,67 @@ Once the secrets are set in 1Password and the NixOS config is applied:
 
 ---
 
+## 🛠️ Standalone / WSL2 Setup (Non-NixOS)
+
+If you are running on a standard WSL2 instance (e.g., Ubuntu) and want to use `.env.local` for secrets:
+
+### 1. Build and Prepare
+```bash
+go build -o controller ./cmd/controller/main.go
+chmod +x qcontrol
+```
+
+### 2. Configure Systemd User Service
+To make the bot start automatically with WSL2:
+```bash
+mkdir -p ~/.config/systemd/user/
+cp quiver-controller.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable quiver-controller.service
+systemctl --user start quiver-controller.service
+```
+
+### 3. Background Persistence (Linger)
+By default, user services stop when you close your last terminal. To keep the bot running in the background:
+```bash
+./qcontrol linger-enable
+```
+
+### 4. Management Script (`qcontrol`)
+Use the included helper script for common tasks:
+- `./qcontrol logs`: View live output.
+- `./qcontrol restart`: Restart the daemon.
+- `./qcontrol status`: Check if it's running.
+
+---
+
+## 🤖 Interacting with the Bot
+
+The Quiver HQ Controller is designed to be your interface to all projects in the `projects/` directory.
+
+### 1. Projects as Submodules
+The controller automatically scans the `projects/` folder. To add a new project:
+```bash
+git submodule add <repo-url> projects/<project-name>
+```
+
+### 2. Starting a Mission (Project Interaction)
+In Discord, use the `/mission start` command. 
+- **Project**: Use the autocomplete to select your project.
+- **ID**: Give this specific task a name (e.g., `fix-bugs`).
+- **Command**: The command to run (e.g., `npm`, `python`, `go`).
+- **Args**: Arguments for the command (e.g., `run dev`, `main.py`).
+
+### 3. Dedicated Threads
+When you start a mission, the bot creates a **dedicated thread** in Discord.
+- **Output**: All logs from your command are piped to this thread.
+- **Input**: Any message you type in the thread is piped directly to the command's `stdin`. This allows you to interact with CLIs or provide input to your scripts in real-time.
+
+### 4. Approval Gates
+If an agent/script outputs `QUIVER_SIGNAL:REQUEST_APPROVAL <prompt>`, the bot will pause and show **Approve/Deny** buttons. This is perfect for "Human-in-the-loop" workflows where you want to review an action before it executes.
+
+---
+
 ## Workflows
 
 There are two primary workflows for using this repository: managing an existing system and installing a new system from scratch.
