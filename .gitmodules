@@ -16,3 +16,6 @@
 [submodule "projects/therapyanimalhub.com"]
 	path = projects/therapyanimalhub.com
 	url = git@github.com:deltaepsilon/therapyanimalhub.com.git
+[submodule "projects/chrisesplin.com"]
+	path = projects/chrisesplin.com
+	url = git@github.com:deltaepsilon/chrisesplin.com.git
