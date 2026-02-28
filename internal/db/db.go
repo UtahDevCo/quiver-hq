@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	_ "modernc.org/sqlite"
 	"os"
 )
@@ -15,6 +16,12 @@ func InitDB(path string) (*DB, error) {
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		return nil, err
+	}
+
+	// Enable WAL mode for better concurrency
+	_, err = db.Exec("PRAGMA journal_mode=WAL;")
+	if err != nil {
+		return nil, fmt.Errorf("failed to enable WAL mode: %v", err)
 	}
 
 	if err := db.Ping(); err != nil {

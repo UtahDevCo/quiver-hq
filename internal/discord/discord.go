@@ -88,15 +88,31 @@ func NewBot(token string, mgr *manager.Manager, scanner *projects.Scanner, datab
 		},
 		{
 			Name:        "mission",
-			Description: "Start a gemini-cli mission in the attached project",
+			Description: "Manage missions in the attached project",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
 					Name:        "prompt",
-					Description: "Initial prompt for gemini-cli",
+					Description: "Start a gemini mission with an optional prompt",
+					Required:    false,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "raw",
+					Description: "Run a raw shell command (e.g. 'bash', 'ls -la')",
+					Required:    false,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "stop",
+					Description: "Stop a running mission in this channel",
 					Required:    false,
 				},
 			},
+		},
+		{
+			Name:        "mission-debug",
+			Description: "Debug the mission environment (runs tty and env)",
 		},
 	}
 
@@ -107,7 +123,7 @@ func NewBot(token string, mgr *manager.Manager, scanner *projects.Scanner, datab
 		}
 	}
 
-	log.Println("Discord bot is now running with Project-based commands.")
+	log.Println("Discord bot is now running with Enhanced Commands.")
 	return bot, nil
 }
 
@@ -235,6 +251,8 @@ func (b *Bot) handleSlashCommand(s *discordgo.Session, i *discordgo.InteractionC
 		b.handleProjectSlash(s, i)
 	case "mission":
 		b.handleMissionSlash(s, i)
+	case "mission-debug":
+		b.handleMissionDebug(s, i)
 	}
 }
 
@@ -284,6 +302,37 @@ func (b *Bot) handleProjectSlash(s *discordgo.Session, i *discordgo.InteractionC
 	}
 }
 
+func (b *Bot) handleMissionDebug(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	ctx := context.Background()
+	_, projectPath, err := b.DB.GetChannelBinding(ctx, i.ChannelID)
+	if err != nil {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{Content: "❌ Channel not bound."},
+		})
+		return
+	}
+
+	missionID := "debug-" + b.generateFunkyID()
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{Content: "🔍 Running environment debug..."},
+	})
+
+	msg, _ := s.InteractionResponse(i.Interaction)
+	thread, _ := s.MessageThreadStartComplex(i.ChannelID, msg.ID, &discordgo.ThreadStart{
+		Name: "Debug: Environment",
+		Type: discordgo.ChannelTypeGuildPublicThread,
+	})
+	
+	b.mu.Lock()
+	b.MissionThreads[missionID] = thread.ID
+	b.mu.Unlock()
+
+	// Run tty and fd check
+	b.Manager.StartMission(ctx, missionID, projectPath, "sh", "-c", "tty; ls -l /proc/self/fd; env | grep TERM")
+}
+
 func (b *Bot) handleMissionSlash(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	ctx := context.Background()
 	projectName, projectPath, err := b.DB.GetChannelBinding(ctx, i.ChannelID)
@@ -295,9 +344,29 @@ func (b *Bot) handleMissionSlash(s *discordgo.Session, i *discordgo.InteractionC
 		return
 	}
 
-	var prompt string
-	if len(i.ApplicationCommandData().Options) > 0 {
-		prompt = i.ApplicationCommandData().Options[0].StringValue()
+	var prompt, raw, stopID string
+	for _, opt := range i.ApplicationCommandData().Options {
+		switch opt.Name {
+		case "prompt":
+			prompt = opt.StringValue()
+		case "raw":
+			raw = opt.StringValue()
+		case "stop":
+			stopID = opt.StringValue()
+		}
+	}
+
+	if stopID != "" {
+		err := b.Manager.StopMission(stopID)
+		content := fmt.Sprintf("🛑 Mission `%s` stopped.", stopID)
+		if err != nil {
+			content = fmt.Sprintf("❌ Error: %v", err)
+		}
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{Content: content},
+		})
+		return
 	}
 
 	missionID := b.generateFunkyID()
@@ -322,22 +391,30 @@ func (b *Bot) handleMissionSlash(s *discordgo.Session, i *discordgo.InteractionC
 		b.MissionThreads[missionID] = thread.ID
 		b.mu.Unlock()
 	} else {
-		log.Printf("Failed to create thread: %v", err)
 		b.mu.Lock()
 		b.MissionThreads[missionID] = i.ChannelID
 		b.mu.Unlock()
 	}
 
-	// Run gemini-cli
-	cmdArgs := []string{}
-	if prompt != "" {
-		cmdArgs = append(cmdArgs, prompt)
+	if raw != "" {
+		parts := strings.Fields(raw)
+		cmd := parts[0]
+		args := []string{}
+		if len(parts) > 1 {
+			args = parts[1:]
+		}
+		err = b.Manager.StartMission(ctx, missionID, projectPath, cmd, args...)
+	} else {
+		cmdArgs := []string{"--output-format", "text"}
+		if prompt != "" {
+			cmdArgs = append(cmdArgs, "--prompt", prompt)
+		}
+		err = b.Manager.StartMission(ctx, missionID, projectPath, "gemini", cmdArgs...)
 	}
 
-	err = b.Manager.StartMission(ctx, missionID, projectPath, "gemini-cli", cmdArgs...)
 	if err != nil {
 		s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-			Content: fmt.Sprintf("❌ Failed to start gemini-cli: %v", err),
+			Content: fmt.Sprintf("❌ Failed to start: %v", err),
 		})
 	}
 }
@@ -348,40 +425,17 @@ func (b *Bot) onLog(missionID, text string) {
 	b.mu.Unlock()
 
 	if ok {
-		// Basic ANSI stripping for Discord
-		cleanText := b.stripANSI(text)
+		cleanText := b.Manager.StripANSI(text)
 		if cleanText == "" {
 			return
 		}
 		
-		// Chunking for Discord 2000 char limit
 		if len(cleanText) > 1950 {
 			cleanText = cleanText[:1950] + "..."
 		}
 		
 		b.Session.ChannelMessageSend(threadID, cleanText)
 	}
-}
-
-func (b *Bot) stripANSI(str string) string {
-	// Simple ANSI escape code stripper
-	// A more robust one might be needed later
-	var result strings.Builder
-	inEscape := false
-	for _, r := range str {
-		if r == '\x1b' {
-			inEscape = true
-			continue
-		}
-		if inEscape {
-			if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') {
-				inEscape = false
-			}
-			continue
-		}
-		result.WriteRune(r)
-	}
-	return result.String()
 }
 
 func (b *Bot) Close() {
