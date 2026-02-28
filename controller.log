@@ -1,3 +1,37 @@
-2026/02/26 14:41:30 Discord bot is now running with Project-based commands.
-2026/02/26 14:41:45 System Check Result: Daemon Online.
-2026/02/26 14:41:45 Quiver HQ Daemon is fully operational. Press Ctrl+C to exit.
+2026/02/27 15:23:04 Discord bot is now running with Enhanced Commands.
+2026/02/27 15:23:06 System Check Result: Daemon Online.
+2026/02/27 15:23:06 Quiver HQ Daemon is fully operational. Press Ctrl+C to exit.
+2026/02/27 15:23:25 Spawning mission funky-muffin: gemini [--output-format text --prompt Is this on?]
+2026/02/27 16:28:20 Resuming mission funky-muffin in /home/chris/dev/quiver-hq/projects/job-harvester
+2026/02/27 16:28:20 Spawning mission funky-muffin: gemini [--output-format text --resume latest --prompt Core Concept: From Selectors to Workflows
+Move from a "DOM scraper" to a Web Automation State Machine. Instead of caching simple selectors, Sapsucker will cache Workflows (Action Graphs)—JSON-serializable sequences that the Extension (the "Runner") executes.
+
+Proposed Workflow Structure
+Workflows include action types like EXTRACT, CLICK, SCROLL, WAIT, and LOOP.
+
+Discovery Mode (Agentic): If no cached workflow exists, the LLM analyzes the DOM and the goal (e.g., "Find all job URLs"). It explores pagination or "load more" buttons and outputs a JSON Workflow.
+
+Execution Mode (Deterministic): The Runner executes the cached JSON 99% of the time without LLM intervention, ensuring speed and low cost.
+
+Migration & Testing Plan
+Phase 1: Infrastructure Lockdown
+Disable All Automation: Immediately pause all cron jobs, large-scale crawls, and background worker queues.
+
+Update Schema: Modify the database to support Workflow definitions instead of flat selector lists.
+
+Phase 2: The "Single-Action" UI
+To test this manually, we will modify the Job Boards page:
+
+Trigger Button: Add a "Run Manual Discovery" button next to each job board entry.
+
+Test Environment: When clicked, it kicks off a single crawl for that specific board using the new Discovery Mode.
+
+Feedback Loop: Display the generated JSON Workflow and the extracted data in a side panel for immediate validation.
+
+Phase 3: Action Engine Development
+The Runner: Build the Extension logic to handle the new action types (CLICK, WAIT, LOOP).
+
+The Agent: Refine the LLM prompt to identify pagination patterns and translate them into the LOOP schema.
+
+Phase 4: Validation
+Once individual manual calls work reliably, we will re-enable the scheduler one board at a time.]

@@ -10,6 +10,7 @@ test-manager
 
 # Database
 quiver.db
+quiver.db*
 
 # Environment files
 .env
