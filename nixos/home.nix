@@ -31,7 +31,7 @@
     google-cloud-sdk 
     gemini-cli
     _1password-cli
-    fzf socat
+    fzf socat lsof
     vscode
   ];
 
@@ -72,9 +72,11 @@
     initContent = ''
       # 0. Ensure basic system tools are in PATH immediately
       export PATH="$HOME/bin:$HOME/.nix-profile/bin:$PATH"
+      export PATH="$HOME/.npm-global/bin:$PATH"
 
       alias ll="ls -al"
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
+      alias reload='(cd ~/dev/quiver-hq && sudo nixos-rebuild switch --flake .#quiver-wsl)'
       alias opsignin='eval $(op signin)'
       alias qlogs='journalctl -u quiver-controller -f'
       alias qrestart='sudo systemctl restart quiver-controller'
@@ -90,6 +92,58 @@
 
       # 3. Setup direnv
       eval "$(direnv hook zsh)"
+
+      # pk - Kill process(es) by port number
+      # Usage: pk [port]
+      #   With port: kills process on specified port
+      #   Without port: kills processes on ports 3000-3030 and every 10th port from 3030-3120
+      pk() {
+          local port=$1
+
+          # Function to kill a single port
+          kill_port() {
+              local p=$1
+              local pids=$(lsof -ti :$p 2>/dev/null)
+
+              # Fall back to ss if lsof doesn't work
+              if [ -z "$pids" ]; then
+                  pids=$(ss -tlnp 2>/dev/null | grep ":$p " | grep -oP 'pid=\K[0-9]+')
+              fi
+
+              if [ -n "$pids" ]; then
+                  echo "Killing process(es) on port $p: $pids"
+                  kill -9 $pids 2>/dev/null
+                  if [ $? -eq 0 ]; then
+                      echo "  ✓ Port $p freed"
+                  else
+                      echo "  ✗ Failed to kill process on port $p"
+                  fi
+              else
+                  echo "No process found on port $p"
+              fi
+          }
+
+          if [ -n "$port" ]; then
+              # Kill specific port
+              kill_port $port
+          else
+              # Kill ports 3000-3030
+              echo "Killing ports 3000-3030..."
+              for p in {3000..3030}; do
+                  kill_port $p
+              done
+
+              echo ""
+              echo "Killing every 10th port from 3030-3120..."
+              # Kill every 10th port from 3030 to 3120
+              for p in {3030..3120..10}; do
+                  kill_port $p
+              done
+
+              echo ""
+              echo "Done!"
+          fi
+      }
     '';
   };
 
