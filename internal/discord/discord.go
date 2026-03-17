@@ -405,7 +405,7 @@ func (b *Bot) handleMissionSlash(s *discordgo.Session, i *discordgo.InteractionC
 		}
 		err = b.Manager.StartMission(ctx, missionID, projectPath, cmd, args...)
 	} else {
-		cmdArgs := []string{"--output-format", "text"}
+		cmdArgs := []string{"--output-format", "text", "--yolo"}
 		if prompt != "" {
 			cmdArgs = append(cmdArgs, "--prompt", prompt)
 		}

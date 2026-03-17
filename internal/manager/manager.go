@@ -186,9 +186,9 @@ func (m *Manager) WriteToMission(id, text string) error {
 		return fmt.Errorf("mission %s not found and has no project directory", id)
 	}
 
-	// Stateless resumption: spawn a new gemini command
+	// Stateless resumption: spawn a new gemini command with --yolo
 	log.Printf("Resuming mission %s in %s", id, projectDir)
-	return m.runProcess(context.Background(), id, projectDir, "gemini", "--output-format", "text", "--resume", "latest", "--prompt", text)
+	return m.runProcess(context.Background(), id, projectDir, "gemini", "--output-format", "text", "--yolo", "--resume", "latest", "--prompt", text)
 }
 
 func (m *Manager) StopMission(id string) error {
