@@ -39,6 +39,15 @@
         ];
       };
 
+      # ASUS PN54 (Ryzen 5) – Niri desktop host
+      nixosConfigurations."quiver-pn54" = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./nixos/hosts/pn54/configuration.nix
+        ];
+      };
+
       darwinConfigurations."quiver-mac" = nix-darwin.lib.darwinSystem {
         system = "aarch64-darwin";
         specialArgs = { inherit inputs; };
