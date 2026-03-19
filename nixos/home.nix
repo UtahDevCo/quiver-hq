@@ -76,7 +76,7 @@
 
       alias ll="ls -al"
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
-      alias reload='(cd ~/dev/quiver-hq && sudo nixos-rebuild switch --flake .#quiver-wsl)'
+      alias reload='(cd ~/dev/quiver-hq && sudo nixos-rebuild switch --flake .#$(hostname))'
       alias opsignin='eval $(op signin)'
       alias qlogs='journalctl -u quiver-controller -f'
       alias qrestart='sudo systemctl restart quiver-controller'
