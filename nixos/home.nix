@@ -73,6 +73,7 @@
       # 0. Ensure basic system tools are in PATH immediately
       export PATH="$HOME/bin:$HOME/.nix-profile/bin:$PATH"
       export PATH="$HOME/.npm-global/bin:$PATH"
+      export NIX_LD_LIBRARY_PATH="/run/current-system/sw/share/nix-ld/lib"
 
       alias ll="ls -al"
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
@@ -87,7 +88,7 @@
 
       # 2. Fetch API Keys with 1Password
       if [[ -z "$GEMINI_API_KEY" ]]; then
-          export GEMINI_API_KEY=$(op read "op://Personal/quiver-hq/GEMINI_API_KEY" 2>/dev/null)
+          export GEMINI_API_KEY=$(op read "op://Dev/quiver-hq/GEMINI_API_KEY" 2>/dev/null)
       fi
 
       # 3. Setup direnv

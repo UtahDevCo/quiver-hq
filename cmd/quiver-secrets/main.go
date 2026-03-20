@@ -13,6 +13,7 @@ import (
 )
 
 const itemName = "quiver-hq"
+const vaultName = "Dev"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -68,24 +69,23 @@ func ingestBatch(rootPath string) error {
 		return nil
 	}
 
-	// Ensure item exists
-	checkCmd := exec.Command("op", "item", "get", itemName, "--format", "json")
-	checkOut, err := checkCmd.CombinedOutput()
-	if err != nil {
-		// Only create the item if it genuinely doesn't exist. Any other error
-		// (e.g. duplicate items, auth failure) should be surfaced to the user
-		// rather than silently creating yet another duplicate.
-		outStr := string(checkOut)
-		if !strings.Contains(outStr, "isn't an item") && !strings.Contains(outStr, "not found") {
-			return fmt.Errorf("unexpected error checking 1Password item '%s': %v\nOutput: %s", itemName, err, outStr)
-		}
-		fmt.Printf("Creating 1Password item '%s' as API Credential...\n", itemName)
-		createCmd := exec.Command("op", "item", "create", "--category", "API Credential", "--title", itemName)
-		if out, err := createCmd.CombinedOutput(); err != nil {
-			return fmt.Errorf("failed to create 1Password item: %v\nOutput: %s", err, string(out))
-		}
-	}
-
+	        // Ensure item exists
+	        checkCmd := exec.Command("op", "item", "get", itemName, "--vault", vaultName, "--format", "json")
+	        checkOut, err := checkCmd.CombinedOutput()
+	        if err != nil {
+	                // Only create the item if it genuinely doesn't exist. Any other error
+	                // (e.g. duplicate items, auth failure) should be surfaced to the user
+	                // rather than silently creating yet another duplicate.
+	                outStr := string(checkOut)
+	                if !strings.Contains(outStr, "isn't an item") && !strings.Contains(outStr, "not found") {
+	                        return fmt.Errorf("unexpected error checking 1Password item '%s': %v\nOutput: %s", itemName, err, outStr)
+	                }
+	                fmt.Printf("Creating 1Password item '%s' as API Credential...\n", itemName)
+	                createCmd := exec.Command("op", "item", "create", "--category", "API Credential", "--title", itemName, "--vault", vaultName)
+	                if out, err := createCmd.CombinedOutput(); err != nil {
+	                        return fmt.Errorf("failed to create 1Password item: %v\nOutput: %s", err, string(out))
+	                }
+	        }
 	for _, envPath := range envFiles {
 		if err := ingestFile(rootPath, envPath); err != nil {
 			fmt.Printf("Warning: failed to ingest %s: %v\n", envPath, err)
@@ -116,13 +116,17 @@ func ingestFile(rootPath, envPath string) error {
 	// Replace periods with underscores to avoid 'op' syntax errors (e.g., "utahdevco.com" -> "utahdevco_com")
 	sectionName = strings.ReplaceAll(sectionName, ".", "_")
 
-	fmt.Printf("Ingesting %s into 1Password item '%s' section '%s'...\n", envPath, itemName, sectionName)
-
-	args := []string{"item", "edit", itemName}
-	for k, v := range env {
-		// Syntax: [section.]field=value
-		args = append(args, fmt.Sprintf("%s.%s=%s", sectionName, k, v))
-	}
+	        fmt.Printf("Ingesting %s into 1Password item '%s' section '%s'...\n", envPath, itemName, sectionName)
+	
+	                args := []string{"item", "edit", itemName, "--vault", vaultName}
+	
+	                for k, v := range env {
+	
+	                        // Syntax: [section.]field=value
+	
+	                        args = append(args, fmt.Sprintf("%s.%s=%s", sectionName, k, v))
+	
+	                }
 
 	cmd := exec.Command("op", args...)
 	if out, err := cmd.CombinedOutput(); err != nil {
@@ -158,8 +162,8 @@ type OpItem struct {
 
 func hydrateRecursive(rootPath string) error {
         // Fetch 1Password item once
-        fmt.Printf("Fetching 1Password item '%s'...\n", itemName)
-        cmd := exec.Command("op", "item", "get", itemName, "--format", "json")
+        fmt.Printf("Fetching 1Password item '%s' from vault '%s'...\n", itemName, vaultName)
+        cmd := exec.Command("op", "item", "get", itemName, "--vault", vaultName, "--format", "json")
         output, err := cmd.CombinedOutput()
         if err != nil {
                 return fmt.Errorf("failed to get item from 1Password: %v\nOutput: %s", err, string(output))

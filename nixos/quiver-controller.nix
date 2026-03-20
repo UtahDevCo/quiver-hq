@@ -11,8 +11,8 @@
       Type = "simple";
       User = "chris";
       WorkingDirectory = "/home/chris/dev/quiver-hq";
-      # We use a wrapper script to load 1Password secrets before starting
-      ExecStart = "${pkgs.zsh}/bin/zsh -c 'source /home/chris/.zshrc; exec /home/chris/dev/quiver-hq/bin/controller'";
+      EnvironmentFile = "/home/chris/dev/quiver-hq/.env.secrets";
+      ExecStart = "/home/chris/dev/quiver-hq/bin/controller";
       Restart = "always";
       RestartSec = "10";
     };
@@ -21,6 +21,7 @@
       go
       sqlite
       _1password-cli
+      nix-ld
       git
       bash
       coreutils

@@ -117,13 +117,26 @@ Once the secrets are set in 1Password and the NixOS config is applied:
 
 If you are running on a standard WSL2 instance (e.g., Ubuntu) and want to use `.env.local` for secrets:
 
-### 1. Build and Prepare
+### 1. Create a 1Password Service Account Token
+Create a service account token with a read-only vault scope:
+
+```bash
+op service-account create "nix-view-copy" --vault "Dev:read_items" --expires-in 90d
+```
+
+Then store the resulting token in `.env.local` as:
+
+```bash
+OP_SERVICE_ACCOUNT_TOKEN=<your-token>
+```
+
+### 2. Build and Prepare
 ```bash
 go build -o controller ./cmd/controller/main.go
 chmod +x qcontrol
 ```
 
-### 2. Configure Systemd User Service
+### 3. Configure Systemd User Service
 To make the bot start automatically with WSL2:
 ```bash
 mkdir -p ~/.config/systemd/user/
@@ -133,13 +146,13 @@ systemctl --user enable quiver-controller.service
 systemctl --user start quiver-controller.service
 ```
 
-### 3. Background Persistence (Linger)
+### 4. Background Persistence (Linger)
 By default, user services stop when you close your last terminal. To keep the bot running in the background:
 ```bash
 ./qcontrol linger-enable
 ```
 
-### 4. Management Script (`qcontrol`)
+### 5. Management Script (`qcontrol`)
 Use the included helper script for common tasks:
 - `./qcontrol logs`: View live output.
 - `./qcontrol restart`: Restart the daemon.

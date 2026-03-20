@@ -86,12 +86,12 @@ func getSecret(key string) string {
 	if val != "" {
 		return val
 	}
-	log.Printf("%s not in env, checking 1Password...", key)
-	cmd := exec.Command("op", "read", fmt.Sprintf("op://Personal/quiver-hq/%s", key))
-	out, err := cmd.Output()
-	if err != nil {
-		return ""
-	}
+	        log.Printf("%s not in env, checking 1Password...", key)
+	        cmd := exec.Command("op", "read", fmt.Sprintf("op://Dev/quiver-hq/%s", key))
+	                out, err := cmd.Output()
+	                if err != nil {
+	                        return ""
+	                }
 	return string(bytes.TrimSpace(out))
 }
 
