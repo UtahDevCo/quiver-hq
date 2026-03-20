@@ -38,7 +38,25 @@
   programs.zsh.enable = true;
 
   # Enable nix-ld for running non-nix binaries
-  programs.nix-ld.enable = true;
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      stdenv.cc.cc
+      zlib
+      fuse3
+      icu
+      nss
+      openssl
+      curl
+      expat
+      glib
+      libunwind
+      libuuid
+      krb5
+      libsecret
+      # Add more libraries as needed for VS Code extensions
+    ];
+  };
 
   # List packages installed in system profile.
   environment.systemPackages = with pkgs; [
@@ -49,6 +67,10 @@
     nix-ld
     tailscale
   ];
+
+  environment.variables = {
+#    GOOGLE_CLOUD_PROJECT = "gen-lang-client-0493073390";
+  };
 
   # Enable Tailscale service
   services.tailscale.enable = true;
