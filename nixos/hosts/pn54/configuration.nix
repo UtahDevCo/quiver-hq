@@ -13,6 +13,9 @@
     # Quiver HQ controller daemon (also runs on this host).
     ../../quiver-controller.nix
 
+    # Fizzy self-hosted bookmark manager (Podman + Caddy).
+    ../../fizzy.nix
+
     # Desktop: Niri compositor, greetd, AMD graphics, Bluetooth, PipeWire.
     ../../../modules/nixos/desktop/niri.nix
   ];
