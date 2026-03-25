@@ -22,12 +22,18 @@
   # ---------------------------------------------------------------------------
   networking.hostName = "quiver-pn54";
   networking.networkmanager.enable = true;
-  networking.wireless.enable = lib.mkForce false;
   users.users.chris.extraGroups = [ "networkmanager" "wheel" "video" ];
   hardware.enableRedistributableFirmware = true;
   boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
   boot.initrd.kernelModules = [ "mt7925e" ];
   networking.networkmanager.wifi.powersave = false;
+  networking.networkmanager.unmanaged = [ "interface-name:lo" ];
+  networking.networkmanager.appendConfig = ''
+    [device]
+    match-device=mac:52:02:dc:4d:4a
+    managed=1
+  '';
+  networking.wireless.enable = false;
 
   # Mountain Time – adjust if the machine moves.
   time.timeZone = lib.mkForce "America/Denver";
