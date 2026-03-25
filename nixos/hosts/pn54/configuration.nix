@@ -35,6 +35,9 @@
     keyfile = {
       unmanaged-devices = "none";
     };
+    device = {
+      "wifi.scan-rand-mac-address" = "no";
+    };
   };
   networking.wireless.enable = lib.mkForce false;
 
