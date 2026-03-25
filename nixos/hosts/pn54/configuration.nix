@@ -28,7 +28,7 @@
   boot.initrd.kernelModules = [ "mt7925e" ];
   networking.networkmanager.wifi.powersave = false;
   networking.networkmanager.unmanaged = [ "interface-name:lo" ];
-  networking.networkmanager.appendConfig = ''
+  networking.networkmanager.extraConfig = ''
     [device]
     match-device=mac:52:02:dc:4d:4a
     managed=1
