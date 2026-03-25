@@ -30,7 +30,7 @@
   networking.networkmanager.unmanaged = [ "interface-name:lo" ];
   networking.networkmanager.settings = {
     device = {
-      match-device = "mac:52:02:dc:4d:4a";
+      match-device = "mac:8a:5e:25:ec:c5:a6";
       managed = 1;
     };
   };
