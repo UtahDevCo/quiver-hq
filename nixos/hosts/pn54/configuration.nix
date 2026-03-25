@@ -26,7 +26,7 @@
   users.users.chris.extraGroups = [ "networkmanager" "wheel" "video" ];
   hardware.enableRedistributableFirmware = true;
   boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
-  boot.initrd.kernelModules = { "mt7925e" ];
+  boot.initrd.kernelModules = [ "mt7925e" ];
   networking.networkmanager.wifi.powersave = false;
 
   # Mountain Time – adjust if the machine moves.
