@@ -13,6 +13,12 @@
   };
 
   # ---------------------------------------------------------------------------
+  # Chrome Flags – Force Wayland for Google Chrome
+  # ---------------------------------------------------------------------------
+  xdg.configFile."chrome-flags.conf".text = "--ozone-platform=wayland";
+  xdg.configFile."google-chrome-flags.conf".text = "--ozone-platform=wayland";
+
+  # ---------------------------------------------------------------------------
   # Niri compositor settings (Direct KDL)
   # ---------------------------------------------------------------------------
   xdg.configFile."niri/config.kdl".text = ''

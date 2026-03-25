@@ -22,7 +22,8 @@
   # ---------------------------------------------------------------------------
   networking.hostName = "quiver-pn54";
   networking.networkmanager.enable = true;
-  users.users.chris.extraGroups = [ "networkmanager" "wheel" "video" ];
+  systemd.services.NetworkManager.stopIfChanged = false;
+  users.users.chris.extraGroups = [ "networkmanager" "wheel" "video" "onepassword-cli" ];
   hardware.enableRedistributableFirmware = true;
   boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
   boot.initrd.kernelModules = [ "mt7925e" ];
@@ -39,7 +40,9 @@
       "wifi.scan-rand-mac-address" = "no";
     };
   };
-  networking.wireless.enable = lib.mkForce false;
+  networking.networkmanager.wifi.backend = "iwd";
+  networking.wireless.iwd.enable = true;
+  networking.wireless.enable = false;
 
   # Mountain Time – adjust if the machine moves.
   time.timeZone = lib.mkForce "America/Denver";
@@ -63,9 +66,22 @@
     packages = [ pkgs.terminus_font ];
   };
 
+  environment.systemPackages = with pkgs; [
+    wpa_supplicant
+    iw
+    iwd
+  ];
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.grub.enable = false;
+
+  # ---------------------------------------------------------------------------
+  # Fingerprint Authentication
+  # ---------------------------------------------------------------------------
+  services.fprintd.enable = true;
+  security.pam.services.login.fprintAuth = true;
+  security.pam.services.sudo.fprintAuth = true;
 
   # ---------------------------------------------------------------------------
   # 1Password GUI and CLI

@@ -31,6 +31,7 @@
     google-cloud-sdk 
     gemini-cli
     fzf socat lsof
+    zellij
     vscode
   ];
 
@@ -92,6 +93,15 @@
 
       # 3. Setup direnv
       eval "$(direnv hook zsh)"
+
+      # 4. Auto-attach to zellij (optional, only if not already in a session)
+      if [[ -z "$ZELLIJ" && $- == *i* ]]; then
+          if zellij list-sessions 2>/dev/null | grep -q "EXITED"; then
+              zellij delete-all-sessions --force
+          fi
+          # Uncomment the line below if you want to automatically start zellij
+          # zellij attach -c default
+      fi
 
       # pk - Kill process(es) by port number
       # Usage: pk [port]
