@@ -30,7 +30,6 @@
     github-copilot-cli
     google-cloud-sdk 
     gemini-cli
-    _1password-cli
     fzf socat lsof
     vscode
   ];

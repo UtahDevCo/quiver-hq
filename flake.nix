@@ -1,7 +1,7 @@
 {
   description = "Quiver HQ Agentic Dev Environment & Multi-Host NixOS Config";
 
-  inputs = {
+  inputs = {   
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";

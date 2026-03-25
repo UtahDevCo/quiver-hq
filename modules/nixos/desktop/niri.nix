@@ -19,7 +19,7 @@
     settings = {
       default_session = {
         # tuigreet remembers the last user and launches niri directly.
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd niri";
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd niri";
         user = "greeter";
       };
     };
@@ -51,7 +51,7 @@
   # Audio – PipeWire (Wayland-preferred stack)
   # ---------------------------------------------------------------------------
   # Disable legacy PulseAudio in favour of PipeWire.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
 
   services.pipewire = {

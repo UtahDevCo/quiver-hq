@@ -1,7 +1,7 @@
 # nixos/hosts/pn54/home.nix
 # Home Manager configuration for the ASUS PN54 desktop.
 # Extends the shared nixos/home.nix with the Niri desktop module.
-{ ... }:
+{ pkgs, inputs, ... }:
 
 {
   imports = [

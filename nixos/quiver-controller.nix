@@ -20,7 +20,6 @@
     path = with pkgs; [
       go
       sqlite
-      _1password-cli
       nix-ld
       git
       bash

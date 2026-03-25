@@ -5,150 +5,115 @@
 
 {
   # ---------------------------------------------------------------------------
-  # Niri compositor settings
+  # Session Variables – Wayland compatibility
   # ---------------------------------------------------------------------------
-  # The niri HM module writes ~/.config/niri/config.kdl from these options.
-  programs.niri.settings = {
-
-    # -------------------------------------------------------------------------
-    # Layout – optimised for a 49" Samsung G9 (5120×1440)
-    # -------------------------------------------------------------------------
-    layout = {
-      # New windows open at 1/3 of the monitor width by default.
-      # On the G9 (~5120 px) that is ~1707 px – a comfortable reading width.
-      default-column-width = { proportion = 1.0 / 3.0; };
-
-      gaps = 8;
-
-      # Keep focused column stationary unless it is off-screen; avoids
-      # jarring scrolls on an ultrawide where many columns are visible at once.
-      center-focused-column = "never";
-
-      struts = {
-        top = 0;
-        bottom = 0;
-        left = 0;
-        right = 0;
-      };
-    };
-
-    # -------------------------------------------------------------------------
-    # Input – Apple Magic Trackpad 2 (Bluetooth HID)
-    # -------------------------------------------------------------------------
-    input = {
-      keyboard = {
-        xkb = {
-          layout = "us";
-          # No special options needed for a standard US layout.
-        };
-      };
-
-      # Niri applies these settings to any libinput touchpad device,
-      # including the Magic Trackpad 2 once it is paired over Bluetooth.
-      touchpad = {
-        # Tap-to-click: one-finger = left, two-finger = right, three = middle.
-        tap = true;
-        # Natural (content-follows-finger) scrolling.
-        natural-scroll = true;
-        # clickfinger: number of fingers determines the click button, which
-        # matches macOS behaviour and is recommended for the Magic Trackpad.
-        click-method = "clickfinger";
-        # Two-finger scrolling (the only sensible choice for the Magic Trackpad).
-        scroll-method = "two-finger";
-        # Disable touchpad while typing to prevent accidental cursor moves.
-        dwt = true;
-        # Increase accel speed slightly for the large Magic Trackpad surface.
-        accel-speed = 0.2;
-        accel-profile = "adaptive";
-      };
-    };
-
-    # -------------------------------------------------------------------------
-    # Workspaces – named tiers for a vertical-project workflow
-    # Workspaces 2-6 are reserved for project contexts; 1 is general/admin.
-    # -------------------------------------------------------------------------
-    workspaces = [
-      { name = "admin"; }     # workspace 1
-      { name = "infra"; }     # workspace 2
-      { name = "backend"; }   # workspace 3
-      { name = "frontend"; }  # workspace 4
-      { name = "ops"; }       # workspace 5
-      { name = "lab"; }       # workspace 6
-    ];
-
-    # -------------------------------------------------------------------------
-    # Key bindings
-    # -------------------------------------------------------------------------
-    # config.lib.niri.actions provides typed action constructors that are
-    # validated by the niri Home Manager module at evaluation time.
-    binds = with config.lib.niri.actions; {
-
-      # --- Application launchers ---------------------------------------------
-      # Mod+Enter  → open a Foot terminal
-      "Mod+Return".action = spawn "foot";
-      # Mod+Space  → fuzzel application launcher
-      "Mod+Space".action = spawn "fuzzel";
-      # Mod+Q      → close the focused window
-      "Mod+Q".action = close-window;
-
-      # --- Column-width presets (Samsung G9 ultrawide shortcuts) -------------
-      # These keys are chosen to avoid collision with workspace move bindings.
-      # Mod+Ctrl+1  → 1/3 width (default, ~1707 px on the G9)
-      "Mod+Ctrl+1".action = set-column-width "33%";
-      # Mod+Ctrl+2  → 1/2 width (~2560 px – side-by-side code+browser)
-      "Mod+Ctrl+2".action = set-column-width "50%";
-      # Mod+Ctrl+3  → full width (100% – immersive/reference mode)
-      "Mod+Ctrl+3".action = set-column-width "100%";
-
-      # --- Maximize toggle (mirrors the F11 habit from VS Code) --------------
-      "Mod+F11".action = maximize-column;
-      "Mod+Shift+F".action = maximize-column;
-
-      # --- Focus navigation --------------------------------------------------
-      "Mod+Left".action = focus-column-left;
-      "Mod+Right".action = focus-column-right;
-      "Mod+Up".action = focus-window-up;
-      "Mod+Down".action = focus-window-down;
-      "Mod+H".action = focus-column-left;
-      "Mod+L".action = focus-column-right;
-      "Mod+K".action = focus-window-up;
-      "Mod+J".action = focus-window-down;
-
-      # --- Column movement ---------------------------------------------------
-      "Mod+Shift+Left".action = move-column-left;
-      "Mod+Shift+Right".action = move-column-right;
-      "Mod+Shift+H".action = move-column-left;
-      "Mod+Shift+L".action = move-column-right;
-
-      # --- Workspace focus (Mod+1 … Mod+6) ----------------------------------
-      "Mod+1".action = focus-workspace 1;
-      "Mod+2".action = focus-workspace 2;
-      "Mod+3".action = focus-workspace 3;
-      "Mod+4".action = focus-workspace 4;
-      "Mod+5".action = focus-workspace 5;
-      "Mod+6".action = focus-workspace 6;
-
-      # --- Move active column to workspace (Mod+Shift+1 … Mod+Shift+6) -----
-      "Mod+Shift+1".action = move-column-to-workspace 1;
-      "Mod+Shift+2".action = move-column-to-workspace 2;
-      "Mod+Shift+3".action = move-column-to-workspace 3;
-      "Mod+Shift+4".action = move-column-to-workspace 4;
-      "Mod+Shift+5".action = move-column-to-workspace 5;
-      "Mod+Shift+6".action = move-column-to-workspace 6;
-
-      # --- Session management -----------------------------------------------
-      "Mod+Shift+E".action = quit;
-      "Mod+Shift+R".action = reload-config;
-
-      # --- Screenshot --------------------------------------------------------
-      "Print".action = screenshot;
-      "Mod+Shift+S".action = screenshot-screen;
-    };
+  home.sessionVariables = {
+    # Forces Electron apps (Chrome, VS Code) to use Wayland natively.
+    NIXOS_OZONE_WL = "1";
   };
+
+  # ---------------------------------------------------------------------------
+  # Niri compositor settings (Direct KDL)
+  # ---------------------------------------------------------------------------
+  xdg.configFile."niri/config.kdl".text = ''
+    // Named workspaces
+    workspace "admin"
+    workspace "infra"
+    workspace "backend"
+    workspace "frontend"
+    workspace "ops"
+    workspace "lab"
+
+    layout {
+        gaps 8
+        center-focused-column "never"
+        default-column-width { proportion 0.33333; }
+    }
+
+    input {
+        keyboard {
+            xkb {
+                layout "us"
+            }
+        }
+
+        touchpad {
+            tap
+            natural-scroll
+            click-method "clickfinger"
+            scroll-method "two-finger"
+            dwt
+            accel-speed 0.2
+            accel-profile "adaptive"
+        }
+    }
+
+    spawn-at-startup "waybar"
+
+    binds {
+        // --- Application launchers ---
+        // Mod is Super by default in niri unless bound otherwise
+        Mod+Return { spawn "foot"; }
+        Mod+Space { spawn "fuzzel"; }
+        Mod+Q { close-window; }
+
+        // --- Column-width presets ---
+        Mod+Ctrl+1 { set-column-width "33%"; }
+        Mod+Ctrl+2 { set-column-width "50%"; }
+        Mod+Ctrl+3 { set-column-width "100%"; }
+
+        // --- Maximize toggle ---
+        Mod+F11 { maximize-column; }
+        Mod+Shift+F { maximize-column; }
+
+        // --- Focus navigation ---
+        Mod+Left  { focus-column-left; }
+        Mod+Right { focus-column-right; }
+        Mod+Up    { focus-window-up; }
+        Mod+Down  { focus-window-down; }
+        Mod+H     { focus-column-left; }
+        Mod+L     { focus-column-right; }
+        Mod+K     { focus-window-up; }
+        Mod+J     { focus-window-down; }
+
+        // --- Column movement ---
+        Mod+Shift+Left  { move-column-left; }
+        Mod+Shift+Right { move-column-right; }
+        Mod+Shift+H     { move-column-left; }
+        Mod+Shift+L     { move-column-right; }
+
+        // --- Workspace focus ---
+        Mod+1 { focus-workspace 1; }
+        Mod+2 { focus-workspace 2; }
+        Mod+3 { focus-workspace 3; }
+        Mod+4 { focus-workspace 4; }
+        Mod+5 { focus-workspace 5; }
+        Mod+6 { focus-workspace 6; }
+
+        // --- Move column to workspace ---
+        Mod+Shift+1 { move-column-to-workspace 1; }
+        Mod+Shift+2 { move-column-to-workspace 2; }
+        Mod+Shift+3 { move-column-to-workspace 3; }
+        Mod+Shift+4 { move-column-to-workspace 4; }
+        Mod+Shift+5 { move-column-to-workspace 5; }
+        Mod+Shift+6 { move-column-to-workspace 6; }
+
+        // --- Session management ---
+        Mod+Shift+E { quit; }
+
+        // --- Screenshot ---
+        Print { screenshot; }
+        Mod+Shift+S { screenshot-screen; }
+
+	Mod+T { spawn "alacritty"; }
+	Mod+D { spawn "fuzzel"; }
+    }
+  '';
 
   # ---------------------------------------------------------------------------
   # Waybar – status bar
   # ---------------------------------------------------------------------------
+  programs.fuzzel.enable = true;
   programs.waybar = {
     enable = true;
 
@@ -341,7 +306,11 @@
     slurp           # Region selector for grim
     wl-clipboard    # wl-copy / wl-paste (Wayland clipboard CLI)
     gnome-keyring   # Secret storage (needed by many apps)
-    polkit-gnome    # Authentication agent for privilege escalation dialogs
+    polkit_gnome    # Authentication agent for privilege escalation dialogs
+
+    alacritty
+    firefox
+    google-chrome
   ];
 
   # Start the GNOME authentication agent on login so polkit prompts work.
@@ -353,7 +322,7 @@
     };
     Service = {
       Type = "simple";
-      ExecStart = "${pkgs.polkit-gnome}/libexec/polkit-gnome-authentication-agent-1";
+      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
       Restart = "on-failure";
     };
     Install.WantedBy = [ "graphical-session.target" ];
@@ -363,5 +332,19 @@
   services.gnome-keyring = {
     enable = true;
     components = [ "pkcs11" "secrets" "ssh" ];
+  };
+
+  programs.alacritty = {
+    enable = true;
+    
+    settings = {
+      font = {
+        size = 9.0;
+      };
+      window.padding = {
+        x = 10;
+        y = 10;
+      };
+    };
   };
 }
