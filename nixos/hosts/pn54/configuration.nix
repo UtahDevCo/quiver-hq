@@ -33,7 +33,7 @@
     match-device=mac:52:02:dc:4d:4a
     managed=1
   '';
-  networking.wireless.enable = false;
+  networking.wireless.enable = lib.mkForce false;
 
   # Mountain Time – adjust if the machine moves.
   time.timeZone = lib.mkForce "America/Denver";
