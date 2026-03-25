@@ -29,9 +29,11 @@
   networking.networkmanager.wifi.powersave = false;
   networking.networkmanager.unmanaged = [ "interface-name:lo" ];
   networking.networkmanager.settings = {
-    device = {
-      match-device = "mac:8a:5e:25:ec:c5:a6";
-      managed = 1;
+    main = {
+      no-auto-default = "*";
+    };
+    keyfile = {
+      unmanaged-devices = "none";
     };
   };
   networking.wireless.enable = lib.mkForce false;
