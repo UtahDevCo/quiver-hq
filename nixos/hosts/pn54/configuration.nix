@@ -28,11 +28,12 @@
   boot.initrd.kernelModules = [ "mt7925e" ];
   networking.networkmanager.wifi.powersave = false;
   networking.networkmanager.unmanaged = [ "interface-name:lo" ];
-  networking.networkmanager.extraConfig = ''
-    [device]
-    match-device=mac:52:02:dc:4d:4a
-    managed=1
-  '';
+  networking.networkmanager.settings = {
+    device = {
+      match-device = "mac:52:02:dc:4d:4a";
+      managed = 1;
+    };
+  };
   networking.wireless.enable = lib.mkForce false;
 
   # Mountain Time – adjust if the machine moves.
