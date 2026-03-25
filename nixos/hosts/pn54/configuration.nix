@@ -25,7 +25,7 @@
   networking.wireless.enable = lib.mkForce false;
   users.users.chris.extraGroups = [ "networkmanager" "wheel" "video" ];
   hardware.enableRedistributableFirmware = true;
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   # Mountain Time – adjust if the machine moves.
   time.timeZone = lib.mkForce "America/Denver";
