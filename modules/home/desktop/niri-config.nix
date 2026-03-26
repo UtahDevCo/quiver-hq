@@ -358,11 +358,12 @@
 
   programs.alacritty = {
     enable = true;
-    
+
     settings = {
       font = {
-        size = 9.0;
+        size = 12.0;
       };
+
       window.padding = {
         x = 10;
         y = 10;
