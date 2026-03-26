@@ -10,18 +10,21 @@
   home.sessionVariables = {
     # Forces Electron apps (Chrome, VS Code) to use Wayland natively.
     NIXOS_OZONE_WL = "1";
+    ELECTRON_OZONE_PLATFORM_HINT = "wayland";
   };
 
   # ---------------------------------------------------------------------------
   # Chrome Flags – Force Wayland for Google Chrome
   # ---------------------------------------------------------------------------
-  xdg.configFile."chrome-flags.conf".text = "--ozone-platform=wayland";
-  xdg.configFile."google-chrome-flags.conf".text = "--ozone-platform=wayland";
+  xdg.configFile."chrome-flags.conf".text = "--ozone-platform=wayland --enable-features=UseOzonePlatform";
+  xdg.configFile."google-chrome-flags.conf".text = "--ozone-platform=wayland --enable-features=UseOzonePlatform";
 
   # ---------------------------------------------------------------------------
   # Niri compositor settings (Direct KDL)
   # ---------------------------------------------------------------------------
   xdg.configFile."niri/config.kdl".text = ''
+    prefer-no-csd
+
     // Named workspaces
     workspace "admin"
     workspace "infra"
@@ -31,9 +34,14 @@
     workspace "lab"
 
     layout {
-        gaps 8
+        gaps 0
         center-focused-column "never"
         default-column-width { proportion 0.33333; }
+    }
+
+    window-rule {
+        geometry-corner-radius 0
+        clip-to-geometry true
     }
 
     input {
@@ -64,9 +72,10 @@
         Mod+Q { close-window; }
 
         // --- Column-width presets ---
-        Mod+Ctrl+1 { set-column-width "33%"; }
+        Mod+Ctrl+1 { set-column-width "33.333%"; }
         Mod+Ctrl+2 { set-column-width "50%"; }
         Mod+Ctrl+3 { set-column-width "100%"; }
+        Mod+Ctrl+4 { set-column-width "66.666%"; }
 
         // --- Maximize toggle ---
         Mod+F11 { maximize-column; }
@@ -82,11 +91,15 @@
         Mod+K     { focus-window-up; }
         Mod+J     { focus-window-down; }
 
-        // --- Column movement ---
+        // --- Column/Window movement ---
         Mod+Shift+Left  { move-column-left; }
         Mod+Shift+Right { move-column-right; }
+        Mod+Shift+Up    { move-window-up; }
+        Mod+Shift+Down  { move-window-down; }
         Mod+Shift+H     { move-column-left; }
         Mod+Shift+L     { move-column-right; }
+        Mod+Shift+K     { move-window-up; }
+        Mod+Shift+J     { move-window-down; }
 
         // --- Workspace focus ---
         Mod+1 { focus-workspace 1; }
@@ -107,6 +120,9 @@
         // --- Session management ---
         Mod+Shift+E { quit; }
 
+        // --- Shortcuts overlay ---
+        Mod+Shift+Slash { show-hotkey-overlay; }
+
         // --- Screenshot ---
         Print { screenshot; }
         Mod+Shift+S { screenshot-screen; }
@@ -119,7 +135,23 @@
   # ---------------------------------------------------------------------------
   # Waybar – status bar
   # ---------------------------------------------------------------------------
-  programs.fuzzel.enable = true;
+  programs.fuzzel = {
+    enable = true;
+    settings = {
+      main = {
+        terminal = "${pkgs.foot}/bin/foot";
+        layer = "overlay";
+      };
+      colors = {
+        background = "1e1e2ef2";
+        text = "cdd6f4ff";
+        match = "f38ba8ff";
+        selection = "585b70ff";
+        selection-text = "cdd6f4ff";
+        border = "b4befeff";
+      };
+    };
+  };
   programs.waybar = {
     enable = true;
 
@@ -205,7 +237,7 @@
     style = ''
       * {
         font-family: "monospace";
-        font-size: 13px;
+        font-size: 11px;
         min-height: 0;
       }
 
@@ -269,7 +301,7 @@
     enable = true;
     settings = {
       main = {
-        font = "monospace:size=11";
+        font = "Noto Mono:size=11";
         # Pad the terminal slightly for readability on a high-DPI display.
         pad = "8x8";
       };

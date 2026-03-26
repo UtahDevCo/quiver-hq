@@ -11,6 +11,11 @@
   # Installs niri, sets up PAM session, udev rules, and polkit support.
   programs.niri.enable = true;
 
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+    ELECTRON_OZONE_PLATFORM_HINT = "wayland";
+  };
+
   # ---------------------------------------------------------------------------
   # Login manager – greetd + tuigreet (Wayland-native, minimal)
   # ---------------------------------------------------------------------------
@@ -19,7 +24,8 @@
     settings = {
       default_session = {
         # tuigreet remembers the last user and launches niri directly.
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd niri";
+        # Use --session to export WAYLAND_DISPLAY to D-Bus and systemd.
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd 'niri --session'";
         user = "greeter";
       };
     };
@@ -109,6 +115,7 @@
   # Keep this list small: only truly system-wide tools that are not
   # user-configurable via Home Manager belong here.
   environment.systemPackages = with pkgs; [
+    xwayland           # X11 compatibility layer for Wayland
     xdg-utils          # xdg-open, xdg-mime, etc.
     brightnessctl      # backlight control without root
     playerctl          # MPRIS media key control

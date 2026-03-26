@@ -33,6 +33,8 @@
     fzf socat lsof
     zellij
     vscode
+    noto-fonts
+    noto-fonts-color-emoji
   ];
 
   # Configure Git declaratively
