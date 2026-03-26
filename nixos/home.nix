@@ -31,6 +31,8 @@
     google-cloud-sdk 
     gemini-cli
     fzf socat lsof
+    appimage-run
+    wl-clipboard
     zellij
     vscode
     xfce.thunar
@@ -40,11 +42,15 @@
 
   xdg.desktopEntries.vibetyper = {
     name = "VibeTyper";
-    exec = "/home/chris/Downloads/VibeTyper.AppImage";
-    icon = "vibe-typer";
+    exec = "env PASSWORD_STORE_BACKEND=gnome-libsecret appimage-run /home/chris/bin/VibeTyper.AppImage --password-store=gnome-libsecret %u";
+    icon = "/home/chris/bin/vibe-typer.png";
     comment = "AI Voice Typing";
-    categories = [ "Utility" ];
+    categories = [ "Utility" "AudioVideo" ];
     terminal = false;
+    mimeType = [ "x-scheme-handler/vibetyper" ];
+    settings = {
+      Type = "Application";
+    };
   };
 
   # Configure Git declaratively

@@ -7,6 +7,9 @@
     inputs.home-manager.nixosModules.default
   ];
 
+  # Boot configuration
+  boot.kernelModules = [ "uinput" ];
+
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
 
@@ -55,9 +58,15 @@
       libuuid
       krb5
       libsecret
+      dbus
+      p11-kit
       # Add more libraries as needed for VS Code extensions
     ];
   };
+
+  # Enable gnome-keyring service
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.chris.enableGnomeKeyring = true;
 
   # List packages installed in system profile.
   environment.systemPackages = with pkgs; [
@@ -67,6 +76,8 @@
     htop
     nix-ld
     tailscale
+    gnome-keyring
+    libsecret
   ];
 
   environment.variables = {
@@ -75,6 +86,11 @@
 
   # Enable Tailscale service
   services.tailscale.enable = true;
+
+  services.udev.extraRules = ''
+    KERNEL=="uinput", MODE="0666", OPTIONS+="static_node=uinput"
+    KERNEL=="event*", SUBSYSTEM=="input", MODE="0666"
+  '';
 
   # Hook in Home Manager and tell it to use our home.nix
   home-manager = {
