@@ -177,19 +177,12 @@
     settings = {
       bar = {
         location = "top";
+        layer = "top";
         height = 30;
-        background = "1a1b2bec";
+        background = "1a1b2bff";
         font = "Noto Sans:size=11";
         
-        left = [
-          {
-            label = {
-              content = {
-                string = { text = "Niri Workspaces"; };
-              };
-            };
-          }
-        ];
+        left = [];
 
         center = [
           {
@@ -201,10 +194,7 @@
           }
         ];
 
-        right = [
-          { cpu = { poll-interval = 5000; content = { string = { text = " CPU: {usage}% "; }; }; }; }
-          { mem = { poll-interval = 5000; content = { string = { text = " MEM: {used_percent}% "; }; }; }; }
-        ];
+        right = [];
       };
     };
   };
@@ -275,6 +265,7 @@
       "--force-device-scale-factor=1"
       "--disable-features=WaylandFractionalScaleV1"
       "--remote-debugging-port=9222"
+      "--remote-debugging-address=0.0.0.0"
     ];
   };
 

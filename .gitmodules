@@ -23,3 +23,6 @@
 	path = projects/k1
 	url = git@github.com:UtahDevCo/k1.git
 	branch = main
+[submodule "projects/foundation-web"]
+	path = projects/foundation-web
+	url = git@github.com:buildwithfoundation/web.git
