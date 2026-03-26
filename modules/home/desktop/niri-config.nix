@@ -23,6 +23,11 @@
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
     XCURSOR_SIZE = "16";
+
+    # Force 1.0 scale to prevent double-scaling or auto-detection issues in GTK/Electron
+    GDK_SCALE = "1";
+    GDK_DPI_SCALE = "1";
+    _JAVA_OPTIONS = "-Dsun.java2d.uiScale=1";
   };
 
   # ---------------------------------------------------------------------------
@@ -31,11 +36,11 @@
   xdg.configFile."niri/config.kdl".text = ''
     prefer-no-csd
 
-    output "HDMI-A-1" {
-        // Try values like 1.25, 1.5, or 2.0. 
-        // 1.0 is the current default.
-        scale 1.0
-    }
+    // Explicitly set scale for all likely output names on the PN54
+    output "HDMI-A-1" { scale 1.0; }
+    output "DP-1" { scale 1.0; }
+    output "DP-2" { scale 1.0; }
+    output "eDP-1" { scale 1.0; }
 
     // Named workspaces
     workspace "admin"
@@ -333,6 +338,7 @@
       "--enable-features=UseOzonePlatform,WaylandFractionalScaleV1"
       "--remote-debugging-port=9222"
       "--remote-debugging-address=0.0.0.0"
+      "--force-device-scale-factor=1"
     ];
   };
 
