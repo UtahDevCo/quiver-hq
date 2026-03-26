@@ -35,11 +35,14 @@
     vscode
     noto-fonts
     noto-fonts-color-emoji
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.symbols-only
   ];
 
   # Configure Git declaratively
   programs.git = {
     enable = true;
+    signing.format = "openpgp";
     settings = {
       user.name = "Chris Esplin";
       user.email = "chris@chrisesplin.com";

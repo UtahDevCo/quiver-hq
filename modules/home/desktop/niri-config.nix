@@ -9,7 +9,7 @@
   # ---------------------------------------------------------------------------
   home.pointerCursor = {
     gtk.enable = true;
-    # x11.enable = true;
+    x11.enable = true;
     package = pkgs.gnome-themes-extra;
     name = "Adwaita";
     size = 16; # Adjust to 16, 24, or 32 as needed.
@@ -191,8 +191,8 @@
         location = "top";
         layer = "top";
         height = 30;
-        background = "1a1b2bff";
-        font = "Noto Sans:size=11";
+        background = "1e1e2ef2"; # Matches Foot background
+        font = "Noto Sans:size=11,JetBrainsMono Nerd Font:size=11,Symbols Nerd Font:size=11";
         
         left = [];
 
@@ -201,7 +201,10 @@
             clock = {
               time-format = "%H:%M";
               content = {
-                string = { text = "{time}"; };
+                string = { 
+                  text = " {time}"; 
+                  foreground = "cdd6f4ff";
+                };
               };
             };
           }
@@ -210,11 +213,16 @@
         right = [
           {
             network = {
+              poll-interval = 0;
               content = {
                 map = {
                   conditions = {
                     "name == \"wlan0\"" = {
-                      string = { text = "NET {ipv4}"; };
+                      string = { 
+                        text = " {ipv4}"; 
+                        foreground = "89b4faff"; # Blue
+                        right-margin = 15;
+                      };
                     };
                   };
                 };
@@ -225,7 +233,17 @@
             cpu = {
               poll-interval = 5000;
               content = {
-                string = { text = "CPU {cpu}%"; };
+                map = {
+                  conditions = {
+                    "id < 0" = {
+                      string = { 
+                        text = " {cpu}%"; 
+                        foreground = "f38ba8ff"; # Red
+                        right-margin = 15;
+                      };
+                    };
+                  };
+                };
               };
             };
           }
@@ -233,7 +251,11 @@
             mem = {
               poll-interval = 10000;
               content = {
-                string = { text = "RAM {used}MB"; };
+                string = { 
+                  text = " {percent_used}%"; 
+                  foreground = "a6e3a1ff"; # Green
+                  right-margin = 15;
+                };
               };
             };
           }
@@ -349,6 +371,7 @@
 
   gtk = {
     enable = true;
+    gtk4.theme = config.gtk.theme;
     font = {
       name = "Noto Sans";
       size = 11;
