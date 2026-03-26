@@ -33,10 +33,9 @@
     fzf socat lsof
     zellij
     vscode
+    xfce.thunar
     noto-fonts
     noto-fonts-color-emoji
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.symbols-only
   ];
 
   # Configure Git declaratively

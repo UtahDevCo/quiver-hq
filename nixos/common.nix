@@ -86,4 +86,12 @@
 
   # Set the system state version
   system.stateVersion = "23.11";
+
+  fonts = {
+    fontDir.enable = true;
+    packages = with pkgs; [
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.symbols-only
+    ];
+  };
 }

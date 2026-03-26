@@ -192,8 +192,7 @@
         layer = "top";
         height = 30;
         background = "1e1e2ef2"; # Matches Foot background
-        font = "Noto Sans:size=11,JetBrainsMono Nerd Font:size=11,Symbols Nerd Font:size=11";
-        
+        font = "Noto Sans:size=11,JetBrainsMono NF:size=11,Symbols Nerd Font:size=11";        
         left = [];
 
         center = [
@@ -326,9 +325,7 @@
     package = pkgs.google-chrome;
     commandLineArgs = [
       "--ozone-platform=wayland"
-      "--enable-features=UseOzonePlatform"
-      "--force-device-scale-factor=1"
-      "--disable-features=WaylandFractionalScaleV1"
+      "--enable-features=UseOzonePlatform,WaylandFractionalScaleV1"
       "--remote-debugging-port=9222"
       "--remote-debugging-address=0.0.0.0"
     ];
