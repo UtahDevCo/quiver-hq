@@ -192,7 +192,7 @@
         layer = "top";
         height = 30;
         background = "1e1e2ef2"; # Matches Foot background
-        font = "Noto Sans:size=11,JetBrainsMono NF:size=11,Symbols Nerd Font:size=11";        
+        font = "JetBrainsMono NF:size=11,Noto Sans:size=11";        
         left = [];
 
         center = [
@@ -201,7 +201,7 @@
               time-format = "%H:%M";
               content = {
                 string = { 
-                  text = " {time}"; 
+                  text = "   {time}"; 
                   foreground = "cdd6f4ff";
                 };
               };
@@ -218,26 +218,8 @@
                   conditions = {
                     "name == \"wlan0\"" = {
                       string = { 
-                        text = " {ipv4}"; 
+                        text = "   {ipv4}"; 
                         foreground = "89b4faff"; # Blue
-                        right-margin = 15;
-                      };
-                    };
-                  };
-                };
-              };
-            };
-          }
-          {
-            cpu = {
-              poll-interval = 5000;
-              content = {
-                map = {
-                  conditions = {
-                    "id < 0" = {
-                      string = { 
-                        text = " {cpu}%"; 
-                        foreground = "f38ba8ff"; # Red
                         right-margin = 15;
                       };
                     };
@@ -251,9 +233,32 @@
               poll-interval = 10000;
               content = {
                 string = { 
-                  text = " {percent_used}%"; 
+                  text = "   {used:gib}GB"; 
                   foreground = "a6e3a1ff"; # Green
                   right-margin = 15;
+                };
+              };
+            };
+          }
+          {
+            cpu = {
+              poll-interval = 5000;
+              content = {
+                map = {
+                  conditions = {
+                    "id == -1" = {
+                      string = { 
+                        text = "  "; 
+                        foreground = "f38ba8ff"; # Red
+                      };
+                    };
+                    "id >= 0" = {
+                      string = { 
+                        text = "{cpu}% "; 
+                        foreground = "f38ba8ff"; # Red
+                      };
+                    };
+                  };
                 };
               };
             };
