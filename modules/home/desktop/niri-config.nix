@@ -14,12 +14,6 @@
   };
 
   # ---------------------------------------------------------------------------
-  # Chrome Flags – Force Wayland for Google Chrome
-  # ---------------------------------------------------------------------------
-  xdg.configFile."chrome-flags.conf".text = "--ozone-platform=wayland --enable-features=UseOzonePlatform";
-  xdg.configFile."google-chrome-flags.conf".text = "--ozone-platform=wayland --enable-features=UseOzonePlatform";
-
-  # ---------------------------------------------------------------------------
   # Niri compositor settings (Direct KDL)
   # ---------------------------------------------------------------------------
   xdg.configFile."niri/config.kdl".text = ''
@@ -68,7 +62,7 @@
         }
     }
 
-    spawn-at-startup "waybar"
+    spawn-at-startup "yambar"
 
     binds {
         // --- Application launchers ---
@@ -79,14 +73,16 @@
         Mod+Tab { toggle-overview; }
 
         // --- Column-width presets ---
-        Mod+Ctrl+1 { set-column-width "33.333%"; }
-        Mod+Ctrl+2 { set-column-width "50%"; }
-        Mod+Ctrl+3 { set-column-width "100%"; }
+        Mod+Ctrl+1 { set-column-width "25%"; }
+        Mod+Ctrl+2 { set-column-width "33.333%"; }
+        Mod+Ctrl+3 { set-column-width "50%"; }
         Mod+Ctrl+4 { set-column-width "66.666%"; }
+        Mod+Ctrl+5 { set-column-width "100%"; }
+        Mod+R { switch-preset-column-width; }
 
         // --- Maximize toggle ---
+        F11 { maximize-column; }
         Mod+F11 { maximize-column; }
-        Mod+Shift+F { maximize-column; }
 
         // --- Focus navigation ---
         Mod+Left  { focus-column-left; }
@@ -152,7 +148,7 @@
   '';
 
   # ---------------------------------------------------------------------------
-  # Waybar – status bar
+  # Fuzzel – application launcher
   # ---------------------------------------------------------------------------
   programs.fuzzel = {
     enable = true;
@@ -172,147 +168,47 @@
       };
     };
   };
-  programs.waybar = {
+
+  # ---------------------------------------------------------------------------
+  # Yambar – status bar
+  # ---------------------------------------------------------------------------
+  programs.yambar = {
     enable = true;
-
     settings = {
-      mainBar = {
-        layer = "top";
-        position = "top";
+      bar = {
+        location = "top";
         height = 30;
-
-        modules-left = [
-          "niri/workspaces"
-          "niri/window"
+        background = "1a1b2bec";
+        font = "Noto Sans:size=11";
+        
+        left = [
+          {
+            label = {
+              content = {
+                string = { text = "Niri Workspaces"; };
+              };
+            };
+          }
         ];
 
-        modules-center = [
-          "clock"
+        center = [
+          {
+            clock = {
+              content = {
+                string = { text = "{time}"; };
+              };
+            };
+          }
         ];
 
-        modules-right = [
-          "pulseaudio"
-          "network"
-          "cpu"
-          "memory"
-          "bluetooth"
-          "tray"
+        right = [
+          { cpu = { poll-interval = 5000; content = { string = { text = " CPU: {usage}% "; }; }; }; }
+          { mem = { poll-interval = 5000; content = { string = { text = " MEM: {used_percent}% "; }; }; }; }
         ];
-
-        "niri/workspaces" = {
-          format = "{name}";
-        };
-
-        "niri/window" = {
-          max-length = 60;
-        };
-
-        clock = {
-          format = " {:%a %b %d  %H:%M}";
-          tooltip-format = "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>";
-        };
-
-        cpu = {
-          format = " {usage}%";
-          tooltip = false;
-          interval = 5;
-        };
-
-        memory = {
-          format = " {}%";
-          interval = 10;
-        };
-
-        network = {
-          format-wifi = " {essid} ({signalStrength}%)";
-          format-ethernet = " {ifname}";
-          format-disconnected = "⚠ Disconnected";
-          tooltip-format = "{ifname}: {ipaddr}/{cidr}";
-        };
-
-        pulseaudio = {
-          format = "{icon} {volume}%";
-          format-muted = " muted";
-          format-icons = {
-            default = [ "" "" "" ];
-          };
-          on-click = "pavucontrol";
-        };
-
-        bluetooth = {
-          format = " {status}";
-          format-connected = " {device_alias}";
-          tooltip-format = "{controller_alias}\t{controller_address}\n\n{num_connections} connected";
-          tooltip-format-connected = "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}";
-          tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
-          on-click = "blueman-manager";
-        };
-
-        tray = {
-          spacing = 8;
-        };
       };
     };
-
-    style = ''
-      * {
-        font-family: "Noto Sans", "Noto Mono";
-        font-size: 11px;
-        min-height: 0;
-      }
-
-      window#waybar {
-        background-color: rgba(26, 27, 38, 0.92);
-        color: #cdd6f4;
-        border-bottom: 2px solid rgba(100, 114, 125, 0.5);
-      }
-
-      .modules-left,
-      .modules-right,
-      .modules-center {
-        padding: 0 8px;
-      }
-
-      #workspaces button {
-        padding: 0 8px;
-        color: #6c7086;
-        border-radius: 4px;
-      }
-
-      #workspaces button.active {
-        color: #cdd6f4;
-        background-color: rgba(100, 114, 125, 0.3);
-      }
-
-      #workspaces button:hover {
-        color: #cba6f7;
-      }
-
-      #clock {
-        color: #cba6f7;
-        font-weight: bold;
-      }
-
-      #cpu    { color: #a6e3a1; }
-      #memory { color: #89dceb; }
-
-      #network {
-        color: #89b4fa;
-      }
-
-      #pulseaudio {
-        color: #f5c2e7;
-      }
-
-      #bluetooth {
-        color: #74c7ec;
-      }
-
-      #tray {
-        padding: 0 4px;
-      }
-    '';
   };
+  programs.waybar.enable = false;
 
   # ---------------------------------------------------------------------------
   # Foot terminal
@@ -368,8 +264,19 @@
 
     alacritty
     firefox
-    google-chrome
   ];
+
+  programs.chromium = {
+    enable = true;
+    package = pkgs.google-chrome;
+    commandLineArgs = [
+      "--ozone-platform=wayland"
+      "--enable-features=UseOzonePlatform"
+      "--force-device-scale-factor=1"
+      "--disable-features=WaylandFractionalScaleV1"
+      "--remote-debugging-port=9222"
+    ];
+  };
 
   # Start the GNOME authentication agent on login so polkit prompts work.
   systemd.user.services.polkit-gnome-authentication-agent = {

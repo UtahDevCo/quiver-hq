@@ -105,6 +105,21 @@
           # zellij attach -c default
       fi
 
+      # 5. Fix jump plugin to resolve symlinks to physical paths
+      # This prevents landing in the Nix store when jumping to a mark
+      jump() {
+          local mark=$1
+          if [[ -z "$mark" ]]; then
+              echo "Usage: jump <mark>"
+              return 1
+          fi
+          if [[ -L "$HOME/.marks/$mark" ]]; then
+              cd -P "$HOME/.marks/$mark"
+          else
+              cd "$HOME/.marks/$mark" 2>/dev/null || echo "No such mark: $mark"
+          fi
+      }
+
       # pk - Kill process(es) by port number
       # Usage: pk [port]
       #   With port: kills process on specified port
