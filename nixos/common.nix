@@ -87,12 +87,6 @@
   # Enable Tailscale service
   services.tailscale.enable = true;
 
-  xdg.portal = {
-    enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
-    config.common.default = "*";
-  };
-
   services.udev.extraRules = ''
     KERNEL=="uinput", MODE="0666", OPTIONS+="static_node=uinput"
     KERNEL=="event*", SUBSYSTEM=="input", MODE="0666"

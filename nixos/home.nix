@@ -35,7 +35,7 @@
     wl-clipboard
     zellij
     vscode
-    xfce.thunar
+    thunar
     noto-fonts
     noto-fonts-color-emoji
   ];

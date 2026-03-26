@@ -17,6 +17,11 @@
     ../../../modules/nixos/desktop/niri.nix
   ];
 
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
+  };
+
   # ---------------------------------------------------------------------------
   # Host identity
   # ---------------------------------------------------------------------------
