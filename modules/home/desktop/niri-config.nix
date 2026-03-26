@@ -190,15 +190,9 @@
       layer = "top";
       position = "top";
       height = 30;
-      modules-left = [ "niri/workspaces" ];
-      modules-center = [ "clock" ];
-      modules-right = [ "tray" "network" "memory" "cpu" ];
-
-      "niri/workspaces" = {
-          format = "{name}";
-          active-only = false;
-          all-outputs = true;
-      };
+      modules-left = [ "clock" ];
+      modules-center = [ "tray" ];
+      modules-right = [ "network" "memory" "cpu" ];
 
       "clock" = {
         format = "   {:%H:%M}";
@@ -223,8 +217,8 @@
       };
 
       "tray" = {
-        icon-size = 16;
-        spacing = 10;
+        icon-size = 20;
+        spacing = 15;
       };
     }];
 
@@ -241,17 +235,6 @@
         color: #cdd6f4;
       }
 
-      #workspaces button {
-        padding: 0 8px;
-        color: #cdd6f4;
-        background-color: transparent;
-      }
-
-      #workspaces button.active {
-        color: #89b4fa;
-        border-bottom: 2px solid #89b4fa;
-      }
-
       #clock, #network, #memory, #cpu, #tray {
         padding: 0 10px;
         margin: 0 5px;
@@ -260,6 +243,10 @@
       #network { color: #89b4fa; }
       #memory { color: #a6e3a1; }
       #cpu { color: #f38ba8; }
+      #tray {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+      }
     '';
   };
 
