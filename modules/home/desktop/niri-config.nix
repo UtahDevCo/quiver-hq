@@ -23,11 +23,6 @@
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
     XCURSOR_SIZE = "16";
-
-    # Force 1.0 scale to prevent double-scaling or auto-detection issues in GTK/Electron
-    GDK_SCALE = "1";
-    GDK_DPI_SCALE = "1";
-    _JAVA_OPTIONS = "-Dsun.java2d.uiScale=1";
   };
 
   # ---------------------------------------------------------------------------
@@ -36,11 +31,11 @@
   xdg.configFile."niri/config.kdl".text = ''
     prefer-no-csd
 
-    // Explicitly set scale for all likely output names on the PN54
-    output "HDMI-A-1" { scale 1.0; }
-    output "DP-1" { scale 1.0; }
-    output "DP-2" { scale 1.0; }
-    output "eDP-1" { scale 1.0; }
+    output "HDMI-A-1" {
+        // Try values like 1.25, 1.5, or 2.0. 
+        // 1.0 is the current default.
+        scale 1.0
+    }
 
     // Named workspaces
     workspace "admin"
@@ -79,7 +74,7 @@
         }
     }
 
-    spawn-at-startup "yambar"
+    spawn-at-startup "waybar"
 
     binds {
         // --- Application launchers ---
@@ -187,92 +182,91 @@
   };
 
   # ---------------------------------------------------------------------------
-  # Yambar – status bar
+  # Waybar – status bar
   # ---------------------------------------------------------------------------
-  programs.yambar = {
+  programs.waybar = {
     enable = true;
-    settings = {
-      bar = {
-        location = "top";
-        layer = "top";
-        height = 30;
-        background = "1e1e2ef2"; # Matches Foot background
-        font = "JetBrainsMono NF:size=11,Noto Sans:size=11";        
-        left = [];
+    settings = [{
+      layer = "top";
+      position = "top";
+      height = 30;
+      modules-left = [ "niri/workspaces" ];
+      modules-center = [ "clock" ];
+      modules-right = [ "tray" "network" "memory" "cpu" ];
 
-        center = [
-          {
-            clock = {
-              time-format = "%H:%M";
-              content = {
-                string = { 
-                  text = "   {time}"; 
-                  foreground = "cdd6f4ff";
-                };
-              };
-            };
-          }
-        ];
-
-        right = [
-          {
-            network = {
-              poll-interval = 0;
-              content = {
-                map = {
-                  conditions = {
-                    "name == \"wlan0\"" = {
-                      string = { 
-                        text = "   {ipv4}"; 
-                        foreground = "89b4faff"; # Blue
-                        right-margin = 15;
-                      };
-                    };
-                  };
-                };
-              };
-            };
-          }
-          {
-            mem = {
-              poll-interval = 10000;
-              content = {
-                string = { 
-                  text = "   {used:gib}GB"; 
-                  foreground = "a6e3a1ff"; # Green
-                  right-margin = 15;
-                };
-              };
-            };
-          }
-          {
-            cpu = {
-              poll-interval = 5000;
-              content = {
-                map = {
-                  conditions = {
-                    "id == -1" = {
-                      string = { 
-                        text = "  "; 
-                        foreground = "f38ba8ff"; # Red
-                      };
-                    };
-                    "id >= 0" = {
-                      string = { 
-                        text = "{cpu}% "; 
-                        foreground = "f38ba8ff"; # Red
-                      };
-                    };
-                  };
-                };
-              };
-            };
-          }
-        ];
+      "niri/workspaces" = {
+          format = "{name}";
+          active-only = false;
+          all-outputs = true;
       };
-    };
+
+      "clock" = {
+        format = "   {:%H:%M}";
+        tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
+      };
+
+      "network" = {
+        format-wifi = "   {essid}";
+        format-ethernet = "󰈀   {ifname}";
+        format-disconnected = "⚠ Disconnected";
+        tooltip-format = "{ifname} via {gwaddr} 󰊗";
+      };
+
+      "memory" = {
+        format = "   {}%";
+        tooltip-format = "Used: {used:0.1f}GB / {total:0.1f}GB";
+      };
+
+      "cpu" = {
+        format = "   {usage}%";
+        tooltip = false;
+      };
+
+      "tray" = {
+        icon-size = 16;
+        spacing = 10;
+      };
+    }];
+
+    style = ''
+      * {
+        font-family: "JetBrainsMono NF", "Noto Sans", sans-serif;
+        font-size: 13px;
+        min-height: 0;
+      }
+
+      window#waybar {
+        background-color: rgba(30, 30, 46, 0.95);
+        border-bottom: 1px solid rgba(212, 211, 220, 0.2);
+        color: #cdd6f4;
+      }
+
+      #workspaces button {
+        padding: 0 8px;
+        color: #cdd6f4;
+        background-color: transparent;
+      }
+
+      #workspaces button.active {
+        color: #89b4fa;
+        border-bottom: 2px solid #89b4fa;
+      }
+
+      #clock, #network, #memory, #cpu, #tray {
+        padding: 0 10px;
+        margin: 0 5px;
+      }
+
+      #network { color: #89b4fa; }
+      #memory { color: #a6e3a1; }
+      #cpu { color: #f38ba8; }
+    '';
   };
-  programs.waybar.enable = false;
+
+  # ---------------------------------------------------------------------------
+  # Yambar – disabled
+  # ---------------------------------------------------------------------------
+  programs.yambar.enable = false;
 
   # ---------------------------------------------------------------------------
   # Foot terminal
@@ -338,7 +332,6 @@
       "--enable-features=UseOzonePlatform,WaylandFractionalScaleV1"
       "--remote-debugging-port=9222"
       "--remote-debugging-address=0.0.0.0"
-      "--force-device-scale-factor=1"
     ];
   };
 
