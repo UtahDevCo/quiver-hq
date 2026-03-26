@@ -38,6 +38,15 @@
     noto-fonts-color-emoji
   ];
 
+  xdg.desktopEntries.vibetyper = {
+    name = "VibeTyper";
+    exec = "/home/chris/Downloads/VibeTyper.AppImage";
+    icon = "vibe-typer";
+    comment = "AI Voice Typing";
+    categories = [ "Utility" ];
+    terminal = false;
+  };
+
   # Configure Git declaratively
   programs.git = {
     enable = true;
