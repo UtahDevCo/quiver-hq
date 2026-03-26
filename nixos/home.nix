@@ -42,7 +42,7 @@
 
   xdg.desktopEntries.vibetyper = {
     name = "VibeTyper";
-    exec = "env PASSWORD_STORE_BACKEND=gnome-libsecret appimage-run /home/chris/bin/VibeTyper.AppImage --password-store=gnome-libsecret %u";
+    exec = "env NO_DESKTOP_ENTRY=1 PASSWORD_STORE_BACKEND=gnome-libsecret appimage-run /home/chris/bin/VibeTyper.AppImage --password-store=gnome-libsecret %u";
     icon = "/home/chris/bin/vibe-typer.png";
     comment = "AI Voice Typing";
     categories = [ "Utility" "AudioVideo" ];

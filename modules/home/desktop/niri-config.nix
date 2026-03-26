@@ -211,11 +211,6 @@
 
         right = [
           {
-            tray = {
-              spacing = 15;
-            };
-          }
-          {
             network = {
               poll-interval = 0;
               content = {
