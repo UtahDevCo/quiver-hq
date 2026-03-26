@@ -56,6 +56,24 @@
         clip-to-geometry true
     }
 
+    window-rule {
+        match app-id="zellij-terminal"
+        open-on-workspace "admin"
+        maximize-column true
+    }
+
+    window-rule {
+        match app-id="google-chrome"
+        open-on-workspace "infra"
+        maximize-column true
+    }
+
+    window-rule {
+        match app-id="de.haeckerfelix.Shortwave"
+        open-on-workspace "backend"
+        maximize-column true
+    }
+
     input {
         keyboard {
             xkb {
@@ -74,12 +92,15 @@
         }
     }
 
+    spawn-at-startup "foot -a zellij-terminal zellij"
+    spawn-at-startup "google-chrome-stable"
+    spawn-at-startup "shortwave"
     spawn-at-startup "waybar"
 
     binds {
         // --- Application launchers ---
         // Mod is Super by default in niri unless bound otherwise
-        Mod+Return { spawn "foot"; }
+        Mod+Return { spawn "alacritty"; }
         Mod+Space { spawn "fuzzel"; }
         Mod+Q { close-window; }
         Mod+Tab { toggle-overview; }
@@ -153,9 +174,6 @@
         // --- Screenshot ---
         Print { screenshot; }
         Mod+Shift+S { screenshot-screen; }
-
-	Mod+T { spawn "alacritty"; }
-	Mod+D { spawn "fuzzel"; }
     }
   '';
 
@@ -309,6 +327,8 @@
 
     alacritty
     firefox
+    zellij
+    shortwave
   ];
 
   programs.chromium = {
