@@ -78,6 +78,7 @@
       export NIX_LD_LIBRARY_PATH="/run/current-system/sw/share/nix-ld/lib"
 
       alias ll="ls -al"
+      alias dc="docker compose"
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
       alias reload='(cd ~/dev/quiver-hq && sudo nixos-rebuild switch --flake .#$(hostname))'
       alias opsignin='eval $(op signin)'

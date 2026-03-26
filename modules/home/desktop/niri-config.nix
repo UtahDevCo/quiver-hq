@@ -5,12 +5,24 @@
 
 {
   # ---------------------------------------------------------------------------
+  # Cursor – size and theme
+  # ---------------------------------------------------------------------------
+  home.pointerCursor = {
+    gtk.enable = true;
+    # x11.enable = true;
+    package = pkgs.gnome-themes-extra;
+    name = "Adwaita";
+    size = 16; # Adjust to 16, 24, or 32 as needed.
+  };
+
+  # ---------------------------------------------------------------------------
   # Session Variables – Wayland compatibility
   # ---------------------------------------------------------------------------
   home.sessionVariables = {
     # Forces Electron apps (Chrome, VS Code) to use Wayland natively.
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
+    XCURSOR_SIZE = "16";
   };
 
   # ---------------------------------------------------------------------------
@@ -187,6 +199,7 @@
         center = [
           {
             clock = {
+              time-format = "%H:%M";
               content = {
                 string = { text = "{time}"; };
               };
@@ -194,7 +207,37 @@
           }
         ];
 
-        right = [];
+        right = [
+          {
+            network = {
+              content = {
+                map = {
+                  conditions = {
+                    "name == \"wlan0\"" = {
+                      string = { text = "NET {ipv4}"; };
+                    };
+                  };
+                };
+              };
+            };
+          }
+          {
+            cpu = {
+              poll-interval = 5000;
+              content = {
+                string = { text = "CPU {cpu}%"; };
+              };
+            };
+          }
+          {
+            mem = {
+              poll-interval = 10000;
+              content = {
+                string = { text = "RAM {used}MB"; };
+              };
+            };
+          }
+        ];
       };
     };
   };

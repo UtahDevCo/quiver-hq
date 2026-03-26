@@ -86,8 +86,28 @@
         MinConnectionInterval = "6";
         MaxConnectionInterval = "9";
         ConnectionLatency = "0";
-        SupervisionTimeout = "42";
       };
+    };
+  };
+
+  # Automatically connect to the Magic Trackpad on boot.
+  systemd.services.connect-magic-trackpad = {
+    description = "Connect Apple Magic Trackpad on boot";
+    after = [ "bluetooth.service" ];
+    requires = [ "bluetooth.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "connect-trackpad" ''
+        MAC="10:94:BB:AA:C9:32"
+        for i in {1..10}; do
+          echo "Attempting to connect to Magic Trackpad ($MAC)..."
+          ${pkgs.bluez}/bin/bluetoothctl connect $MAC && exit 0
+          sleep 5
+        done
+        exit 1
+      '';
+      RemainAfterExit = true;
     };
   };
 

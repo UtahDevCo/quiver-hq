@@ -23,7 +23,7 @@
   networking.hostName = "quiver-pn54";
   networking.networkmanager.enable = true;
   systemd.services.NetworkManager.stopIfChanged = false;
-  users.users.chris.extraGroups = [ "networkmanager" "wheel" "video" "onepassword-cli" ];
+  users.users.chris.extraGroups = [ "networkmanager" "wheel" "video" "onepassword-cli" "docker" ];
   hardware.enableRedistributableFirmware = true;
   boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
   boot.initrd.kernelModules = [ "mt7925e" ];
@@ -91,4 +91,9 @@
     enable = true;
     polkitPolicyOwners = [ "chris" ];
   };
+
+  # ---------------------------------------------------------------------------
+  # Docker
+  # ---------------------------------------------------------------------------
+  virtualisation.docker.enable = true;
 }
