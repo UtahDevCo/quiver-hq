@@ -25,6 +25,12 @@
   xdg.configFile."niri/config.kdl".text = ''
     prefer-no-csd
 
+    output "HDMI-A-1" {
+        // Try values like 1.25, 1.5, or 2.0. 
+        // 1.0 is the current default.
+        scale 1.0
+    }
+
     // Named workspaces
     workspace "admin"
     workspace "infra"
@@ -70,6 +76,7 @@
         Mod+Return { spawn "foot"; }
         Mod+Space { spawn "fuzzel"; }
         Mod+Q { close-window; }
+        Mod+Tab { toggle-overview; }
 
         // --- Column-width presets ---
         Mod+Ctrl+1 { set-column-width "33.333%"; }
@@ -92,14 +99,26 @@
         Mod+J     { focus-window-down; }
 
         // --- Column/Window movement ---
-        Mod+Shift+Left  { move-column-left; }
-        Mod+Shift+Right { move-column-right; }
+        Mod+Shift+Left  { consume-or-expel-window-left; }
+        Mod+Shift+Right { consume-or-expel-window-right; }
         Mod+Shift+Up    { move-window-up; }
         Mod+Shift+Down  { move-window-down; }
-        Mod+Shift+H     { move-column-left; }
-        Mod+Shift+L     { move-column-right; }
+        Mod+Shift+H     { consume-or-expel-window-left; }
+        Mod+Shift+L     { consume-or-expel-window-right; }
         Mod+Shift+K     { move-window-up; }
         Mod+Shift+J     { move-window-down; }
+
+        // --- Entire Column movement ---
+        Mod+Ctrl+Left  { move-column-left; }
+        Mod+Ctrl+Right { move-column-right; }
+        Mod+Ctrl+H     { move-column-left; }
+        Mod+Ctrl+L     { move-column-right; }
+
+        // --- Workspace navigation (Up/Down) ---
+        Mod+Page_Down      { focus-workspace-down; }
+        Mod+Page_Up        { focus-workspace-up; }
+        Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+        Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
 
         // --- Workspace focus ---
         Mod+1 { focus-workspace 1; }
@@ -139,6 +158,7 @@
     enable = true;
     settings = {
       main = {
+        font = "Noto Mono:size=11";
         terminal = "${pkgs.foot}/bin/foot";
         layer = "overlay";
       };
@@ -236,7 +256,7 @@
 
     style = ''
       * {
-        font-family: "monospace";
+        font-family: "Noto Sans", "Noto Mono";
         font-size: 11px;
         min-height: 0;
       }
@@ -384,5 +404,23 @@
         y = 10;
       };
     };
+  };
+
+  gtk = {
+    enable = true;
+    font = {
+      name = "Noto Sans";
+      size = 11;
+    };
+    theme = {
+      name = "Adwaita-dark";
+      package = pkgs.gnome-themes-extra;
+    };
+  };
+
+  qt = {
+    enable = true;
+    platformTheme.name = "gtk";
+    style.name = "adwaita-dark";
   };
 }
