@@ -9,6 +9,14 @@
   services.caddy = {
     enable = true;
 
+    # Build Caddy with the Cloudflare DNS plugin
+    package = (pkgs.caddy.withPlugins {
+      plugins = [ "github.com/caddy-dns/cloudflare@v0.2.4" ];
+      hash = "sha256-Olz4W84Kiyldy+JtbIicVCL7dAYl4zq+2rxEOUTObxA=";
+    }).overrideAttrs (old: {
+      nativeBuildInputs = [ pkgs.go_1_26 ] ++ (lib.filter (p: p.pname or "" != "go") (old.nativeBuildInputs or []));
+    });
+
     # Path to Caddyfile - relative paths are expanded to /etc/caddy/
     # We'll copy the Caddyfile to /etc/caddy/Caddyfile via environment.etc
     configFile = "/etc/caddy/Caddyfile";
@@ -20,6 +28,9 @@
 
     # Enable log output
     logFormat = "json";
+
+    # Environment file for secrets (Cloudflare API Token)
+    environmentFile = "/var/lib/caddy/cloudflare.env";
   };
 
   # Ensure the caddy user exists and can listen on privileged ports
@@ -54,10 +65,6 @@
 
   # Firewall rules - allow HTTP and HTTPS traffic
   networking.firewall.allowedTCPPorts = [ 80 443 ];
-
-  # Optional: Configure Tailscale to resolve *.chrisesplin.com to this host
-  # This requires Tailscale Split DNS configuration via the admin console
-  # For now, users can configure /etc/hosts or use MagicDNS
 
   # Log rotation for Caddy
   services.logrotate.settings.caddy = {
