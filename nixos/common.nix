@@ -78,6 +78,7 @@
     tailscale
     gnome-keyring
     libsecret
+    appimage-run
   ];
 
   environment.variables = {

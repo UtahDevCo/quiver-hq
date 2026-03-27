@@ -36,10 +36,11 @@
   # ---------------------------------------------------------------------------
   xdg.portal = {
     enable = true;
-    # xdg-desktop-portal-gnome handles screen capture, file picker, etc.
-    extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
-    # Explicit portal policy: use gnome portal for everything by default.
-    config.common.default = "gnome";
+    # xdg-desktop-portal-gtk provides file picker, settings, etc. without
+    # requiring a GNOME session (xdg-desktop-portal-gnome fails on Niri
+    # because its systemd unit depends on gnome-shell).
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    config.common.default = "gtk";
   };
 
   # ---------------------------------------------------------------------------

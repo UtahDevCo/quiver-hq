@@ -1,0 +1,169 @@
+# Caddy Configuration for Quiver HQ
+# Reverse proxy for services running on localhost with TLS via Let's Encrypt
+
+# Global settings
+{
+  # Email for Let's Encrypt notifications
+  email chris@chrisesplin.com
+
+  # Optional: Uncomment to use Let's Encrypt staging (for testing)
+  # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+# ============================================================================
+# SECTION 1: Public Routes (via Tailscale Funnel + HTTPS)
+# ============================================================================
+# These are served publicly on the internet via Tailscale Funnel.
+# Use these routes for services you want to expose publicly.
+
+# Example: api.chrisesplin.com -> localhost:3000
+# Uncomment and modify as needed:
+# api.chrisesplin.com {
+#   reverse_proxy localhost:3000
+#   # Optional: Add Tailscale Funnel directive if you want public access
+#   # tls_issuer acme
+# }
+
+# ============================================================================
+# SECTION 2: Tailscale VPN Routes (HTTPS over Tailscale network)
+# ============================================================================
+# These are only accessible when connected to your Tailscale network.
+# Use quiver-pn54.ts.net (Tailscale MagicDNS name) or your machine's IP.
+
+# Replace TAILSCALE_IP with your actual Tailscale IP (e.g., 100.x.x.x)
+# Or use quiver-pn54.ts.net once Tailscale MagicDNS is enabled
+
+# Example: internal.chrisesplin.com -> localhost:3000
+# When accessed from Tailscale network, add to /etc/hosts or use MagicDNS:
+# 100.x.x.x internal.chrisesplin.com
+# OR set up Tailscale DNS to resolve *.chrisesplin.com to this machine
+
+# ============================================================================
+# SECTION 3: Service Templates
+# ============================================================================
+
+# Template 1: Simple Reverse Proxy (no auth)
+# my-service.chrisesplin.com {
+#   reverse_proxy localhost:5000
+#   # Automatic HTTPS with Let's Encrypt
+# }
+
+# Template 2: With Basic Auth
+# secure-service.chrisesplin.com {
+#   reverse_proxy localhost:5001
+#   basicauth {
+#     /api chris PASSWORD_HASH
+#   }
+# }
+
+# Template 3: With Path Routing
+# multi-service.chrisesplin.com {
+#   reverse_proxy /api/* localhost:3000
+#   reverse_proxy /web/* localhost:4000
+#   reverse_proxy /* localhost:5000
+# }
+
+# ============================================================================
+# SECTION 4: Add Your Services Below
+# ============================================================================
+
+# Foundation-Web (Next.js application with multiple dashboards)
+# Main web app: localhost:3000
+app.chrisesplin.com {
+  reverse_proxy localhost:3000
+}
+
+# Inngest - Workflow engine UI (development)
+inngest.chrisesplin.com {
+  reverse_proxy localhost:8288
+}
+
+# Email template preview server (development)
+email.chrisesplin.com {
+  reverse_proxy localhost:55420
+}
+
+# Jaeger - Distributed tracing UI (development)
+tracing.chrisesplin.com {
+  reverse_proxy localhost:16686
+}
+
+# ============================================================================
+# SECTION 5: Additional Project Services
+# ============================================================================
+
+# Therapy Animal Hub - Mental health therapy platform
+# Port 3001: npm run dev
+therapy.chrisesplin.com {
+  reverse_proxy localhost:3001
+}
+
+# Wiley - AI-powered call management platform
+# Port 3600: next dev --port 3600
+wiley.chrisesplin.com {
+  reverse_proxy localhost:3600
+}
+
+# Trikin - Property management system
+# Port 3700: next dev --port 3700
+trikin.chrisesplin.com {
+  reverse_proxy localhost:3700
+}
+
+# K1 - Monorepo template with shadcn/ui components
+# Port: Turbo dynamic (typically 3000-3009 range, check 'pnpm dev' output)
+# Note: May conflict with foundation-web. Consider running on different machine or sequential.
+k1.chrisesplin.com {
+  reverse_proxy localhost:3010
+}
+
+# ============================================================================
+# NOTES & SETUP INSTRUCTIONS
+# ============================================================================
+
+# 1. SERVICE SETUP
+#    Each service should run on localhost and expose its port.
+#    For example: `npm run dev` listening on localhost:3000
+#
+# 2. ADDING NEW SERVICES
+#    - Start your service on a unique port (e.g., 3000, 3001, 4000)
+#    - Add a new block to this Caddyfile:
+#        service-name.chrisesplin.com {
+#          reverse_proxy localhost:PORT
+#        }
+#    - Reload Caddy: `sudo systemctl reload caddy` or `sudo systemctl restart caddy`
+#
+# 3. HTTPS/TLS
+#    - Caddy automatically obtains and renews Let's Encrypt certificates
+#    - First access may take a few seconds for cert provisioning
+#    - Check /var/log/caddy for issues
+#
+# 4. TAILSCALE INTEGRATION
+#    - Your machine's Tailscale name: quiver-pn54.ts.net
+#    - Local Tailscale IP: printed by `tailscale status`
+#    - For subdomains to work:
+#      Option A: Configure Tailscale MagicDNS to resolve *.chrisesplin.com to this host
+#      Option B: Add entries to /etc/hosts on client machines:
+#                100.x.x.x app.chrisesplin.com
+#                100.x.x.x api.chrisesplin.com
+#      Option C: Set up a split-DNS or conditional forwarder in your tailnet
+#
+# 5. PUBLIC EXPOSURE (Optional - Tailscale Funnel)
+#    - To expose a service publicly, add to the service block:
+#        @public {
+#          header Host service.chrisesplin.com
+#        }
+#    - Or use Tailscale Funnel: `tailscale funnel 443`
+#    - See Tailscale docs for Funnel configuration
+#
+# 6. FIREWALL
+#    - Ensure ports 80 and 443 are open (or just 443 for HTTPS)
+#    - Caddy listens on:
+#        - 0.0.0.0:80 (HTTP - redirects to HTTPS)
+#        - 0.0.0.0:443 (HTTPS)
+#
+# 7. TESTING
+#    - From your Tailscale network:
+#        curl https://app.chrisesplin.com --insecure (if DNS not configured)
+#        curl https://app.chrisesplin.com (with DNS configured)
+#    - Tail logs: `sudo tail -f /var/log/caddy/access.log`

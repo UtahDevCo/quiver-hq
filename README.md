@@ -288,3 +288,315 @@ You have correctly placed your Zsh configuration inside `home.nix` using `progra
 ### Hardware Configuration
 
 The file `nixos/hosts/wsl/hardware-configuration.nix` is specific to your current machine. When installing on a new machine, NixOS will generate a new version of this file that is specific to that new hardware. Your current setup correctly isolates this file from the common configuration.
+
+---
+
+## 🌐 Caddy Reverse Proxy Setup (Tailscale Network Serving)
+
+Serve multiple websites and services to your Tailscale network devices using Caddy as a reverse proxy on **quiver-pn54** (Ryzen 5 desktop). This setup provides automatic HTTPS via Let's Encrypt and supports both private (Tailscale VPN) and public (optional Funnel) access.
+
+### Architecture Overview
+
+- **Caddy Server**: Runs on quiver-pn54, listens on ports 80 and 443
+- **Services**: Run on localhost with unique ports (3000, 3001, 4000, etc.)
+- **Reverse Proxy**: Routes `*.chrisesplin.com` subdomains to backend services
+- **HTTPS**: Automatic certificates from Let's Encrypt (email: chris@chrisesplin.com)
+- **Network Access**: Private (Tailscale VPN) + optional public (Funnel)
+
+### Quick Start
+
+#### 1. Apply NixOS Configuration
+
+First, deploy Caddy to quiver-pn54:
+
+```bash
+cd /home/chris/dev/quiver-hq
+sudo nixos-rebuild switch --flake .#quiver-pn54
+```
+
+This will:
+- Install and enable Caddy service
+- Configure automatic HTTPS with Let's Encrypt
+- Open firewall ports 80 and 443
+- Load the Caddyfile from the repository
+
+Verify Caddy is running:
+```bash
+sudo systemctl status caddy
+sudo journalctl -u caddy -f  # View live logs
+```
+
+#### 2. Configure a Service
+
+Start a service on a unique port. For example, if you have a Next.js app:
+
+```bash
+# Terminal 1: On quiver-pn54
+cd ~/my-project
+npm run dev  # Listens on localhost:3000
+```
+
+#### 3. Add to Caddyfile
+
+Edit `/home/chris/dev/quiver-hq/Caddyfile` and add your service:
+
+```caddy
+app.chrisesplin.com {
+  reverse_proxy localhost:3000
+}
+```
+
+Reload Caddy to apply changes:
+```bash
+sudo systemctl reload caddy
+```
+
+#### 4. Access from Tailscale Network
+
+**Option A: With DNS configured** (recommended):
+```bash
+# From any device on your Tailscale network
+curl https://app.chrisesplin.com
+```
+
+**Option B: Without DNS** (temporary):
+```bash
+# Add to /etc/hosts on your client machine:
+# 100.x.x.x app.chrisesplin.com
+
+curl https://app.chrisesplin.com
+```
+
+### Adding New Services
+
+#### Services Reference
+
+Here are all the services currently configured in your Caddyfile:
+
+| Service | Subdomain | Port | Technology | Purpose |
+|---------|-----------|------|-----------|---------|
+| **Foundation-Web** | app.chrisesplin.com | 3000 | Next.js 15, TypeScript | Multi-tenant B2B SaaS (Demo, Buyer, Operator, Super Admin dashboards) |
+| **Inngest** | inngest.chrisesplin.com | 8288 | Workflow Engine | Event-driven async workflows (dev) |
+| **Email Preview** | email.chrisesplin.com | 55420 | jsx-email | Email template testing (dev) |
+| **Jaeger** | tracing.chrisesplin.com | 16686 | OpenTelemetry | Distributed tracing dashboard (dev) |
+| **Therapy Animal Hub** | therapy.chrisesplin.com | 3001 | Next.js, TypeScript | Mental health therapy animal platform with Stripe, Twilio |
+| **Wiley** | wiley.chrisesplin.com | 3600 | Next.js, TypeScript, Firebase | AI call management with Netsapiens & AltaWorx integration |
+| **Trikin** | trikin.chrisesplin.com | 3700 | Next.js, TypeScript, Cloudflare D1 | Property management system with real estate integrations |
+| **K1** | k1.chrisesplin.com | 3010 | Next.js Turbo monorepo | Shadcn/ui component library template |
+
+#### Starting Services
+
+**Foundation-Web:**
+```bash
+cd projects/foundation-web
+npm run dev  # Runs on localhost:3000
+```
+
+**Therapy Animal Hub:**
+```bash
+cd projects/therapyanimalhub.com
+npm run dev  # Runs on localhost:3001
+```
+
+**Wiley:**
+```bash
+cd projects/wiley
+next dev --port 3600  # Or check for configured dev script
+```
+
+**Trikin:**
+```bash
+cd projects/trikin
+next dev --port 3700  # Or check for configured dev script
+```
+
+**K1 (Turbo Monorepo):**
+```bash
+cd projects/k1
+pnpm dev  # Turbo manages ports dynamically; may use 3000-3009 range
+# If conflicts with foundation-web, configure different port in next.config.js
+```
+
+#### Troubleshooting Port Conflicts
+
+If multiple projects try to use port 3000:
+
+**Option 1: Run on different machines**
+- Foundation-Web on quiver-pn54 (port 3000)
+- Other services on different Tailscale machines
+
+**Option 2: Run services sequentially**
+- Stop Foundation-Web before starting K1
+- Or start K1 on explicit port:
+  ```bash
+  cd projects/k1
+  PORT=3010 pnpm dev  # If supported by project config
+  ```
+
+**Option 3: Use environment variables**
+- Check project `.env` or `.env.example` for port configuration
+- Many Next.js projects support `PORT` env var
+
+**Option 4: Modify next.config.js**
+```javascript
+module.exports = {
+  server: {
+    port: 3010,
+  }
+}
+```
+
+#### Standard Pattern
+
+Edit `/home/chris/dev/quiver-hq/Caddyfile` and add a block for each service:
+
+```caddy
+service-name.chrisesplin.com {
+  reverse_proxy localhost:PORT
+}
+```
+
+Then reload Caddy:
+```bash
+sudo systemctl reload caddy
+```
+
+#### Examples
+
+**API Service:**
+```caddy
+api.chrisesplin.com {
+  reverse_proxy localhost:3001
+}
+```
+
+**Multiple routes to one host:**
+```caddy
+dashboard.chrisesplin.com {
+  reverse_proxy /api/* localhost:4000
+  reverse_proxy /* localhost:4001
+}
+```
+
+**With request/response headers:**
+```caddy
+service.chrisesplin.com {
+  reverse_proxy localhost:5000 {
+    header_up X-Forwarded-Proto https
+    header_up X-Forwarded-Host {host}
+  }
+}
+```
+
+### DNS & Tailscale Configuration
+
+#### Option 1: Tailscale MagicDNS (Easiest)
+
+1. Go to [Tailscale Admin Console](https://login.tailscale.com/admin/dns)
+2. Enable **MagicDNS** for your tailnet
+3. Add a **DNS nameserver** rule:
+   - Domain: `chrisesplin.com`
+   - Nameservers: Your normal DNS provider (or configure per-subdomain routing)
+4. Devices will now resolve `*.chrisesplin.com` to your quiver-pn54 machine
+
+#### Option 2: /etc/hosts (Manual, Per-Device)
+
+On each client device, add to `/etc/hosts`:
+```
+100.x.x.x app.chrisesplin.com
+100.x.x.x api.chrisesplin.com
+100.x.x.x dashboard.chrisesplin.com
+```
+
+Replace `100.x.x.x` with your Tailscale IP from `tailscale status`.
+
+#### Option 3: Split DNS / Conditional Forwarder
+
+If you have a local DNS server, configure it to resolve `*.chrisesplin.com` to your Tailscale IP.
+
+### HTTPS/TLS Details
+
+- **Automatic provisioning**: First access to a new subdomain triggers Let's Encrypt cert request
+- **Auto-renewal**: Certificates renew automatically 30 days before expiration
+- **Email**: chris@chrisesplin.com receives renewal notices
+- **Staging server** (for testing): Uncomment the `acme_ca` line in Caddyfile
+
+### Firewall & Port Configuration
+
+Caddy needs:
+- **Port 80** (HTTP): Redirects to HTTPS
+- **Port 443** (HTTPS): Main service port
+
+These are opened automatically via NixOS when you apply the configuration. Check:
+```bash
+sudo ufw status  # or your firewall tool
+```
+
+### Logs & Troubleshooting
+
+**View Caddy logs:**
+```bash
+sudo journalctl -u caddy -f
+sudo tail -f /var/log/caddy/access.log
+```
+
+**Test a service:**
+```bash
+curl -v https://app.chrisesplin.com
+```
+
+**Reload configuration without downtime:**
+```bash
+sudo systemctl reload caddy
+```
+
+**Check certificate status:**
+```bash
+caddy list-modules
+sudo /run/current-system/sw/bin/caddy validate --config /etc/caddy/Caddyfile
+```
+
+### Public Exposure (Optional - Tailscale Funnel)
+
+To expose a service publicly on the internet:
+
+1. **Enable Tailscale Funnel:**
+   ```bash
+   tailscale funnel 443
+   ```
+
+2. **Configure Caddy** (optional, Funnel works with Caddy automatically):
+   - Funnel creates a public URL like `https://quiver-pn54.tail123456.ts.net`
+   - Route to your subdomain via DNS or `chrisesplin.com` CNAME
+
+3. **Security note**: Only services you explicitly enable via Funnel are exposed.
+
+### Service Discovery & Health
+
+To help organize services, consider maintaining a service registry in your project:
+
+**Example `services.md`:**
+```markdown
+# Quiver HQ Services
+
+| Service | Subdomain | Port | Status | Notes |
+|---------|-----------|------|--------|-------|
+| Frontend App | app | 3000 | Active | Next.js |
+| API | api | 3001 | Active | Node.js |
+| Dashboard | dashboard | 4000 | Active | React |
+```
+
+### Commit Configuration to Git
+
+Once configured and tested:
+
+```bash
+git add Caddyfile nixos/caddy.nix nixos/hosts/pn54/configuration.nix
+git commit -m "feat: add Caddy reverse proxy for Tailscale network serving
+
+- Enable Caddy on quiver-pn54 with automatic HTTPS
+- Support *.chrisesplin.com subdomains for services
+- Configure Let's Encrypt with chris@chrisesplin.com
+- Open firewall ports 80 and 443
+- Services routed to localhost with unique ports"
+```

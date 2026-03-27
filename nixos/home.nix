@@ -40,6 +40,18 @@
     noto-fonts-color-emoji
   ];
 
+  xdg.desktopEntries.beeper = {
+    name = "Beeper";
+    exec = "appimage-run /home/chris/downloads/Beeper-4.2.670-x86_64.AppImage %u";
+    icon = "message";
+    comment = "Unified messenger";
+    categories = [ "Network" "InstantMessaging" ];
+    terminal = false;
+    settings = {
+      Type = "Application";
+    };
+  };
+
   xdg.desktopEntries.vibetyper = {
     name = "VibeTyper";
     exec = "env NO_DESKTOP_ENTRY=1 PASSWORD_STORE_BACKEND=gnome-libsecret appimage-run /home/chris/bin/VibeTyper.AppImage --password-store=gnome-libsecret %u";

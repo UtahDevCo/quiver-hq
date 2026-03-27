@@ -15,12 +15,10 @@
 
     # Desktop: Niri compositor, greetd, AMD graphics, Bluetooth, PipeWire.
     ../../../modules/nixos/desktop/niri.nix
-  ];
 
-  xdg.portal = {
-    enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
-  };
+    # Caddy reverse proxy for serving websites to Tailscale network.
+    ../../caddy.nix
+  ];
 
   # ---------------------------------------------------------------------------
   # Host identity
@@ -48,6 +46,7 @@
   networking.networkmanager.wifi.backend = "iwd";
   networking.wireless.iwd.enable = true;
   networking.wireless.enable = false;
+  services.openssh.enable = true;
 
   # Mountain Time – adjust if the machine moves.
   time.timeZone = lib.mkForce "America/Denver";
