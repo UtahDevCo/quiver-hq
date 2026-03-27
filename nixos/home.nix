@@ -42,8 +42,8 @@
 
   xdg.desktopEntries.beeper = {
     name = "Beeper";
-    exec = "appimage-run /home/chris/downloads/Beeper-4.2.670-x86_64.AppImage %u";
-    icon = "message";
+    exec = "appimage-run /home/chris/dev/quiver-hq/assets/Beeper-4.2.670-x86_64.AppImage %u";
+    icon = "/home/chris/dev/quiver-hq/assets/icon.png";
     comment = "Unified messenger";
     categories = [ "Network" "InstantMessaging" ];
     terminal = false;
