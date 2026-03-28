@@ -67,6 +67,7 @@
             nodejs_22
             bun
             sqlite
+            git-lfs
           ];
           shellHook = ''
             echo "🛠️ Quiver HQ Environment is ready."
