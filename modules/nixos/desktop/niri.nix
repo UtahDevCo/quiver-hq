@@ -41,6 +41,7 @@
     # because its systemd unit depends on gnome-shell).
     extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     config.common.default = "gtk";
+    config.niri.default = lib.mkForce "gtk";
   };
 
   # ---------------------------------------------------------------------------

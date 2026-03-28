@@ -31,7 +31,7 @@
   xdg.configFile."niri/config.kdl".text = ''
     prefer-no-csd
 
-    output "HDMI-A-1" {
+    output "DP-1" {
         // Try values like 1.25, 1.5, or 2.0. 
         // 1.0 is the current default.
         scale 1.0

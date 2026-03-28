@@ -68,6 +68,19 @@
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.chris.enableGnomeKeyring = true;
 
+  # Enable printing services
+  services.printing = {
+    enable = true;
+    drivers = [ pkgs.samsung-unified-linux-driver ];
+  };
+
+  # Enable Avahi for network discovery
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
+
   # List packages installed in system profile.
   environment.systemPackages = with pkgs; [
     vim
