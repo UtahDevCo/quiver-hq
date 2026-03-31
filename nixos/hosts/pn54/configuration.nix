@@ -18,6 +18,8 @@
 
     # Caddy reverse proxy for serving websites to Tailscale network.
     ../../caddy.nix
+    ./fizzy.nix
+
   ];
 
   # ---------------------------------------------------------------------------
@@ -62,7 +64,7 @@
   # System state version
   # Keep in sync with common.nix; only bump intentionally.
   # ---------------------------------------------------------------------------
-  system.stateVersion = lib.mkForce "24.11";
+  system.stateVersion = "24.11";
 
   console = {
     earlySetup = true;
@@ -84,6 +86,8 @@
   # Fingerprint Authentication
   # ---------------------------------------------------------------------------
   services.fprintd.enable = true;
+  services.fprintd.tod.enable = true;
+  services.fprintd.tod.driver = pkgs.libfprint-2-tod1-elan;
   security.pam.services.login.fprintAuth = true;
   security.pam.services.sudo.fprintAuth = true;
 

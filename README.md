@@ -10,13 +10,18 @@ The project includes a Go-based agentic controller and a secret management utili
 
 Manage environment variables via 1Password.
 
+*   **Global Installation (NixOS)**:
+    Once you have this repo configured as a flake, you can install the tools globally:
+    ```bash
+    sudo nixos-rebuild switch --flake .#quiver-wsl
+    ```
 *   **Ingest**: Scan a project for `.env` files, push secrets to 1Password, and create a `.env.tmpl` file.
     ```bash
-    ./quiver-secrets ingest ./my-project
+    quiver-secrets ingest ./my-project
     ```
 *   **Hydrate**: Reconstruct a `.env` file from 1Password using the `.env.tmpl`.
     ```bash
-    ./quiver-secrets hydrate ./my-project
+    quiver-secrets hydrate ./my-project
     ```
 
 ### 2. Mission Controller (`controller`)

@@ -27,8 +27,27 @@
 
       # Nixpkgs for each system
       pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
+      # Helper to build all packages in cmd/
+      allCmdPackages = system:
+        let
+          cmdDir = ./cmd;
+          cmds = builtins.attrNames (builtins.readDir cmdDir);
+          pkgs_ = pkgs.${system};
+        in
+        builtins.listToAttrs (map (name: {
+          name = name;
+          value = pkgs_.buildGoModule {
+            pname = name;
+            version = "0.1.0";
+            src = ./.;
+            subPackages = [ "cmd/${name}" ];
+            vendorHash = "sha256-ner2TEKIvNs+Xpj6suH4pTwrjoMDjpWHTj0hXLkfnZw=";
+          };
+        }) cmds);
     in
     {
+      packages = forAllSystems (system: allCmdPackages system);
+
       # -- NIXOS & DARWIN SYSTEM CONFIGURATIONS -----------------------------
       nixosConfigurations."quiver-wsl" = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";

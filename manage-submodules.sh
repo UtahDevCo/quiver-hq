@@ -7,14 +7,19 @@ set -e
 # Function to sign in to 1Password and hydrate secrets
 hydrate_secrets() {
     echo "Signing in to 1Password..."
-    # Since we're in a script, we use the standard command directly
     eval $(op signin)
     
     echo "Hydrating project secrets..."
-    if [ -f "./quiver-secrets" ]; then
+    if command -v quiver-secrets >/dev/null 2>&1; then
+        quiver-secrets hydrate projects
+    elif [ -f "./bin/quiver-secrets" ]; then
+        ./bin/quiver-secrets hydrate projects
+    elif [ -f "./quiver-secrets" ]; then
         ./quiver-secrets hydrate projects
     else
-        go run cmd/quiver-secrets/main.go hydrate projects
+        echo "Building quiver-secrets..."
+        go build -o bin/quiver-secrets ./cmd/quiver-secrets
+        ./bin/quiver-secrets hydrate projects
     fi
 }
 

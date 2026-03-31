@@ -1,5 +1,5 @@
 # /home/chris/dev/quiver-hq/nixos/home.nix
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, inputs, ... }:
 
 {
   # Set your username and home directory
@@ -22,23 +22,31 @@
 
   # Add any user-specific packages you want.
   home.packages = with pkgs; [
+    inputs.self.packages.${pkgs.system}.quiver-secrets
+    inputs.self.packages.${pkgs.system}.controller
+    inputs.self.packages.${pkgs.system}.interactive-mission
+    inputs.self.packages.${pkgs.system}.risky-mission
     git 
     direnv 
     nix-direnv 
     nodejs_24
     gh 
-    github-copilot-cli
+    # github-copilot-cli
     google-cloud-sdk 
     gemini-cli
     fzf socat lsof
     appimage-run
     wl-clipboard
     zellij
-    vscode
     thunar
     noto-fonts
     noto-fonts-color-emoji
   ];
+
+  programs.vscode = {
+    enable = true;
+    package = pkgs.vscode-fhs;
+  };
 
   xdg.desktopEntries.beeper = {
     name = "Beeper";
@@ -205,6 +213,6 @@
   };
 
   programs.bash.enable = false;
-  home.stateVersion = "23.11";
+  home.stateVersion = "24.11";
   programs.home-manager.enable = true;
 }

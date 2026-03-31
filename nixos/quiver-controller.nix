@@ -11,7 +11,7 @@
       Type = "simple";
       User = "chris";
       WorkingDirectory = "/home/chris/dev/quiver-hq";
-      EnvironmentFile = "/home/chris/dev/quiver-hq/.env.secrets";
+      EnvironmentFile = "/home/chris/dev/quiver-hq/.env.local";
       ExecStart = "/home/chris/dev/quiver-hq/bin/controller";
       Restart = "always";
       RestartSec = "10";

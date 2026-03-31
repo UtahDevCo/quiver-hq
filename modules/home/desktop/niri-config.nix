@@ -59,19 +59,25 @@
     window-rule {
         match app-id="zellij-terminal"
         open-on-workspace "admin"
-        maximize-column true
+        open-maximized true
     }
 
     window-rule {
         match app-id="google-chrome"
         open-on-workspace "infra"
-        maximize-column true
+        open-maximized true
     }
 
     window-rule {
-        match app-id="de.haeckerfelix.Shortwave"
+        match app-id="1password" title="Quick Access — 1Password"
+        open-floating true
+        block-out-from "screen-capture"
+    }
+
+    window-rule {
+        match app-id="crx_lnachpgegbbmnnlgpokibfjlmppeciah"
         open-on-workspace "backend"
-        maximize-column true
+        open-maximized true
     }
 
     input {
@@ -94,14 +100,24 @@
 
     spawn-at-startup "foot -a zellij-terminal zellij"
     spawn-at-startup "google-chrome-stable"
-    spawn-at-startup "shortwave"
+    spawn-at-startup "google-chrome-stable --profile-directory=Default --app-id=lnachpgegbbmnnlgpokibfjlmppeciah"
     spawn-at-startup "waybar"
+    spawn-at-startup "1password" "--silent"
+
+    // --- Idle management ---
+    // Turns off the screen after 10 minutes (600 seconds) of inactivity.
+    // Niri will automatically wake the screen on keyboard/mouse input.
+    idle-timeout 600 {
+        spawn "niri msg action power-off-monitors"
+    }
 
     binds {
         // --- Application launchers ---
         // Mod is Super by default in niri unless bound otherwise
         Mod+Return { spawn "alacritty"; }
         Mod+Space { spawn "fuzzel"; }
+        Ctrl+Shift+Space { spawn "1password" "--quick-access"; }
+        Ctrl+Shift+L { spawn "1password" "--lock"; }
         Mod+Q { close-window; }
         Mod+Tab { toggle-overview; }
 
@@ -207,10 +223,72 @@
     settings = [{
       layer = "top";
       position = "top";
-      height = 30;
-      modules-left = [ "clock" ];
-      modules-center = [ "tray" ];
-      modules-right = [ "network" "memory" "cpu" ];
+      height = 40;
+      spacing = 4;
+      modules-left = [ "niri/workspaces" "niri/window" ];
+      modules-center = [ "clock" ];
+      modules-right = [ "mpris" "idle_inhibitor" "pulseaudio" "network" "cpu" "memory" "temperature" "disk" "tray" "custom/power" ];
+
+      "niri/workspaces" = {
+        format = "{icon}";
+        format-icons = {
+          focused = "";
+          active = "";
+          default = "";
+          empty = "";
+        };
+      };
+
+      "niri/window" = {
+        format = "{}";
+        rewrite = {
+          "(.*) - Google Chrome" = " $1";
+          "(.*) - Visual Studio Code" = "󰨞 $1";
+          "(.*) - Alacritty" = " $1";
+          "Beeper" = "  Beeper";
+          "(.*) - Beeper" = "  $1";
+        };
+        separate-outputs = true;
+        on-click = "niri msg action focus-window --app-id BeeperTexts";
+      };
+
+      "custom/power" = {
+        format = "";
+        on-click = "niri msg action power-off-monitors";
+        tooltip = false;
+      };
+
+      "mpris" = {
+        format = " {artist} - {title}";
+        format-paused = "";
+        max-length = 40;
+        on-click = "playerctl play-pause";
+        on-click-right = "playerctl next";
+        on-click-middle = "playerctl previous";
+      };
+
+      "idle_inhibitor" = {
+        format = "{icon}";
+        format-icons = {
+          activated = "";
+          deactivated = "";
+        };
+      };
+
+      "pulseaudio" = {
+        format = "{icon} {volume}%";
+        format-muted = "  Muted";
+        format-icons = {
+          headphone = "";
+          hands-free = "";
+          headset = "";
+          phone = "";
+          portable = "";
+          car = "";
+          default = [ "" "" "" ];
+        };
+        on-click = "pavucontrol";
+      };
 
       "clock" = {
         format = "   {:%H:%M}";
@@ -222,6 +300,7 @@
         format-ethernet = "󰈀   {ifname}";
         format-disconnected = "⚠ Disconnected";
         tooltip-format = "{ifname} via {gwaddr} 󰊗";
+        on-click = "${pkgs.foot}/bin/foot -e nmtui";
       };
 
       "memory" = {
@@ -232,6 +311,17 @@
       "cpu" = {
         format = "   {usage}%";
         tooltip = false;
+      };
+
+      "temperature" = {
+        critical-threshold = 80;
+        format = "{icon} {temperatureC}°C";
+        format-icons = [ "" "" "" "" "" ];
+      };
+
+      "disk" = {
+        format = "󰋊 {percentage_used}%";
+        tooltip-format = "{used} / {total} ({percentage_used}%) used on {path}";
       };
 
       "tray" = {
@@ -251,19 +341,56 @@
         background-color: rgba(30, 30, 46, 0.95);
         border-bottom: 1px solid rgba(212, 211, 220, 0.2);
         color: #cdd6f4;
+        transition-property: background-color;
+        transition-duration: .5s;
       }
 
-      #clock, #network, #memory, #cpu, #tray {
-        padding: 0 10px;
-        margin: 0 5px;
+      #workspaces button {
+        padding: 0 5px;
+        background-color: transparent;
+        color: #cdd6f4;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s cubic-bezier(.55,-0.04,.3,1.44);
       }
 
-      #network { color: #89b4fa; }
-      #memory { color: #a6e3a1; }
+      #workspaces button.focused {
+        color: #89b4fa;
+        border-bottom: 3px solid #89b4fa;
+      }
+
+      #workspaces button.active {
+        color: #a6e3a1;
+      }
+
+      #workspaces button.urgent {
+        background-color: #f38ba8;
+        color: #1e1e2e;
+      }
+
+      #window {
+        margin: 0 10px;
+        font-weight: bold;
+      }
+
+      #clock, #mpris, #idle_inhibitor, #pulseaudio, #network, #cpu, #memory, #temperature, #disk, #tray, #custom-power {
+        padding: 2px 10px;
+        margin: 6px 4px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      #clock { color: #f9e2af; }
+      #mpris { color: #f5c2e7; }
+      #idle_inhibitor { color: #fab387; }
+      #pulseaudio { color: #89b4fa; }
+      #network { color: #94e2d5; }
       #cpu { color: #f38ba8; }
+      #memory { color: #a6e3a1; }
+      #temperature { color: #fab387; }
+      #disk { color: #b4befe; }
+      #custom-power { color: #f38ba8; }
       #tray {
         background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
       }
     '';
   };
@@ -328,7 +455,8 @@
     alacritty
     firefox
     zellij
-    shortwave
+    playerctl       # MPRIS controller for Waybar
+    brightnessctl   # Optional: for brightness control
   ];
 
   programs.chromium = {

@@ -108,6 +108,8 @@
 
   # Hook in Home Manager and tell it to use our home.nix
   home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
     extraSpecialArgs = { inherit inputs; };
     backupFileExtension = "backup";
     users = {
@@ -116,7 +118,7 @@
   };
 
   # Set the system state version
-  system.stateVersion = "23.11";
+  system.stateVersion = "24.11";
 
   fonts = {
     fontDir.enable = true;
