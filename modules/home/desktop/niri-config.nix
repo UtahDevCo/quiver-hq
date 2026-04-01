@@ -107,9 +107,7 @@
     // --- Idle management ---
     // Turns off the screen after 10 minutes (600 seconds) of inactivity.
     // Niri will automatically wake the screen on keyboard/mouse input.
-    idle-timeout 600 {
-        spawn "niri msg action power-off-monitors"
-    }
+    spawn-at-startup "swayidle" "-w" "timeout" "600" "niri msg action power-off-monitors" "resume" "niri msg action power-on-monitors"
 
     binds {
         // --- Application launchers ---
@@ -189,7 +187,7 @@
 
         // --- Screenshot ---
         Print { screenshot; }
-        Mod+Shift+S { screenshot-screen; }
+        Mod+Shift+S { spawn "sh" "-c" "grim -g \"$(slurp)\" - | ksnip -e -"; }
     }
   '';
 
@@ -448,9 +446,11 @@
     pavucontrol     # PulseAudio/PipeWire volume control GUI
     grim            # Wayland screen-capture tool
     slurp           # Region selector for grim
+    ksnip           # Full-featured screenshot editor (Snagit alternative)
     wl-clipboard    # wl-copy / wl-paste (Wayland clipboard CLI)
     gnome-keyring   # Secret storage (needed by many apps)
     polkit_gnome    # Authentication agent for privilege escalation dialogs
+    swayidle        # Idle management daemon
 
     alacritty
     firefox

@@ -31,7 +31,9 @@
     nix-direnv 
     nodejs_24
     gh 
-    # github-copilot-cli
+    (github-copilot-cli.overrideAttrs (oldAttrs: {
+      doInstallCheck = false;
+    }))
     google-cloud-sdk 
     gemini-cli
     fzf socat lsof
@@ -121,6 +123,7 @@
       alias opsignin='eval $(op signin)'
       alias qlogs='journalctl -u quiver-controller -f'
       alias qrestart='sudo systemctl restart quiver-controller'
+      alias copilot='copilot'
 
       # 1. Setup Path
       export GOPATH=$HOME/go

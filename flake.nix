@@ -90,6 +90,9 @@
           ];
           shellHook = ''
             echo "🛠️ Quiver HQ Environment is ready."
+            if command -v gh >/dev/null 2>&1; then
+              gh extension list | grep -q "github/gh-copilot" || gh extension install github/gh-copilot
+            fi
           '';
         };
       });
