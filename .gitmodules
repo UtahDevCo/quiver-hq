@@ -26,3 +26,6 @@
 [submodule "projects/foundation-web"]
 	path = projects/foundation-web
 	url = git@github.com:buildwithfoundation/web.git
+[submodule "projects/k1-fork"]
+	path = projects/k1-fork
+	url = git@github.com:schulzgregory/tax-pe-fork.git
