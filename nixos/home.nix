@@ -1,6 +1,23 @@
 # /home/chris/dev/quiver-hq/nixos/home.nix
 { pkgs, lib, config, inputs, ... }:
 
+let
+  render-cli = pkgs.stdenv.mkDerivation {
+    pname = "render-cli";
+    version = "2.15.1";
+    src = pkgs.fetchurl {
+      url = "https://github.com/render-oss/cli/releases/download/v2.15.1/cli_2.15.1_linux_amd64.zip";
+      sha256 = "1gq0djz31v41gvr1a3pwf3z022617ik83xl7h64md79vf80847df";
+    };
+    nativeBuildInputs = [ pkgs.unzip ];
+    unpackPhase = "unzip $src";
+    installPhase = ''
+      mkdir -p $out/bin
+      cp cli_v2.15.1 $out/bin/render
+      chmod +x $out/bin/render
+    '';
+  };
+in
 {
   # Set your username and home directory
   home.username = "chris";
@@ -16,12 +33,19 @@
     ".marks/v2".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/quiver-photos-v2";
     ".marks/v3".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/quiver-photos-v2";
     ".marks/w".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/wiley";
+      ".config/ghostty/config".text = ''
+      theme = Catppuccin Mocha
+      font-family = "JetBrainsMono Nerd Font"
+      font-size = 12
+      window-decoration = false
+    '';
   };
 
   nixpkgs.config.allowUnfree = true;
 
   # Add any user-specific packages you want.
   home.packages = with pkgs; [
+    render-cli
     inputs.self.packages.${pkgs.system}.quiver-secrets
     inputs.self.packages.${pkgs.system}.controller
     inputs.self.packages.${pkgs.system}.interactive-mission
@@ -36,10 +60,13 @@
     }))
     google-cloud-sdk 
     gemini-cli
+    dbeaver-bin
     fzf socat lsof
+    ffmpeg
     appimage-run
     wl-clipboard
     zellij
+    ghostty
     thunar
     noto-fonts
     noto-fonts-color-emoji
@@ -112,7 +139,7 @@
 
     initContent = ''
       # 0. Ensure basic system tools are in PATH immediately
-      export PATH="$HOME/bin:$HOME/.nix-profile/bin:$PATH"
+      export PATH="$HOME/.local/bin:$HOME/bin:$HOME/.nix-profile/bin:$PATH"
       export PATH="$HOME/.npm-global/bin:$PATH"
       export NIX_LD_LIBRARY_PATH="/run/current-system/sw/share/nix-ld/lib"
 
@@ -128,10 +155,17 @@
       # 1. Setup Path
       export GOPATH=$HOME/go
       export PATH=$HOME/dev/quiver-hq/bin:$GOPATH/bin:$PATH
+      export BUN_INSTALL="$HOME/.bun"
+      export PATH="$BUN_INSTALL/bin:$PATH"
 
       # 2. Fetch API Keys with 1Password
       if [[ -z "$GEMINI_API_KEY" ]]; then
           export GEMINI_API_KEY=$(op read "op://Dev/quiver-hq/GEMINI_API_KEY" 2>/dev/null)
+      fi
+
+      # 3.5. Setup Ghostty shell integration
+      if [[ -n "$GHOSTTY_RESOURCES_DIR" ]]; then
+          source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
       fi
 
       # 3. Setup direnv

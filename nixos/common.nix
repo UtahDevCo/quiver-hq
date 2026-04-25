@@ -92,6 +92,7 @@
     gnome-keyring
     libsecret
     appimage-run
+    unzip
   ];
 
   environment.variables = {

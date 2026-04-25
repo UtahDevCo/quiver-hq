@@ -87,6 +87,7 @@
             bun
             sqlite
             git-lfs
+            unzip
           ];
           shellHook = ''
             echo "🛠️ Quiver HQ Environment is ready."
