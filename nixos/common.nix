@@ -20,7 +20,7 @@
   users.users.chris = {
     isNormalUser = true;
     description = "Chris";
-    uid = 1001;
+    uid = 1000;
     extraGroups = [ "wheel" "networkmanager" ];
   };
   users.defaultUserShell = pkgs.zsh;

@@ -102,13 +102,12 @@
     spawn-at-startup "foot -a zellij-terminal zellij"
     spawn-at-startup "google-chrome-stable"
     spawn-at-startup "google-chrome-stable --profile-directory=Default --app-id=lnachpgegbbmnnlgpokibfjlmppeciah"
-    spawn-at-startup "waybar"
     spawn-at-startup "1password" "--silent"
 
     // --- Idle management ---
-    // Turns off the screen after 10 minutes (600 seconds) of inactivity.
+    // Turns off the screen after 20 minutes (1200 seconds) of inactivity.
     // Niri will automatically wake the screen on keyboard/mouse input.
-    spawn-at-startup "swayidle" "-w" "timeout" "600" "niri msg action power-off-monitors" "resume" "niri msg action power-on-monitors"
+    spawn-at-startup "swayidle" "-w" "timeout" "1200" "niri msg action power-off-monitors" "resume" "niri msg action power-on-monitors"
 
     binds {
         // --- Application launchers ---
@@ -189,6 +188,13 @@
         // --- Screenshot ---
         Print { screenshot; }
         Mod+Shift+S { spawn "sh" "-c" "grim -g \"$(slurp)\" - | ksnip -e -"; }
+
+        // --- Volume and Brightness ---
+        XF86AudioRaiseVolume { spawn "pamixer" "-i" "5"; }
+        XF86AudioLowerVolume { spawn "pamixer" "-d" "5"; }
+        XF86AudioMute        { spawn "pamixer" "-t"; }
+        XF86MonBrightnessUp   { spawn "brightnessctl" "set" "+10%"; }
+        XF86MonBrightnessDown { spawn "brightnessctl" "set" "10%-"; }
     }
   '';
 
@@ -219,8 +225,12 @@
   # ---------------------------------------------------------------------------
   programs.waybar = {
     enable = true;
+    systemd.enable = true;
+    systemd.target = "graphical-session.target";
     settings = [{
       layer = "top";
+      exclusive = true;
+      passthrough = false;
       position = "top";
       height = 40;
       spacing = 4;
@@ -261,9 +271,9 @@
         format = " {artist} - {title}";
         format-paused = "";
         max-length = 40;
-        on-click = "playerctl play-pause";
-        on-click-right = "playerctl next";
-        on-click-middle = "playerctl previous";
+        on-click = "${pkgs.playerctl}/bin/playerctl play-pause";
+        on-click-right = "${pkgs.playerctl}/bin/playerctl next";
+        on-click-middle = "${pkgs.playerctl}/bin/playerctl previous";
       };
 
       "idle_inhibitor" = {
@@ -286,7 +296,9 @@
           car = "";
           default = [ "" "" "" ];
         };
-        on-click = "pavucontrol";
+        on-click = "${pkgs.pavucontrol}/bin/pavucontrol";
+        on-scroll-up = "${pkgs.pamixer}/bin/pamixer -i 5";
+        on-scroll-down = "${pkgs.pamixer}/bin/pamixer -d 5";
       };
 
       "clock" = {
@@ -299,7 +311,7 @@
         format-ethernet = "󰈀   {ifname}";
         format-disconnected = "⚠ Disconnected";
         tooltip-format = "{ifname} via {gwaddr} 󰊗";
-        on-click = "${pkgs.foot}/bin/foot -e nmtui";
+        on-click = "${pkgs.foot}/bin/foot -e ${pkgs.networkmanager}/bin/nmtui";
       };
 
       "memory" = {
@@ -394,8 +406,15 @@
     '';
   };
 
-  # ---------------------------------------------------------------------------
-  # Yambar – disabled
+  systemd.user.services.waybar = {
+    Service = {
+      Restart = lib.mkForce "always";
+      RestartSec = lib.mkForce "2sec";
+    };
+  };
+      # ---------------------------------------------------------------------------
+      # Yambar – disabled
+
   # ---------------------------------------------------------------------------
   programs.yambar.enable = false;
 
