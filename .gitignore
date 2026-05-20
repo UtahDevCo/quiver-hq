@@ -25,3 +25,7 @@ test-project/
 .direnv/
 result
 result-*
+
+.npm-global/
+.bin/
+projects/ts-interview-skeleton/

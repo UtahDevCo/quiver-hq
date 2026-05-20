@@ -31,6 +31,10 @@
   users.users.chris.extraGroups = [ "networkmanager" "wheel" "video" "onepassword-cli" "docker" ];
   hardware.enableRedistributableFirmware = true;
   boot.kernelPackages = pkgs.linuxPackages_xanmod_latest;
+  boot.kernelParams = [ "ipv6.disable=1" ];
+  boot.extraModprobeConfig = ''
+    options mt7925e disable_ps=1
+  '';
   boot.initrd.kernelModules = [ "mt7925e" ];
   networking.networkmanager.wifi.powersave = false;
   networking.networkmanager.unmanaged = [ "interface-name:lo" ];
@@ -44,9 +48,23 @@
     device = {
       "wifi.scan-rand-mac-address" = "no";
     };
+    connection = {
+      "ipv6.method" = "disabled";
+    };
   };
   networking.networkmanager.wifi.backend = "iwd";
   networking.wireless.iwd.enable = true;
+  networking.wireless.iwd.settings = {
+    Settings = {
+      AutoConnect = true;
+    };
+    General = {
+      EnableNetworkConfiguration = true;
+    };
+    Network = {
+      EnableIPv6 = false;
+    };
+  };
   networking.wireless.enable = false;
   services.openssh.enable = true;
 

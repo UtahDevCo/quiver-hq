@@ -93,6 +93,7 @@
     libsecret
     appimage-run
     unzip
+    antigravity
   ];
 
   environment.variables = {

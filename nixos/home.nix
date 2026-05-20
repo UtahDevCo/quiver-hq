@@ -33,6 +33,7 @@ in
     ".marks/v2".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/quiver-photos-v2";
     ".marks/v3".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/quiver-photos-v2";
     ".marks/w".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/wiley";
+    ".gemini".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.agents";
       ".config/ghostty/config".text = ''
       theme = Catppuccin Mocha
       font-family = "JetBrainsMono Nerd Font"
@@ -60,6 +61,11 @@ in
     }))
     google-cloud-sdk 
     gemini-cli
+    antigravity
+    (pkgs.runCommand "agy" { } ''
+      mkdir -p $out/bin
+      ln -s ${pkgs.antigravity}/bin/antigravity $out/bin/agy
+    '')
     dbeaver-bin
     fzf socat lsof
     ffmpeg
@@ -147,6 +153,7 @@ in
       alias dc="docker compose"
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
       alias reload='(cd ~/dev/quiver-hq && sudo nixos-rebuild switch --flake .#$(hostname))'
+      alias agy='antigravity'
       alias opsignin='eval $(op signin)'
       alias qlogs='journalctl -u quiver-controller -f'
       alias qrestart='sudo systemctl restart quiver-controller'
@@ -161,6 +168,9 @@ in
       # 2. Fetch API Keys with 1Password
       if [[ -z "$GEMINI_API_KEY" ]]; then
           export GEMINI_API_KEY=$(op read "op://Dev/quiver-hq/GEMINI_API_KEY" 2>/dev/null)
+      fi
+      if [[ -z "$ANTIGRAVITY_API_KEY" ]]; then
+          export ANTIGRAVITY_API_KEY="$GEMINI_API_KEY"
       fi
 
       # 3.5. Setup Ghostty shell integration

@@ -26,7 +26,10 @@
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
       # Nixpkgs for each system
-      pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
+      pkgs = forAllSystems (system: import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      });
       # Helper to build all packages in cmd/
       allCmdPackages = system:
         let
@@ -88,6 +91,7 @@
             sqlite
             git-lfs
             unzip
+            antigravity
           ];
           shellHook = ''
             echo "🛠️ Quiver HQ Environment is ready."
