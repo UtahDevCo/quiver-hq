@@ -42,6 +42,11 @@ in
     '';
   };
 
+  home.sessionVariables = {
+    PUPPETEER_EXECUTABLE_PATH = "/etc/profiles/per-user/chris/bin/google-chrome";
+    CHROME_PATH = "/etc/profiles/per-user/chris/bin/google-chrome";
+  };
+
   nixpkgs.config.allowUnfree = true;
 
   # Add any user-specific packages you want.
@@ -61,11 +66,9 @@ in
     }))
     google-cloud-sdk 
     gemini-cli
-    antigravity
-    (pkgs.runCommand "agy" { } ''
-      mkdir -p $out/bin
-      ln -s ${pkgs.antigravity}/bin/antigravity $out/bin/agy
-    '')
+    inputs.self.packages.${pkgs.system}.antigravity-cli
+    inputs.self.packages.${pkgs.system}.antigravity-manager
+    inputs.self.packages.${pkgs.system}.antigravity-ide
     dbeaver-bin
     fzf socat lsof
     ffmpeg
@@ -81,6 +84,29 @@ in
   programs.vscode = {
     enable = true;
     package = pkgs.vscode-fhs;
+  };
+
+  # Configure Zed editor
+  programs.zed-editor = {
+    enable = true;
+    extensions = [ "nix" "toml" "rust" ];
+    userSettings = {
+      features = {
+        copilot = true;
+      };
+      ui_font_family = "JetBrainsMono Nerd Font";
+      buffer_font_family = "JetBrainsMono Nerd Font";
+      theme = {
+        mode = "system";
+        dark = "One Dark";
+        light = "One Light";
+      };
+    };
+  };
+
+  # Configure OpenCode AI Agent
+  programs.opencode = {
+    enable = true;
   };
 
   xdg.desktopEntries.beeper = {
@@ -153,11 +179,12 @@ in
       alias dc="docker compose"
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
       alias reload='(cd ~/dev/quiver-hq && sudo nixos-rebuild switch --flake .#$(hostname))'
-      alias agy='antigravity'
+      alias agide='antigravity-ide'
       alias opsignin='eval $(op signin)'
       alias qlogs='journalctl -u quiver-controller -f'
       alias qrestart='sudo systemctl restart quiver-controller'
       alias copilot='copilot'
+      alias zed='zeditor'
 
       # 1. Setup Path
       export GOPATH=$HOME/go

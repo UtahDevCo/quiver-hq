@@ -93,7 +93,9 @@
     libsecret
     appimage-run
     unzip
-    antigravity
+    inputs.self.packages.${pkgs.system}.antigravity-cli
+    inputs.self.packages.${pkgs.system}.antigravity-manager
+    inputs.self.packages.${pkgs.system}.antigravity-ide
   ];
 
   environment.variables = {

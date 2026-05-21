@@ -23,9 +23,10 @@
     enable = true;
     settings = {
       default_session = {
-        # tuigreet remembers the last user and launches niri directly.
-        # Use --session to export WAYLAND_DISPLAY to D-Bus and systemd.
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd 'niri --session'";
+        # tuigreet remembers the last user and launches the Niri session.
+        # Using niri-session (instead of raw niri) ensures that the systemd user manager
+        # imports the Wayland environment and correctly brings up graphical-session.target.
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd 'niri-session'";
         user = "greeter";
       };
     };
@@ -36,12 +37,17 @@
   # ---------------------------------------------------------------------------
   xdg.portal = {
     enable = true;
-    # xdg-desktop-portal-gtk provides file picker, settings, etc. without
-    # requiring a GNOME session (xdg-desktop-portal-gnome fails on Niri
-    # because its systemd unit depends on gnome-shell).
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-    config.common.default = "gtk";
-    config.niri.default = lib.mkForce "gtk";
+    # Use gtk as the default backend, but GNOME specifically for screen sharing
+    # and screenshots since Niri natively implements GNOME's Mutter screencast API.
+    extraPortals = [
+      pkgs.xdg-desktop-portal-gtk
+      pkgs.xdg-desktop-portal-gnome
+    ];
+    config = {
+      common = {
+        default = "gtk";
+      };
+    };
   };
 
   # ---------------------------------------------------------------------------
