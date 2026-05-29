@@ -238,16 +238,16 @@
            in
            {
              antigravity-cli = mkAntigravityCli {
-               version = "1.0.0-5288553236791296";
-               url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.0-5288553236791296/linux-x64/cli_linux_x64.tar.gz";
-               hash = "sha256-cAljQFdPr8SgbE08gFcxTiLUdc4cgg0K1R/wf7fpnrY=";
+               version = "1.0.4-6513644876464128";
+               url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.4-6513644876464128/linux-x64/cli_linux_x64.tar.gz";
+               hash = "sha256-Nz9ULRd9M7k76FfQfTWladctMwzgqLSTF8uKPtaBTuI=";
              };
              antigravity-manager = mkAntigravityApp {
                pname = "antigravity-manager";
-               version = "2.0.1-6566078776737792";
+               version = "100.0.0-6081531354152960";
                src = pkgs_.fetchurl {
-                url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.1-6566078776737792/linux-x64/Antigravity.tar.gz";
-                hash = "sha256-Byfh9WlhttI0eUHyeNppzGwX3jvv6YhSSEjNFnOA6as=";
+                url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/100.0.0-6081531354152960/linux-x64/Antigravity.tar.gz";
+                hash = "sha256-UDWduWkpG9VK9jVZygjK8f/jWreDQBrUzpPjnDdO0Ug=";
               };
               sourceRoot = "Antigravity-x64";
               execPath = "antigravity";
@@ -267,15 +267,38 @@
               binName = "antigravity-ide";
               desktopName = "Antigravity IDE";
               comment = "Google Antigravity IDE";
-              categories = [ "Development" "IDE" ];
+               categories = [ "Development" "IDE" ];
             };
           }
         else
           { };
-    in
+
+      investingScreenerPackage = system:
+        let
+          pkgs_ = pkgs.${system};
+        in
+        {
+          investing-screener = pkgs_.stdenvNoCC.mkDerivation {
+            pname = "investing-screener";
+            version = "1.0.0";
+            dontUnpack = true;
+            dontBuild = true;
+            dontConfigure = true;
+            installPhase = ''
+              mkdir -p $out/bin
+              cat << 'EOF' > $out/bin/invest
+              #!/bin/sh
+              exec ${pkgs_.bun}/bin/bun run /home/chris/dev/quiver-hq/projects/tools/apps/investing/src/index.ts "$@"
+              EOF
+              chmod +x $out/bin/invest
+              ln -s invest $out/bin/inv
+            '';
+          };
+        };
+     in
     {
       packages = forAllSystems (system:
-        (allCmdPackages system) // (antigravityPackages system)
+        (allCmdPackages system) // (antigravityPackages system) // (investingScreenerPackage system)
       );
 
       # -- NIXOS & DARWIN SYSTEM CONFIGURATIONS -----------------------------
@@ -319,6 +342,7 @@
               sqlite
               git-lfs
               unzip
+              self.packages.${system}.investing-screener
              ])
              ++ nixpkgs.lib.optionals (system == "x86_64-linux") [
                self.packages.${system}.antigravity-cli

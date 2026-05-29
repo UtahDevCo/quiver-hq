@@ -96,6 +96,7 @@
     inputs.self.packages.${pkgs.system}.antigravity-cli
     inputs.self.packages.${pkgs.system}.antigravity-manager
     inputs.self.packages.${pkgs.system}.antigravity-ide
+    inputs.self.packages.${pkgs.system}.investing-screener
   ];
 
   environment.variables = {
