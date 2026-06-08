@@ -17,6 +17,24 @@ let
       chmod +x $out/bin/render
     '';
   };
+
+  alpaca-cli = pkgs.buildGoModule {
+    pname = "alpaca-cli";
+    version = "0.0.11";
+    src = pkgs.fetchFromGitHub {
+      owner = "alpacahq";
+      repo = "cli";
+      rev = "v0.0.11";
+      hash = "sha256-c49q7I+0H7SheMiVr/XBnxAD6X8gHLULn3RNyNKGQ+g=";
+    };
+    subPackages = [ "cmd/alpaca" ];
+    vendorHash = "sha256-1jWJQwzS3PZlwX49hAJk8DGaIN2wUt6mzXilpSVKXFM=";
+    meta = {
+      description = "Alpaca Trading API CLI";
+      mainProgram = "alpaca";
+      homepage = "https://github.com/alpacahq/cli";
+    };
+  };
 in
 {
   # Set your username and home directory
@@ -52,10 +70,9 @@ in
   # Add any user-specific packages you want.
   home.packages = with pkgs; [
     render-cli
+    alpaca-cli
     inputs.self.packages.${pkgs.system}.quiver-secrets
-    inputs.self.packages.${pkgs.system}.controller
-    inputs.self.packages.${pkgs.system}.interactive-mission
-    inputs.self.packages.${pkgs.system}.risky-mission
+    inputs.self.packages.${pkgs.system}.multica
     git 
     direnv 
     nix-direnv 
@@ -66,6 +83,7 @@ in
     }))
     google-cloud-sdk 
     gemini-cli
+    claude-code
     inputs.self.packages.${pkgs.system}.antigravity-cli
     inputs.self.packages.${pkgs.system}.antigravity-manager
     inputs.self.packages.${pkgs.system}.antigravity-ide
@@ -180,9 +198,10 @@ in
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
       alias reload='(cd ~/dev/quiver-hq && sudo nixos-rebuild switch --flake .#$(hostname))'
       alias agide='antigravity-ide'
+      alias upgrade-agy='cd ~/dev/quiver-hq && bun /home/chris/.gemini/config/skills/antigravity-upgrade/scripts/upgrade.js --auto --rebuild && cd -'
       alias opsignin='eval $(op signin)'
-      alias qlogs='journalctl -u quiver-controller -f'
-      alias qrestart='sudo systemctl restart quiver-controller'
+      alias mlogs='journalctl --user -u multica-daemon -f'
+      alias mrestart='systemctl --user restart multica-daemon'
       alias copilot='copilot'
       alias zed='zeditor'
 
@@ -284,6 +303,62 @@ in
           fi
       }
     '';
+  };
+
+  systemd.user.services.multica-daemon = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Multica local agent runtime";
+      After = [ "network-online.target" ];
+      Wants = [ "network-online.target" ];
+    };
+    Service = {
+      Type = "simple";
+      ExecCondition = "${pkgs.jq}/bin/jq -e '.token | strings | length > 0' %h/.multica/config.json";
+      ExecStart = "${inputs.self.packages.${pkgs.system}.multica}/bin/multica daemon start --foreground --no-auto-update";
+      Restart = "on-failure";
+      RestartSec = 10;
+      Environment = [
+        "HOME=%h"
+        "MULTICA_WORKSPACES_ROOT=%h/multica_workspaces"
+        "PATH=%h/.nix-profile/bin:/etc/profiles/per-user/chris/bin:/run/current-system/sw/bin:%h/.local/bin:%h/.npm-global/bin:%h/.bun/bin:%h/go/bin"
+      ];
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
+  systemd.user.services.agy-pinger = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Ping Antigravity, Claude, and Codex CLIs to start/keep-alive sessions";
+    };
+    Service = {
+      Type = "oneshot";
+      WorkingDirectory = "/home/chris/dev/quiver-hq/projects/tools";
+      ExecStart = "/home/chris/dev/quiver-hq/projects/tools/apps/agy-pinger/agy-ping.sh";
+      Environment = [
+        "HOME=%h"
+        "PATH=/run/current-system/sw/bin:/etc/profiles/per-user/chris/bin:%h/.nix-profile/bin:%h/.npm-global/bin"
+      ];
+    };
+  };
+
+  systemd.user.timers.agy-pinger = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Trigger Antigravity, Claude, and Codex pinger every 5 hours and 5 minutes starting at midnight";
+    };
+    Timer = {
+      OnCalendar = [
+        "*-*-* 00:00:00"
+        "*-*-* 05:05:00"
+        "*-*-* 10:10:00"
+        "*-*-* 15:15:00"
+        "*-*-* 20:20:00"
+      ];
+      Unit = "agy-pinger.service";
+      Persistent = true;
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
   };
 
   programs.bash.enable = false;
