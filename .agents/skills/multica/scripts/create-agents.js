@@ -134,7 +134,6 @@ const agentDefs = [
   {
     name: "Wiley Manager Agent",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructions: "You are the Wiley Manager Agent and Squad Leader for the Wiley project. Your job is to oversee the team, coordinate tasks, deconstruct features into cards in Fizzy, assign cards to specialized agents, monitor execution, and record leader evaluations using the fizzy CLI.",
     skills: ["fizzy", "github-helper", "multica"],
     mcpConfig: null
@@ -142,7 +141,6 @@ const agentDefs = [
   {
     name: "Wiley Release & Deploy Agent",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructionFiles: [
       "projects/wiley/.github/agents/release-manager.agent.md",
       "projects/wiley/.github/agents/deploy-monitor.agent.md"
@@ -160,7 +158,6 @@ const agentDefs = [
   {
     name: "Wiley Email Triage Agent",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructionFiles: ["projects/wiley/.github/agents/email-triage.agent.md"],
     skills: ["fizzy", "github-helper", "multica"],
     mcpConfig: null
@@ -168,7 +165,6 @@ const agentDefs = [
   {
     name: "Wiley Production Debug Agent",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructionFiles: ["projects/wiley/.github/agents/production-debug.agent.md"],
     skills: ["fizzy", "github-helper", "multica"],
     mcpConfig: {
@@ -183,7 +179,6 @@ const agentDefs = [
   {
     name: "Wiley Triage Agent",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructionFiles: ["projects/wiley/.github/agents/wiley-triage.agent.md"],
     skills: ["fizzy", "github-helper", "multica"],
     mcpConfig: null
@@ -380,7 +375,6 @@ const agentDefs = [
   {
     name: "Tools Manager Agent",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructions: "You are the Tools Manager Agent and Squad Leader for the internal developer tools. Your job is to oversee the team, review developer tools feature requests, deconstruct them into tasks, assign them to specialized tools agents, monitor execution, and verify the final output.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -388,7 +382,6 @@ const agentDefs = [
   {
     name: "Tools Execution Agent",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructions: "You are a developer for internal tools. You implement code changes under tools/apps/, write clean code, and debug Next.js apps, Chrome extensions, and CLI scripts. (Includes Chrome DevTools MCP).",
     skills: ["chrome-extensions", "investing-screener", "opentui", "github-helper", "multica"],
     mcpConfig: {
@@ -403,7 +396,6 @@ const agentDefs = [
   {
     name: "Tools Code Review Agent",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructions: "You are the Tools Code Review Agent. Your job is to review pull requests for the internal developer tools under projects/tools/.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -411,7 +403,6 @@ const agentDefs = [
   {
     name: "Tools PR/Linear Manager",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructions: "You are the Tools PR/Linear Manager. Your job is to handle branching, committing, pushing, and closing tickets/PRs for the tools project.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -423,7 +414,6 @@ const agentDefs = [
   {
     name: "Multica Management Agent",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructions: "You are the Multica Management Agent. Your job is to manage the Multica configuration, sync workspace skills, provision agents/squads, and audit runtime configurations using the multica CLI and sync scripts.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -443,7 +433,6 @@ const agentDefs = [
   {
     name: "Dependency Upgrader Agent",
     provider: "antigravity",
-    model: "flash-3.5-medium",
     instructions: "You are a Dependency and Package Upgrader. Your job is to monitor and execute updates for npm packages, go modules, and Nix system configurations/flakes. You run verification testing after upgrades to ensure no breaking changes are introduced.",
     skills: ["antigravity-upgrade", "skills-manager", "github-helper", "multica"],
     mcpConfig: null
