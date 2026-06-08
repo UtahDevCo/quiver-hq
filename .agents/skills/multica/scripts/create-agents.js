@@ -418,7 +418,19 @@ const agentDefs = [
   },
 
   // ==========================================
-  // H. Monorepo-wide Agents
+  // H. Multica Management Project Squad (Antigravity)
+  // ==========================================
+  {
+    name: "Multica Management Agent",
+    provider: "antigravity",
+    model: "flash-3.5-medium",
+    instructions: "You are the Multica Management Agent. Your job is to manage the Multica configuration, sync workspace skills, provision agents/squads, and audit runtime configurations using the multica CLI and sync scripts.",
+    skills: ["github-helper", "multica"],
+    mcpConfig: null
+  },
+
+  // ==========================================
+  // I. Monorepo-wide Agents
   // ==========================================
   {
     name: "Monorepo Documenter Agent",
@@ -517,6 +529,12 @@ const squadDefs = [
       "Tools Code Review Agent",
       "Tools PR/Linear Manager"
     ]
+  },
+  {
+    name: "Multica Management Squad",
+    leader: "Multica Management Agent",
+    description: "Squad managing the Multica platform and workspace configuration",
+    members: []
   }
 ];
 
