@@ -190,7 +190,7 @@ const agentDefs = [
   {
     name: "K1 Manager Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructions: "You are the K1 Manager Agent and Squad Leader for the K1 project. Your responsibility is to oversee the team, review incoming requests, break them down into tickets, assign them to the K1 specialized agents, monitor execution, and verify the final output.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -198,7 +198,7 @@ const agentDefs = [
   {
     name: "K1 Triage Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructions: "You are the K1 Triage Agent. Your job is to intake bug reports, troubleshoot local Firebase environment configurations, and prioritize tickets.",
     skills: ["firebase-local-env-setup", "firebase-basics", "github-helper", "multica"],
     mcpConfig: null
@@ -206,7 +206,7 @@ const agentDefs = [
   {
     name: "K1 Codex Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructions: "You are a software developer building out the K1 project (acting as the K1 Execution Agent). You write clean code and use Drizzle schema, Firebase Data Connect, Genkit, and Firestore skills. (Includes Chrome DevTools MCP).",
     skills: [
       "deployment-monitor",
@@ -237,7 +237,7 @@ const agentDefs = [
   {
     name: "K1 Code Review Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructions: "You are the K1 Code Review Agent. Your job is to perform deep dive reviews on pull requests for the K1 project.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -249,7 +249,7 @@ const agentDefs = [
   {
     name: "Therapy Animal Hub Manager Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructions: "You are the Therapy Animal Hub Manager Agent and Squad Leader for the Therapy Animal Hub project. Your responsibility is to oversee the team, coordinate Next.js task allocation, monitor builds, and verify successful deployments.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -257,7 +257,7 @@ const agentDefs = [
   {
     name: "Therapy Animal Hub Triage Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructions: "You are the Therapy Animal Hub Triage Agent. Your job is to evaluate incoming bug reports and diagnose app routing or deployment-related issues.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -265,7 +265,7 @@ const agentDefs = [
   {
     name: "Therapy Animal Hub Release Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructionFiles: ["projects/therapyanimalhub.com/.github/agents/release.agent.md"],
     skills: ["deploy-therapyanimalhub", "github-helper", "multica"],
     mcpConfig: {
@@ -280,7 +280,7 @@ const agentDefs = [
   {
     name: "Therapy Animal Hub Code Review Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructions: "You are the Therapy Animal Hub Code Review Agent. Your job is to perform reviews on Next.js App Router PRs for Therapy Animal Hub.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -292,7 +292,7 @@ const agentDefs = [
   {
     name: "Trikin Manager Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructions: "You are the Trikin Manager Agent and Squad Leader for the Trikin project. Your responsibility is to coordinate tasks, deconstruct features into tickets, assign them to the specialized Trikin agents, and monitor execution.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -300,7 +300,7 @@ const agentDefs = [
   {
     name: "Trikin Triage Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructionFiles: ["projects/trikin/.github/agents/production-debugger.agent.md"],
     skills: ["github-helper", "multica"],
     mcpConfig: null
@@ -308,7 +308,7 @@ const agentDefs = [
   {
     name: "Trikin Execution Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructions: "You are the Trikin Execution Agent. Your job is to implement code changes under web/src/, edit Drizzle schemas, run local tests, and manage Cloudflare D1 database operations. (Includes Chrome DevTools MCP).",
     skills: ["github-helper", "multica"],
     mcpConfig: {
@@ -323,7 +323,7 @@ const agentDefs = [
   {
     name: "Trikin Code Review Agent",
     provider: "codex",
-    model: "gpt-5.5-medium",
+    model: "gpt-5.5",
     instructions: "You are the Trikin Code Review Agent. Your job is to review pull requests and verify conformance to the React component guidelines in AGENTS.md.",
     skills: ["github-helper", "multica"],
     mcpConfig: null
