@@ -44,7 +44,7 @@
              version = "0.1.0";
              src = ./.;
              subPackages = [ "cmd/${name}" ];
-             vendorHash = "sha256-ner2TEKIvNs+Xpj6suH4pTwrjoMDjpWHTj0hXLkfnZw=";
+             vendorHash = "sha256-5uJYNIjm5mXndjl7/pW3lmCtYqG1j/zT0R4PBeHliZc=";
            };
          }) cmds);
       antigravityPackages = system:
@@ -295,10 +295,52 @@
             '';
           };
         };
+
+      multicaPackage = system:
+        let
+          pkgs_ = pkgs.${system};
+          version = "0.3.18";
+          release =
+            if system == "x86_64-linux" then {
+              platform = "linux-amd64";
+              hash = "sha256-9tdWCDAqsCi95w91TKnVUOrTMAwX+zPyTu+cU9BbeAA=";
+            } else if system == "aarch64-darwin" then {
+              platform = "darwin-arm64";
+              hash = "sha256-cQcC6WBX9cOH0mNrbxCRgHobs8GrARse7nk3C3ErrA0=";
+            } else
+              throw "Unsupported Multica platform: ${system}";
+        in
+        {
+          multica = pkgs_.stdenvNoCC.mkDerivation {
+            pname = "multica";
+            inherit version;
+            src = pkgs_.fetchurl {
+              url = "https://github.com/multica-ai/multica/releases/download/v${version}/multica-cli-${version}-${release.platform}.tar.gz";
+              inherit (release) hash;
+            };
+            sourceRoot = ".";
+            dontBuild = true;
+            installPhase = ''
+              runHook preInstall
+              install -Dm755 multica $out/bin/multica
+              install -Dm644 LICENSE $out/share/licenses/multica/LICENSE
+              runHook postInstall
+            '';
+            meta = {
+              description = "Managed agent platform CLI and local daemon";
+              homepage = "https://github.com/multica-ai/multica";
+              license = pkgs_.lib.licenses.asl20;
+              mainProgram = "multica";
+            };
+          };
+        };
      in
     {
       packages = forAllSystems (system:
-        (allCmdPackages system) // (antigravityPackages system) // (investingScreenerPackage system)
+        (allCmdPackages system)
+        // (antigravityPackages system)
+        // (investingScreenerPackage system)
+        // (multicaPackage system)
       );
 
       # -- NIXOS & DARWIN SYSTEM CONFIGURATIONS -----------------------------
@@ -342,7 +384,11 @@
               sqlite
               git-lfs
               unzip
+              ffmpeg
+              tmux
+              (yt-dlp.override { javascriptSupport = false; })
               self.packages.${system}.investing-screener
+              self.packages.${system}.multica
              ])
              ++ nixpkgs.lib.optionals (system == "x86_64-linux") [
                self.packages.${system}.antigravity-cli

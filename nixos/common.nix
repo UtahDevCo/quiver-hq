@@ -93,6 +93,7 @@
     libsecret
     appimage-run
     unzip
+    bubblewrap
     inputs.self.packages.${pkgs.system}.antigravity-cli
     inputs.self.packages.${pkgs.system}.antigravity-manager
     inputs.self.packages.${pkgs.system}.antigravity-ide

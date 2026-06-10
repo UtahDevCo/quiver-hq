@@ -302,7 +302,7 @@
       };
 
       "clock" = {
-        format = "   {:%H:%M}";
+        format = "   {:%H:%M  %a %b %d}";
         tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
       };
 

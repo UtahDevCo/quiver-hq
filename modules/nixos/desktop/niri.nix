@@ -122,6 +122,10 @@
   # Blueman provides a system tray applet and GUI for pairing devices.
   services.blueman.enable = true;
 
+  # Enable storage volume management and virtual filesystem (required for Thunar mounting)
+  services.udisks2.enable = true;
+  services.gvfs.enable = true;
+
   # hid-apple provides proper HID descriptors for Apple Bluetooth peripherals.
   boot.kernelModules = [ "hid-apple" ];
 
@@ -155,4 +159,13 @@
   # Network Manager (preferred over wpa_supplicant for desktop use)
   # ---------------------------------------------------------------------------
   networking.networkmanager.enable = true;
+
+  # Enable Thunar file manager system-wide with volume management plugins
+  programs.thunar = {
+    enable = true;
+    plugins = with pkgs.xfce; [
+      thunar-archive-plugin
+      thunar-volman
+    ];
+  };
 }

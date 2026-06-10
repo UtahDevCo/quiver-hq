@@ -94,10 +94,18 @@ in
     wl-clipboard
     zellij
     ghostty
-    thunar
+    (warp-terminal.override { waylandSupport = true; })
     noto-fonts
     noto-fonts-color-emoji
   ];
+
+  programs.yt-dlp = {
+    enable = true;
+    package = pkgs.yt-dlp.override { javascriptSupport = false; };
+    settings = {
+      js-runtimes = "node";
+    };
+  };
 
   programs.vscode = {
     enable = true;
