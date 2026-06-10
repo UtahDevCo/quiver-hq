@@ -9,9 +9,6 @@
 
     # Import the hardware configuration specific to this machine
     ./hardware-configuration.nix
-
-    # Quiver HQ specific services
-    ../../quiver-controller.nix
   ];
 
   # WSL-specific settings

@@ -10,9 +10,6 @@
     # Hardware: AMD CPU/GPU, NVMe, UEFI boot.
     ./hardware-configuration.nix
 
-    # Quiver HQ controller daemon (also runs on this host).
-    ../../quiver-controller.nix
-
     # Desktop: Niri compositor, greetd, AMD graphics, Bluetooth, PipeWire.
     ../../../modules/nixos/desktop/niri.nix
 
