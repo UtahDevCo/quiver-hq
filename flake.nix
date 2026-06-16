@@ -15,6 +15,10 @@
       url = "github:lnl7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    agent-of-empires = {
+      url = "github:agent-of-empires/agent-of-empires";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, nixos-wsl, home-manager, nix-darwin, ... }@inputs:
@@ -386,9 +390,11 @@
               unzip
               ffmpeg
               tmux
+              uv
               (yt-dlp.override { javascriptSupport = false; })
               self.packages.${system}.investing-screener
               self.packages.${system}.multica
+              inputs.agent-of-empires.packages.${system}.aoe-with-web
              ])
              ++ nixpkgs.lib.optionals (system == "x86_64-linux") [
                self.packages.${system}.antigravity-cli

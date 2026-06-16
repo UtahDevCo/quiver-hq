@@ -29,3 +29,9 @@
 [submodule "projects/k1-fork"]
 	path = projects/k1-fork
 	url = git@github.com:schulzgregory/tax-pe-fork.git
+[submodule "projects/zamp"]
+	path = projects/zamp
+	url = git@github.com:zamptax/zamp.git
+[submodule "projects/foundation-integrations"]
+	path = projects/foundation-integrations
+	url = git@github.com:buildwithfoundation/foundation-integrations.git
