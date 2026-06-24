@@ -81,7 +81,6 @@
     openFirewall = true;
   };
 
-  # List packages installed in system profile.
   environment.systemPackages = with pkgs; [
     vim
     wget
@@ -94,6 +93,7 @@
     appimage-run
     unzip
     bubblewrap
+    tmux
     inputs.self.packages.${pkgs.system}.antigravity-cli
     inputs.self.packages.${pkgs.system}.antigravity-manager
     inputs.self.packages.${pkgs.system}.antigravity-ide
