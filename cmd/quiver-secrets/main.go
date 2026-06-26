@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -157,7 +158,13 @@ func ingestFile(rootPath, envPath string) error {
 		}
 		defer tmplFile.Close()
 
+		var keys []string
 		for k := range env {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, k := range keys {
 			// Format: KEY={{ .SectionName.KEY }}
 			fmt.Fprintf(tmplFile, "%s={{ .%s.%s }}\n", k, sectionName, k)
 		}
