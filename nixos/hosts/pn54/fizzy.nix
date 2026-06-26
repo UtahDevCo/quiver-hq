@@ -22,8 +22,8 @@
   services.cloudflared = {
     enable = true;
     tunnels = {
-      "797d9ca3-91f2-4ac2-9125-bb312653dd66" = {
-        credentialsFile = "/home/chris/.cloudflared/797d9ca3-91f2-4ac2-9125-bb312653dd66.json";
+      "92fa1834-368c-4a26-b386-848542a31e99" = {
+        credentialsFile = "/home/chris/.cloudflared/92fa1834-368c-4a26-b386-848542a31e99.json";
         ingress = {
           "fizzy.chrisesplin.com" = "http://localhost:7890";
         };

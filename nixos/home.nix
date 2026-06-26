@@ -84,6 +84,7 @@ in
     google-cloud-sdk 
     gemini-cli
     claude-code
+    codex
     inputs.self.packages.${pkgs.system}.antigravity-cli
     inputs.self.packages.${pkgs.system}.antigravity-manager
     inputs.self.packages.${pkgs.system}.antigravity-ide
@@ -198,6 +199,9 @@ in
     initContent = ''
       # 0. Ensure basic system tools are in PATH immediately
       export PATH="$HOME/.local/bin:$HOME/bin:$HOME/.nix-profile/bin:$PATH"
+      # Prisma 7 on NixOS: point to nix-provided schema-engine so prisma generate
+      # skips the CDN download (linux-nixos binaries are not always published).
+      export PRISMA_SCHEMA_ENGINE_BINARY="${pkgs.prisma-engines}/bin/schema-engine"
       export PATH="$HOME/.npm-global/bin:$PATH"
       export NIX_LD_LIBRARY_PATH="/run/current-system/sw/share/nix-ld/lib"
 
