@@ -116,6 +116,7 @@ in
     (warp-terminal.override { waylandSupport = true; })
     noto-fonts
     noto-fonts-color-emoji
+    signal-desktop
   ];
 
   programs.yt-dlp = {
