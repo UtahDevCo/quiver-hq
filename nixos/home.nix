@@ -35,6 +35,23 @@ let
       homepage = "https://github.com/alpacahq/cli";
     };
   };
+
+  # PWD-aware claude shim. aoe launches `claude` directly via tmux, bypassing
+  # direnv/.envrc — so we route by working directory in the binary itself.
+  # ~/.local/bin sits before /etc/profiles/... in PATH (see daemon env).
+  claudeShim = pkgs.writeShellScript "claude" ''
+    case "$PWD/" in
+      "$HOME/dev/quiver-hq/projects/zamp/"*) \
+        export CLAUDE_CONFIG_DIR="$HOME/.claude-zamp" ;;
+      "$HOME/dev/quiver-hq/projects/zamp-worktrees/"*) \
+        export CLAUDE_CONFIG_DIR="$HOME/.claude-zamp" ;;
+      "$HOME/dev/quiver-hq/projects/foundation-web/"*) \
+        export CLAUDE_CONFIG_DIR="$HOME/.claude-foundation" ;;
+      "$HOME/dev/quiver-hq/projects/foundation-web-worktrees/"*) \
+        export CLAUDE_CONFIG_DIR="$HOME/.claude-foundation" ;;
+    esac
+    exec ${pkgs.claude-code}/bin/claude "$@"
+  '';
 in
 {
   # Set your username and home directory
@@ -42,6 +59,7 @@ in
   home.homeDirectory = "/home/chris";
 
   home.file = {
+    ".local/bin/claude".source = claudeShim;
     ".marks/dev".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev";
     ".marks/hq".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq";
     ".marks/j".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/job-harvester";
@@ -338,14 +356,14 @@ in
     Install.WantedBy = [ "default.target" ];
   };
 
-  systemd.user.services.agy-pinger = lib.mkIf pkgs.stdenv.isLinux {
+  systemd.user.services.cli-pinger = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
-      Description = "Ping Antigravity, Claude, and Codex CLIs to start/keep-alive sessions";
+      Description = "Ping Antigravity, Claude (foundation + zamp), and Codex CLIs to keep session quotas warm";
     };
     Service = {
       Type = "oneshot";
       WorkingDirectory = "/home/chris/dev/quiver-hq/projects/tools";
-      ExecStart = "/home/chris/dev/quiver-hq/projects/tools/apps/agy-pinger/agy-ping.sh";
+      ExecStart = "/home/chris/dev/quiver-hq/projects/tools/apps/cli-pinger/cli-ping.sh";
       Environment = [
         "HOME=%h"
         "PATH=/run/current-system/sw/bin:/etc/profiles/per-user/chris/bin:%h/.nix-profile/bin:%h/.npm-global/bin"
@@ -353,9 +371,9 @@ in
     };
   };
 
-  systemd.user.timers.agy-pinger = lib.mkIf pkgs.stdenv.isLinux {
+  systemd.user.timers.cli-pinger = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
-      Description = "Trigger Antigravity, Claude, and Codex pinger every 5 hours and 5 minutes starting at midnight";
+      Description = "Trigger CLI pinger every ~5 hours";
     };
     Timer = {
       OnCalendar = [
@@ -365,7 +383,7 @@ in
         "*-*-* 15:15:00"
         "*-*-* 20:20:00"
       ];
-      Unit = "agy-pinger.service";
+      Unit = "cli-pinger.service";
       Persistent = true;
     };
     Install = {
