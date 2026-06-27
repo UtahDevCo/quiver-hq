@@ -91,6 +91,7 @@ in
     alpaca-cli
     inputs.self.packages.${pkgs.system}.quiver-secrets
     inputs.self.packages.${pkgs.system}.multica
+    inputs.self.packages.${pkgs.system}.quiver-sleep
     git 
     direnv 
     nix-direnv 
@@ -389,6 +390,21 @@ in
     };
     Install = {
       WantedBy = [ "timers.target" ];
+    };
+  };
+
+  systemd.user.services.quiver-sleep-monitor = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Quiver Sleep Monitor Service";
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${inputs.self.packages.${pkgs.system}.quiver-sleep}/bin/quiver-sleep monitor";
+      Restart = "always";
+      Environment = [
+        "HOME=%h"
+        "PATH=/run/current-system/sw/bin:/etc/profiles/per-user/chris/bin:%h/.nix-profile/bin"
+      ];
     };
   };
 
