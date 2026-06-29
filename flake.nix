@@ -388,6 +388,7 @@
               sqlite
               git-lfs
               unzip
+              zip
               ffmpeg
               tmux
               uv
