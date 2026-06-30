@@ -29,3 +29,4 @@ result-*
 .npm-global/
 .bin/
 projects/ts-interview-skeleton/
+.DS_Store

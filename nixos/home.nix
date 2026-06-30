@@ -92,6 +92,10 @@ in
     inputs.self.packages.${pkgs.system}.quiver-secrets
     inputs.self.packages.${pkgs.system}.multica
     inputs.self.packages.${pkgs.system}.quiver-sleep
+    inputs.self.packages.${pkgs.system}.controller
+    inputs.self.packages.${pkgs.system}.interactive-mission
+    inputs.self.packages.${pkgs.system}.risky-mission
+    inputs.self.packages.${pkgs.system}.quiver-sync
     git 
     direnv 
     nix-direnv 
