@@ -96,6 +96,8 @@ func runSync(isPush bool) error {
 	args := []string{
 		"-avzu",                  // archive, verbose, compress, update (only newer files over receiver)
 		"--prune-empty-dirs",     // Do not create empty directories on the receiving side
+		"--no-owner",             // Do not preserve owner (prevents mapping/permission issues)
+		"--no-group",             // Do not preserve group (prevents GID mapping issues like _lpoperator)
 		"--exclude=.git/",        // Exclude git metadata
 		"--exclude=node_modules/",// Exclude dependencies
 		"--exclude=.direnv/",     // Exclude local dev environment cache
