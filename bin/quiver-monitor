@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+import os
+import sys
+import subprocess
+import signal
+
+DEV_KEYWORDS = ["node", "bun", "next-server", "vite", "webpack", "esbuild", "ts-node", "next-dev", "vitest"]
+
+def get_systemd_user_pids():
+    pids = []
+    try:
+        out = subprocess.check_output(["pgrep", "-f", "systemd --user"]).decode().strip()
+        pids = [int(p) for p in out.split() if p.isdigit()]
+    except Exception:
+        pass
+    pids.append(1) # systemd PID 1
+    return pids
+
+def get_listening_ports():
+    ports = {}
+    try:
+        # Run ss -lntp to find listening ports mapped to PIDs
+        out = subprocess.check_output(["ss", "-lntp"]).decode()
+        for line in out.strip().split("\n"):
+            if "LISTEN" not in line:
+                continue
+            parts = line.split()
+            if len(parts) < 6:
+                continue
+            
+            # Local address/port (e.g. 127.0.0.1:3000 or *:3000)
+            local = parts[3]
+            port = local.split(":")[-1]
+            
+            # Process info is usually at the end (e.g. users:(("next-server",pid=251520,fd=24)))
+            process_field = parts[5] if len(parts) == 6 else parts[6]
+            if "pid=" in process_field:
+                for sub in process_field.split("pid="):
+                    pid_str = ""
+                    for char in sub:
+                        if char.isdigit():
+                            pid_str += char
+                        else:
+                            break
+                    if pid_str:
+                        pid = int(pid_str)
+                        ports.setdefault(pid, []).append(port)
+    except Exception:
+        pass
+    return ports
+
+def get_process_info():
+    systemd_pids = get_systemd_user_pids()
+    ports_map = get_listening_ports()
+    orphans = []
+
+    # Get system CPU ticks and pagesize to calculate usage
+    try:
+        clk_tck = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
+    except Exception:
+        clk_tck = 100
+        
+    for pid_str in os.listdir("/proc"):
+        if not pid_str.isdigit():
+            continue
+        pid = int(pid_str)
+        try:
+            # Read stat
+            with open(f"/proc/{pid}/stat", "r") as f:
+                stat_content = f.read().strip()
+            stat_parts = stat_content.split()
+            
+            # Parent PID is the 4th field
+            ppid = int(stat_parts[3])
+            
+            # TTY is the 7th field (if 0, no tty)
+            tty = int(stat_parts[6])
+            
+            # Get command name from stat (enclosed in parentheses)
+            comm = stat_parts[1].strip("()")
+            
+            # Read cmdline
+            with open(f"/proc/{pid}/cmdline", "r") as f:
+                cmdline = f.read().replace("\x00", " ").strip()
+            
+            if not cmdline:
+                cmdline = comm
+                
+            # Filter by development keywords
+            is_dev = any(kw in cmdline.lower() or kw in comm.lower() for kw in DEV_KEYWORDS)
+            if not is_dev:
+                continue
+                
+            # Orphan condition: TTY is 0 (no TTY) AND parent is systemd (PID 1 or systemd --user)
+            # Or parent process has died and got reparented
+            is_orphan = False
+            if tty == 0:
+                if ppid in systemd_pids:
+                    is_orphan = True
+                else:
+                    # Check parent command
+                    try:
+                        with open(f"/proc/{ppid}/comm", "r") as pf:
+                            pcomm = pf.read().strip()
+                        if "systemd" in pcomm or "init" in pcomm:
+                            is_orphan = True
+                    except Exception:
+                        is_orphan = True # Parent doesn't exist anymore
+
+            if is_orphan:
+                # Calculate %CPU (uptime)
+                # utime=14th, stime=15th, starttime=22nd
+                utime = int(stat_parts[13])
+                stime = int(stat_parts[14])
+                total_time = (utime + stime) / clk_tck
+                
+                # Memory usage
+                # RSS is 24th field (in pages)
+                rss_pages = int(stat_parts[23])
+                rss_bytes = rss_pages * os.sysconf(os.sysconf_names['SC_PAGESIZE'])
+                rss_mb = rss_bytes / (1024 * 1024)
+                
+                open_ports = ports_map.get(pid, [])
+                
+                orphans.append({
+                    "pid": pid,
+                    "ppid": ppid,
+                    "cmd": cmdline,
+                    "cpu_time_sec": total_time,
+                    "rss_mb": rss_mb,
+                    "ports": open_ports
+                })
+        except Exception:
+            continue
+            
+    return orphans
+
+def list_orphans():
+    orphans = get_process_info()
+    if not orphans:
+        print("🎉 No orphaned development processes found!")
+        return
+        
+    print(f"⚠️  Found {len(orphans)} orphaned/detached development processes:\n")
+    print(f"{'PID':<8} {'PPID':<8} {'MEM (MB)':<10} {'PORTS':<12} {'CPU TIME':<10} {'COMMAND'}")
+    print("-" * 100)
+    for o in sorted(orphans, key=lambda x: x["cpu_time_sec"], reverse=True):
+        ports_str = ",".join(o["ports"]) if o["ports"] else "None"
+        
+        # Format CPU time
+        h = int(o["cpu_time_sec"] // 3600)
+        m = int((o["cpu_time_sec"] % 3600) // 60)
+        s = int(o["cpu_time_sec"] % 60)
+        cpu_time_str = f"{h:02d}:{m:02d}:{s:02d}"
+        
+        # Truncate cmd
+        cmd_str = o["cmd"]
+        if len(cmd_str) > 55:
+            cmd_str = cmd_str[:52] + "..."
+            
+        print(f"{o['pid']:<8} {o['ppid']:<8} {o['rss_mb']:<10.1f} {ports_str:<12} {cpu_time_str:<10} {cmd_str}")
+    print("\nRun `quiver-monitor kill` to terminate all of them.")
+
+def kill_orphans():
+    orphans = get_process_info()
+    if not orphans:
+        print("🎉 No orphaned development processes to kill.")
+        return
+        
+    print(f"Killing {len(orphans)} orphaned development processes...")
+    for o in orphans:
+        try:
+            print(f"  Killing PID {o['pid']} ({o['cmd'][:40]}...)")
+            os.kill(o["pid"], signal.SIGKILL)
+        except Exception as e:
+            print(f"  Failed to kill PID {o['pid']}: {e}")
+    print("Done.")
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] not in ["list", "kill"]:
+        print("Usage: quiver-monitor [list|kill]")
+        sys.exit(1)
+        
+    if sys.argv[1] == "list":
+        list_orphans()
+    elif sys.argv[1] == "kill":
+        kill_orphans()
+
+if __name__ == "__main__":
+    main()
