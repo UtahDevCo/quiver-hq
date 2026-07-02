@@ -240,6 +240,9 @@ in
       alias copilot='copilot'
       alias zed='zeditor'
 
+      # Fix tildes (~) appearing before/after pasted text (Zellij/Ghostty compatibility)
+      unset zle_bracketed_paste
+
       # 1. Setup Path
       export GOPATH=$HOME/go
       export PATH=$HOME/dev/quiver-hq/bin:$GOPATH/bin:$PATH
