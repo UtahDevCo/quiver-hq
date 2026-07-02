@@ -89,17 +89,16 @@ in
   home.packages = with pkgs; [
     render-cli
     alpaca-cli
+    stripe-cli
     inputs.self.packages.${pkgs.system}.quiver-secrets
     inputs.self.packages.${pkgs.system}.multica
     inputs.self.packages.${pkgs.system}.quiver-sleep
-    inputs.self.packages.${pkgs.system}.controller
-    inputs.self.packages.${pkgs.system}.interactive-mission
-    inputs.self.packages.${pkgs.system}.risky-mission
     inputs.self.packages.${pkgs.system}.quiver-sync
     git 
     direnv 
     nix-direnv 
     nodejs_24
+    bun
     gh 
     (github-copilot-cli.overrideAttrs (oldAttrs: {
       doInstallCheck = false;
@@ -338,6 +337,11 @@ in
               echo "Done!"
           fi
       }
+    '';
+
+    logoutExtra = ''
+      # Clean up orphaned dev processes on shell exit
+      quiver-monitor kill >/dev/null 2>&1
     '';
   };
 

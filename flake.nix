@@ -396,6 +396,7 @@
               self.packages.${system}.investing-screener
               self.packages.${system}.multica
               inputs.agent-of-empires.packages.${system}.aoe-with-web
+              stripe-cli
              ])
              ++ nixpkgs.lib.optionals (system == "x86_64-linux") [
                self.packages.${system}.antigravity-cli
