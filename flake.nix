@@ -19,6 +19,10 @@
       url = "github:agent-of-empires/agent-of-empires";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    codex-desktop = {
+      url = "github:ilysenko/codex-desktop-linux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, nixos-wsl, home-manager, nix-darwin, ... }@inputs:
@@ -386,6 +390,8 @@
               nodejs_22
               bun
               sqlite
+              jq
+              python3
               git-lfs
               unzip
               zip
@@ -399,9 +405,10 @@
               stripe-cli
              ])
              ++ nixpkgs.lib.optionals (system == "x86_64-linux") [
-               self.packages.${system}.antigravity-cli
-               self.packages.${system}.antigravity-manager
-               self.packages.${system}.antigravity-ide
+                self.packages.${system}.antigravity-cli
+                self.packages.${system}.antigravity-manager
+                self.packages.${system}.antigravity-ide
+                inputs.codex-desktop.packages.${system}.codex-desktop
              ];
           shellHook = ''
             echo "🛠️ Quiver HQ Environment is ready."
