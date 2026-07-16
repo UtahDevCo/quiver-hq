@@ -180,7 +180,7 @@
   # Enable Thunar file manager system-wide with volume management plugins
   programs.thunar = {
     enable = true;
-    plugins = with pkgs.xfce; [
+    plugins = with pkgs; [
       thunar-archive-plugin
       thunar-volman
     ];

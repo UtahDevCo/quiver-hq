@@ -83,17 +83,17 @@ in
     CHROME_PATH = "/etc/profiles/per-user/chris/bin/google-chrome";
   };
 
-  nixpkgs.config.allowUnfree = true;
+  home.enableNixpkgsReleaseCheck = false;
 
   # Add any user-specific packages you want.
   home.packages = with pkgs; [
     render-cli
     alpaca-cli
     stripe-cli
-    inputs.self.packages.${pkgs.system}.quiver-secrets
-    inputs.self.packages.${pkgs.system}.multica
-    inputs.self.packages.${pkgs.system}.quiver-sleep
-    inputs.self.packages.${pkgs.system}.quiver-sync
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-secrets
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.multica
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-sleep
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-sync
     git 
     direnv 
     nix-direnv 
@@ -107,10 +107,10 @@ in
     gemini-cli
     claude-code
     codex
-    inputs.codex-desktop.packages.${pkgs.system}.codex-desktop
-    inputs.self.packages.${pkgs.system}.antigravity-cli
-    inputs.self.packages.${pkgs.system}.antigravity-manager
-    inputs.self.packages.${pkgs.system}.antigravity-ide
+    inputs.codex-desktop.packages.${pkgs.stdenv.hostPlatform.system}.codex-desktop
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-cli
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-manager
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-ide
     dbeaver-bin
     fzf socat lsof
     ffmpeg
@@ -376,7 +376,7 @@ in
     Service = {
       Type = "simple";
       ExecCondition = "${pkgs.jq}/bin/jq -e '.token | strings | length > 0' %h/.multica/config.json";
-      ExecStart = "${inputs.self.packages.${pkgs.system}.multica}/bin/multica daemon start --foreground --no-auto-update";
+      ExecStart = "${inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.multica}/bin/multica daemon start --foreground --no-auto-update";
       Restart = "on-failure";
       RestartSec = 10;
       Environment = [
@@ -429,7 +429,7 @@ in
     };
     Service = {
       Type = "simple";
-      ExecStart = "${inputs.self.packages.${pkgs.system}.quiver-sleep}/bin/quiver-sleep monitor";
+      ExecStart = "${inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-sleep}/bin/quiver-sleep monitor";
       Restart = "always";
       Environment = [
         "HOME=%h"

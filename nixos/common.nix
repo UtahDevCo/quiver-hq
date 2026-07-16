@@ -94,12 +94,12 @@
     unzip
     bubblewrap
     tmux
-    inputs.self.packages.${pkgs.system}.antigravity-cli
-    inputs.self.packages.${pkgs.system}.antigravity-manager
-    inputs.self.packages.${pkgs.system}.antigravity-ide
-    inputs.codex-desktop.packages.${pkgs.system}.codex-desktop
-    inputs.self.packages.${pkgs.system}.investing-screener
-    inputs.agent-of-empires.packages.${pkgs.system}.aoe-with-web
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-cli
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-manager
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-ide
+    inputs.codex-desktop.packages.${pkgs.stdenv.hostPlatform.system}.codex-desktop
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.investing-screener
+    inputs.agent-of-empires.packages.${pkgs.stdenv.hostPlatform.system}.aoe-with-web
   ];
 
   environment.variables = {
