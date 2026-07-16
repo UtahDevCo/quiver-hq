@@ -107,6 +107,7 @@ in
     gemini-cli
     claude-code
     codex
+    inputs.codex-desktop.packages.${pkgs.system}.codex-desktop
     inputs.self.packages.${pkgs.system}.antigravity-cli
     inputs.self.packages.${pkgs.system}.antigravity-manager
     inputs.self.packages.${pkgs.system}.antigravity-ide
@@ -171,6 +172,16 @@ in
     };
   };
 
+  xdg.desktopEntries.google-calendar = {
+    name = "Google Calendar";
+    genericName = "Calendar";
+    exec = "google-chrome-stable --app=https://calendar.google.com";
+    icon = "google-calendar";
+    terminal = false;
+    categories = [ "Office" "Calendar" ];
+    mimeType = [ "text/html" ];
+  };
+
   xdg.desktopEntries.vibetyper = {
     name = "VibeTyper";
     exec = "env NO_DESKTOP_ENTRY=1 PASSWORD_STORE_BACKEND=gnome-libsecret appimage-run /home/chris/bin/VibeTyper.AppImage --password-store=gnome-libsecret %u";
@@ -222,6 +233,13 @@ in
     initContent = ''
       # 0. Ensure basic system tools are in PATH immediately
       export PATH="$HOME/.local/bin:$HOME/bin:$HOME/.nix-profile/bin:$PATH"
+
+      # 0.5. PWD-aware CLAUDE_CODE_OAUTH_TOKEN: set by default, unset in zamp folders
+      export CLAUDE_CODE_OAUTH_TOKEN="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"
+      case "$PWD/" in
+        "$HOME/dev/quiver-hq/projects/zamp/"*) unset CLAUDE_CODE_OAUTH_TOKEN ;;
+        "$HOME/dev/quiver-hq/projects/zamp-worktrees/"*) unset CLAUDE_CODE_OAUTH_TOKEN ;;
+      esac
       # Prisma 7 on NixOS: point to nix-provided schema-engine so prisma generate
       # skips the CDN download (linux-nixos binaries are not always published).
       export PRISMA_SCHEMA_ENGINE_BINARY="${pkgs.prisma-engines}/bin/schema-engine"
@@ -239,6 +257,7 @@ in
       alias mrestart='systemctl --user restart multica-daemon'
       alias copilot='copilot'
       alias zed='zeditor'
+      alias taildrop='tailscale file get /home/chris/Downloads'
 
       # Fix tildes (~) appearing before/after pasted text (Zellij/Ghostty compatibility)
       unset zle_bracketed_paste
@@ -308,7 +327,7 @@ in
 
               if [ -n "$pids" ]; then
                   echo "Killing process(es) on port $p: $pids"
-                  kill -9 $pids 2>/dev/null
+                  kill -9 $=pids 2>/dev/null
                   if [ $? -eq 0 ]; then
                       echo "  ✓ Port $p freed"
                   else

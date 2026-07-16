@@ -36,6 +36,11 @@ read -p "Select an option [1-5]: " choice
 case $choice in
     1)
         read -p "Enter the repository URL: " repo_url
+        if echo "$repo_url" | grep -q "^https://github.com/"; then
+            repo_url_path=$(echo "$repo_url" | sed -E 's|https://github.com/([^/]+)/([^/]+)|\1/\2|' | sed 's/\.git$//')
+            repo_url="git@github.com:${repo_url_path}.git"
+            echo "Converted HTTPS URL to SSH: $repo_url"
+        fi
         read -p "Enter the destination path (e.g., projects/my-project): " dest_path
         echo "Adding submodule $repo_url to $dest_path..."
         git submodule add "$repo_url" "$dest_path"

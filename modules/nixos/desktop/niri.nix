@@ -153,7 +153,24 @@
     playerctl          # MPRIS media key control
     pamixer            # PulseAudio/PipeWire volume CLI tool
     libnotify          # notify-send for desktop notifications
+    file-roller        # archive manager backend for thunar-archive-plugin (no xarchiver.tap in plugin)
+    loupe              # Wayland-native image viewer (HEIC/AVIF via glycin loaders)
+    libheif            # heif-convert / heif-dec CLI + HEIC decode support
   ];
+
+  # Default image viewer associations (loupe). HEIC otherwise falls back to
+  # Chrome, which just downloads the file instead of displaying it.
+  xdg.mime.defaultApplications = {
+    "image/heif" = "org.gnome.Loupe.desktop";
+    "image/heic" = "org.gnome.Loupe.desktop";
+    "image/jpeg" = "org.gnome.Loupe.desktop";
+    "image/png" = "org.gnome.Loupe.desktop";
+    "image/gif" = "org.gnome.Loupe.desktop";
+    "image/webp" = "org.gnome.Loupe.desktop";
+    "image/avif" = "org.gnome.Loupe.desktop";
+    "image/tiff" = "org.gnome.Loupe.desktop";
+    "image/bmp" = "org.gnome.Loupe.desktop";
+  };
 
   # ---------------------------------------------------------------------------
   # Network Manager (preferred over wpa_supplicant for desktop use)
