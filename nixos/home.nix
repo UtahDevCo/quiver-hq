@@ -98,7 +98,7 @@ in
     (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.risky-mission or null)
     (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-sync or null)
     git 
-    (direnv.overrideAttrs (oldAttrs: { doCheck = false; })) 
+    (direnv.overrideAttrs (oldAttrs: { doCheck = false; }))
     nix-direnv 
     nodejs_24
     bun
