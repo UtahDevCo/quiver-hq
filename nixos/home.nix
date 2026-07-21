@@ -55,8 +55,8 @@ let
 in
 {
   # Set your username and home directory
-  home.username = "chris";
-  home.homeDirectory = "/home/chris";
+  home.username = if pkgs.stdenv.isDarwin then "christopher" else "chris";
+  home.homeDirectory = if pkgs.stdenv.isDarwin then "/Users/christopher" else "/home/chris";
 
   home.file = {
     ".local/bin/claude".source = claudeShim;
@@ -78,7 +78,7 @@ in
     '';
   };
 
-  home.sessionVariables = {
+  home.sessionVariables = lib.optionalAttrs pkgs.stdenv.isLinux {
     PUPPETEER_EXECUTABLE_PATH = "/etc/profiles/per-user/chris/bin/google-chrome";
     CHROME_PATH = "/etc/profiles/per-user/chris/bin/google-chrome";
   };
@@ -86,16 +86,19 @@ in
   home.enableNixpkgsReleaseCheck = false;
 
   # Add any user-specific packages you want.
-  home.packages = with pkgs; [
-    render-cli
+  home.packages = with pkgs; lib.filter (x: x != null) [
+    (if pkgs.stdenv.isLinux then render-cli else null)
     alpaca-cli
     stripe-cli
-    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-secrets
-    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.multica
-    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-sleep
-    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-sync
+    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-secrets or null)
+    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.multica or null)
+    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-sleep or null)
+    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.controller or null)
+    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.interactive-mission or null)
+    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.risky-mission or null)
+    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-sync or null)
     git 
-    direnv 
+    (direnv.overrideAttrs (oldAttrs: { doCheck = false; })) 
     nix-direnv 
     nodejs_24
     bun
@@ -106,22 +109,22 @@ in
     google-cloud-sdk 
     gemini-cli
     claude-code
-    codex
-    inputs.codex-desktop.packages.${pkgs.stdenv.hostPlatform.system}.codex-desktop
-    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-cli
-    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-manager
-    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-ide
-    dbeaver-bin
+    (if pkgs.stdenv.isLinux then codex else null)
+    (inputs.codex-desktop.packages.${pkgs.stdenv.hostPlatform.system}.codex-desktop or null)
+    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-cli or null)
+    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-manager or null)
+    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-ide or null)
+    (if pkgs.stdenv.isLinux then dbeaver-bin else null)
     fzf socat lsof
     ffmpeg
-    appimage-run
-    wl-clipboard
+    (if pkgs.stdenv.isLinux then appimage-run else null)
+    (if pkgs.stdenv.isLinux then wl-clipboard else null)
     zellij
-    ghostty
-    (warp-terminal.override { waylandSupport = true; })
-    noto-fonts
-    noto-fonts-color-emoji
-    signal-desktop
+    (if pkgs.stdenv.isLinux then ghostty else null)
+    (if pkgs.stdenv.isLinux then (warp-terminal.override { waylandSupport = true; }) else null)
+    (if pkgs.stdenv.isLinux then noto-fonts else null)
+    (if pkgs.stdenv.isLinux then noto-fonts-color-emoji else null)
+    (if pkgs.stdenv.isLinux then signal-desktop else null)
   ];
 
   programs.yt-dlp = {
@@ -133,13 +136,14 @@ in
   };
 
   programs.vscode = {
-    enable = true;
-    package = pkgs.vscode-fhs;
+    enable = pkgs.stdenv.isLinux;
+    package = if pkgs.stdenv.isLinux then pkgs.vscode-fhs else pkgs.vscode;
   };
 
   # Configure Zed editor
   programs.zed-editor = {
     enable = true;
+    package = if pkgs.stdenv.isDarwin then null else pkgs.zed-editor;
     extensions = [ "nix" "toml" "rust" ];
     userSettings = {
       features = {
@@ -160,38 +164,40 @@ in
     enable = true;
   };
 
-  xdg.desktopEntries.beeper = {
-    name = "Beeper";
-    exec = "appimage-run /home/chris/dev/quiver-hq/assets/Beeper-4.2.670-x86_64.AppImage %u";
-    icon = "/home/chris/dev/quiver-hq/assets/icon.png";
-    comment = "Unified messenger";
-    categories = [ "Network" "InstantMessaging" ];
-    terminal = false;
-    settings = {
-      Type = "Application";
+  xdg.desktopEntries = lib.optionalAttrs pkgs.stdenv.isLinux {
+    beeper = {
+      name = "Beeper";
+      exec = "appimage-run /home/chris/dev/quiver-hq/assets/Beeper-4.2.670-x86_64.AppImage %u";
+      icon = "/home/chris/dev/quiver-hq/assets/icon.png";
+      comment = "Unified messenger";
+      categories = [ "Network" "InstantMessaging" ];
+      terminal = false;
+      settings = {
+        Type = "Application";
+      };
     };
-  };
 
-  xdg.desktopEntries.google-calendar = {
-    name = "Google Calendar";
-    genericName = "Calendar";
-    exec = "google-chrome-stable --app=https://calendar.google.com";
-    icon = "google-calendar";
-    terminal = false;
-    categories = [ "Office" "Calendar" ];
-    mimeType = [ "text/html" ];
-  };
+    google-calendar = {
+      name = "Google Calendar";
+      genericName = "Calendar";
+      exec = "google-chrome-stable --app=https://calendar.google.com";
+      icon = "google-calendar";
+      terminal = false;
+      categories = [ "Office" "Calendar" ];
+      mimeType = [ "text/html" ];
+    };
 
-  xdg.desktopEntries.vibetyper = {
-    name = "VibeTyper";
-    exec = "env NO_DESKTOP_ENTRY=1 PASSWORD_STORE_BACKEND=gnome-libsecret appimage-run /home/chris/bin/VibeTyper.AppImage --password-store=gnome-libsecret %u";
-    icon = "/home/chris/bin/vibe-typer.png";
-    comment = "AI Voice Typing";
-    categories = [ "Utility" "AudioVideo" ];
-    terminal = false;
-    mimeType = [ "x-scheme-handler/vibetyper" ];
-    settings = {
-      Type = "Application";
+    vibetyper = {
+      name = "VibeTyper";
+      exec = "env NO_DESKTOP_ENTRY=1 PASSWORD_STORE_BACKEND=gnome-libsecret appimage-run /home/chris/bin/VibeTyper.AppImage --password-store=gnome-libsecret %u";
+      icon = "/home/chris/bin/vibe-typer.png";
+      comment = "AI Voice Typing";
+      categories = [ "Utility" "AudioVideo" ];
+      terminal = false;
+      mimeType = [ "x-scheme-handler/vibetyper" ];
+      settings = {
+        Type = "Application";
+      };
     };
   };
 
@@ -249,9 +255,9 @@ in
       alias ll="ls -al"
       alias dc="docker compose"
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
-      alias reload='(cd ~/dev/quiver-hq && sudo nixos-rebuild switch --flake .#$(hostname))'
+      alias reload='(cd ~/dev/quiver-hq && ${if pkgs.stdenv.isDarwin then "darwin-rebuild switch --flake .#quiver-mac" else "sudo nixos-rebuild switch --flake .#$(hostname)"})'
       alias agide='antigravity-ide'
-      alias upgrade-agy='cd ~/dev/quiver-hq && bun /home/chris/.gemini/config/skills/antigravity-upgrade/scripts/upgrade.js --auto --rebuild && cd -'
+      alias upgrade-agy='cd ~/dev/quiver-hq && bun ~/.gemini/config/skills/antigravity-upgrade/scripts/upgrade.js --auto --rebuild && cd -'
       alias opsignin='eval $(op signin)'
       alias mlogs='journalctl --user -u multica-daemon -f'
       alias mrestart='systemctl --user restart multica-daemon'

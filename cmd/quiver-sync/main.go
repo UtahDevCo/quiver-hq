@@ -11,7 +11,6 @@ import (
 const (
 	remoteHost = "nix"
 	nixosPath  = "/home/chris/dev/quiver-hq/"
-	macOSPath  = "/Users/chris/dev/quiver-hq/"
 )
 
 func main() {
@@ -49,6 +48,13 @@ func printUsage() {
 	fmt.Println("  pull    Sync files from NixOS remote desktop (nix) to local machine")
 }
 
+func getDefaultLocalPath() string {
+	if home, err := os.UserHomeDir(); err == nil {
+		return filepath.Join(home, "dev", "quiver-hq")
+	}
+	return "/Users/christopher/dev/quiver-hq"
+}
+
 func runSync(isPush bool) error {
 	// If we are running on Linux (which is the NixOS remote desktop), print a warning.
 	if runtime.GOOS == "linux" {
@@ -60,8 +66,8 @@ func runSync(isPush bool) error {
 		return fmt.Errorf("rsync command not found in PATH; please install rsync first")
 	}
 
-	// Determine local path. Default to macOSPath.
-	localPath := macOSPath
+	// Determine local path.
+	localPath := getDefaultLocalPath()
 
 	// Try to find repository root dynamically if we are currently inside it.
 	if cwd, err := os.Getwd(); err == nil {
@@ -103,6 +109,7 @@ func runSync(isPush bool) error {
 		"--exclude=.direnv/",     // Exclude local dev environment cache
 		"--exclude=.next/",       // Exclude Next.js build cache
 		"--exclude=dist/",        // Exclude production build folders
+		"--exclude=chrome-profile/", // Exclude Chrome profile directories
 		"--include=**/temp/",     // Include all folders named 'temp'
 		"--include=**/temp/**",   // Include everything inside folders named 'temp'
 		"--include=**/scratch/",  // Include all folders named 'scratch'

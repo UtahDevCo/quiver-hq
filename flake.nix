@@ -246,16 +246,16 @@
            in
            {
              antigravity-cli = mkAntigravityCli {
-               version = "1.0.4-6513644876464128";
-               url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.4-6513644876464128/linux-x64/cli_linux_x64.tar.gz";
-               hash = "sha256-Nz9ULRd9M7k76FfQfTWladctMwzgqLSTF8uKPtaBTuI=";
+               version = "1.0.11-5722351879454720";
+               url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.0.11-5722351879454720/linux-x64/cli_linux_x64.tar.gz";
+               hash = "sha256-a87fnTfEUi7v35OeBFWQ5phuU8mk03I/dR48VVWkcsE=";
              };
              antigravity-manager = mkAntigravityApp {
                pname = "antigravity-manager";
-               version = "100.0.0-6081531354152960";
+               version = "100.0.0-5871373990625280";
                src = pkgs_.fetchurl {
-                url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/100.0.0-6081531354152960/linux-x64/Antigravity.tar.gz";
-                hash = "sha256-UDWduWkpG9VK9jVZygjK8f/jWreDQBrUzpPjnDdO0Ug=";
+                url = "https://storage.googleapis.com/antigravity-public/antigravity-hub/100.0.0-5871373990625280/linux-x64/Antigravity.tar.gz";
+                hash = "sha256-+88Vz9wR/IFuDK8EXqB6bNaUutI5vv0JSGBmHyjtLUY=";
               };
               sourceRoot = "Antigravity-x64";
               execPath = "antigravity";
@@ -296,7 +296,7 @@
               mkdir -p $out/bin
               cat << 'EOF' > $out/bin/invest
               #!/bin/sh
-              exec ${pkgs_.bun}/bin/bun run /home/chris/dev/quiver-hq/projects/tools/apps/investing/src/index.ts "$@"
+              exec ${pkgs_.bun}/bin/bun run $HOME/dev/quiver-hq/projects/tools/apps/investing/src/index.ts "$@"
               EOF
               chmod +x $out/bin/invest
               ln -s invest $out/bin/inv
@@ -374,10 +374,7 @@
         system = "aarch64-darwin";
         specialArgs = { inherit inputs; };
         modules = [
-          # Example of where you would put your Mac-specific config
-          # ./nixos/hosts/mac/configuration.nix 
-
-          # You would also import home-manager here for macOS
+          ./nixos/hosts/mac/configuration.nix
         ];
       };
 
