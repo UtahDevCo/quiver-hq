@@ -59,7 +59,13 @@ in
   home.homeDirectory = if pkgs.stdenv.isDarwin then "/Users/christopher" else "/home/chris";
 
   home.file = {
-    ".local/bin/claude".source = claudeShim;
+    # force = true: the native Claude Code self-updater repoints
+    # ~/.local/bin/claude to its versioned binary, which otherwise blocks HM
+    # activation. Always reinstall our PWD-aware shim over whatever is there.
+    ".local/bin/claude" = {
+      source = claudeShim;
+      force = true;
+    };
     ".marks/dev".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev";
     ".marks/hq".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq";
     ".marks/j".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dev/quiver-hq/projects/job-harvester";
