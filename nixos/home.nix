@@ -255,7 +255,7 @@ in
       alias ll="ls -al"
       alias dc="docker compose"
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
-      alias reload='(cd ~/dev/quiver-hq && ${if pkgs.stdenv.isDarwin then "darwin-rebuild switch --flake .#quiver-mac" else "sudo nixos-rebuild switch --flake .#$(hostname)"})'
+      alias reload='(cd ~/dev/quiver-hq && ${if pkgs.stdenv.isDarwin then "sudo darwin-rebuild switch --flake .#quiver-mac" else "sudo nixos-rebuild switch --flake .#$(hostname)"})'
       alias agide='antigravity-ide'
       alias upgrade-agy='cd ~/dev/quiver-hq && bun ~/.gemini/config/skills/antigravity-upgrade/scripts/upgrade.js --auto --rebuild && cd -'
       alias opsignin='eval $(op signin)'
@@ -275,10 +275,16 @@ in
       export PATH="$BUN_INSTALL/bin:$PATH"
 
       # 2. Fetch API Keys with 1Password
+      # Only export when `op read` actually returns a value. A failed read (op
+      # not authenticated) must leave the var UNSET, not empty — an exported
+      # empty string shadows the real key in .env.local for every child process
+      # (dotenv/bun/Next never override an already-defined env var).
       if [[ -z "$GEMINI_API_KEY" ]]; then
-          export GEMINI_API_KEY=$(op read "op://Dev/quiver-hq/GEMINI_API_KEY" 2>/dev/null)
+          _gemini_key=$(op read "op://Dev/quiver-hq/GEMINI_API_KEY" 2>/dev/null)
+          [[ -n "$_gemini_key" ]] && export GEMINI_API_KEY="$_gemini_key"
+          unset _gemini_key
       fi
-      if [[ -z "$ANTIGRAVITY_API_KEY" ]]; then
+      if [[ -z "$ANTIGRAVITY_API_KEY" && -n "$GEMINI_API_KEY" ]]; then
           export ANTIGRAVITY_API_KEY="$GEMINI_API_KEY"
       fi
 
