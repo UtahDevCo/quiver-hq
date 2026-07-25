@@ -20,14 +20,21 @@ func main() {
 	}
 
 	cmd := os.Args[1]
+	dryRun := false
+	for _, a := range os.Args[2:] {
+		if a == "--dry-run" || a == "-n" {
+			dryRun = true
+		}
+	}
+
 	switch cmd {
 	case "push":
-		if err := runSync(true); err != nil {
+		if err := runSync(true, dryRun); err != nil {
 			fmt.Printf("Error during push sync: %v\n", err)
 			os.Exit(1)
 		}
 	case "pull":
-		if err := runSync(false); err != nil {
+		if err := runSync(false, dryRun); err != nil {
 			fmt.Printf("Error during pull sync: %v\n", err)
 			os.Exit(1)
 		}
@@ -41,11 +48,17 @@ func main() {
 }
 
 func printUsage() {
-	fmt.Println("Usage: quiver-sync <push|pull>")
+	fmt.Println("Usage: quiver-sync <push|pull> [--dry-run]")
 	fmt.Println()
 	fmt.Println("Commands:")
 	fmt.Println("  push    Sync files from local machine to NixOS remote desktop (nix)")
 	fmt.Println("  pull    Sync files from NixOS remote desktop (nix) to local machine")
+	fmt.Println()
+	fmt.Println("Flags:")
+	fmt.Println("  --dry-run, -n   List what would transfer without writing anything")
+	fmt.Println()
+	fmt.Println("Carries temp/ and scratch/ only. *.local.md travels by git in")
+	fmt.Println("quiver-hq/local/ instead. Additive: nothing is ever deleted.")
 }
 
 func getDefaultLocalPath() string {
@@ -55,7 +68,7 @@ func getDefaultLocalPath() string {
 	return "/Users/christopher/dev/quiver-hq"
 }
 
-func runSync(isPush bool) error {
+func runSync(isPush, dryRun bool) error {
 	// If we are running on Linux (which is the NixOS remote desktop), print a warning.
 	if runtime.GOOS == "linux" {
 		return fmt.Errorf("quiver-sync is designed to be run from your local macOS machine to pull/push files from/to the NixOS desktop (nix)")
@@ -83,43 +96,88 @@ func runSync(isPush bool) error {
 
 	remotePathSpec := fmt.Sprintf("%s:%s", remoteHost, nixosPath)
 
+	label := ""
+	if dryRun {
+		label = " [DRY RUN — nothing will be written]"
+	}
+
 	var src, dest string
 	if isPush {
 		src = localPath
 		dest = remotePathSpec
-		fmt.Printf("🚀 Starting Push Sync: Local (%s) -> Remote NixOS (%s)\n", src, dest)
+		fmt.Printf("🚀 Starting Push Sync%s: Local (%s) -> Remote NixOS (%s)\n", label, src, dest)
 	} else {
 		src = remotePathSpec
 		dest = localPath
-		fmt.Printf("🚀 Starting Pull Sync: Remote NixOS (%s) -> Local (%s)\n", src, dest)
+		fmt.Printf("🚀 Starting Pull Sync%s: Remote NixOS (%s) -> Local (%s)\n", label, src, dest)
 	}
 
 	// Define rsync arguments.
-	// We want to sync:
-	// - Any directory named 'temp' and all its contents recursively.
-	// - Any *.local.md files.
-	// We exclude version control, dependencies, and build outputs to keep it fast.
+	//
+	// Scope: the working data in temp/ and scratch/ directories. These are
+	// deliberately NOT committed to git, so rsync remains their transport.
+	//
+	// *.local.md is explicitly excluded: those now live in quiver-hq/local/ and
+	// travel by git, symlinked into each project. Letting rsync touch them would
+	// overwrite the symlinks with plain files and break that setup.
+	//
+	// Sync is additive by design (no --delete): deletions are done by hand on
+	// each machine. -u also keeps a newer file on the receiver from being
+	// clobbered by an older one from the sender.
+	//
+	// Text and images are carried; video, browser profiles, and the local-only
+	// photo library never are.
 	args := []string{
-		"-avzu",                  // archive, verbose, compress, update (only newer files over receiver)
-		"--prune-empty-dirs",     // Do not create empty directories on the receiving side
-		"--no-owner",             // Do not preserve owner (prevents mapping/permission issues)
-		"--no-group",             // Do not preserve group (prevents GID mapping issues like _lpoperator)
-		"--exclude=.git/",        // Exclude git metadata
-		"--exclude=node_modules/",// Exclude dependencies
-		"--exclude=.direnv/",     // Exclude local dev environment cache
-		"--exclude=.next/",       // Exclude Next.js build cache
-		"--exclude=dist/",        // Exclude production build folders
-		"--exclude=chrome-profile/", // Exclude Chrome profile directories
-		"--include=**/temp/",     // Include all folders named 'temp'
-		"--include=**/temp/**",   // Include everything inside folders named 'temp'
-		"--include=**/scratch/",  // Include all folders named 'scratch'
-		"--include=**/scratch/**",// Include everything inside folders named 'scratch'
-		"--include=**/*.local.md",// Include any *.local.md files
-		"--include=*/",           // Include all directory structures so we can traverse them
-		"--exclude=*",            // Exclude everything else not matched by rules above
-		src,
-		dest,
+		"-avzu",              // archive, verbose, compress, update (only newer files over receiver)
+		"--prune-empty-dirs", // Do not create empty directories on the receiving side
+		"--no-owner",         // Do not preserve owner (prevents mapping/permission issues)
+		"--no-group",         // Do not preserve group (prevents GID mapping issues like _lpoperator)
+		"--max-size=25m",     // Backstop against anything unexpectedly huge
+
+		// --- Hard denies. First match wins in rsync, so these precede the includes. ---
+		"--exclude=.git/",         // Exclude git metadata
+		"--exclude=node_modules/", // Exclude dependencies
+		"--exclude=.direnv/",      // Exclude local dev environment cache
+		"--exclude=.next/",        // Exclude Next.js build cache
+		"--exclude=dist/",         // Exclude production build folders
+
+		"--exclude=*.local.md", // Owned by git via quiver-hq/local/, never by rsync
+
+		// Chrome profiles turn up under several names (chrome/, chrome-profile/,
+		// chrome-profile-codex-env-test/). They are machine-local state, never shared.
+		"--exclude=chrome/",
+		"--exclude=chrome-profile*/",
+
+		"--exclude=/projects/quiver-photos-v2/temp/", // Local-only photo library, not for sharing
+
+		// Foundation is a former employer; these projects are being removed.
+		"--exclude=/projects/foundation-web/",
+		"--exclude=/projects/foundation-integrations/",
+
+		// Video is never worth the transfer.
+		"--exclude=*.mp4", "--exclude=*.MP4",
+		"--exclude=*.mov", "--exclude=*.MOV",
+		"--exclude=*.mkv", "--exclude=*.avi",
+		"--exclude=*.webm", "--exclude=*.m4v",
+
+		// Machine-local noise.
+		"--exclude=.DS_Store",
+		"--exclude=*.pma", // Chrome BrowserMetrics dumps
+		"--exclude=*.zip",
+
+		// --- What we actually carry. ---
+		"--include=**/temp/",      // Include all folders named 'temp'
+		"--include=**/temp/**",    // Include everything inside folders named 'temp'
+		"--include=**/scratch/",   // Include all folders named 'scratch'
+		"--include=**/scratch/**", // Include everything inside folders named 'scratch'
+		"--include=*/",            // Include all directory structures so we can traverse them
+		"--exclude=*",             // Exclude everything else not matched by rules above
 	}
+
+	if dryRun {
+		args = append(args, "--dry-run")
+	}
+	args = append(args, src, dest)
 
 	// Log command to be executed
 	fmt.Printf("Running command: rsync %s\n\n", formatArgs(args))
