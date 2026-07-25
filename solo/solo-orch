@@ -47,8 +47,12 @@ CHILD_LIB="$SOLO_HOME/solo-child-lib.sh"
 SCRATCH_NAME="orchestration"
 
 die(){ echo "solo-orch: $*" >&2; exit 1; }
-command -v solo >/dev/null || die "'solo' not on PATH — run quiver-hq/solo/install.sh"
-command -v jq   >/dev/null || die "'jq' required"
+# Checked per-command, not up front: `link` only touches files, and it has to
+# work on the Linux box, where Solo has no build yet.
+need_solo(){
+  command -v solo >/dev/null || die "'solo' not on PATH — run quiver-hq/solo/install.sh"
+  command -v jq   >/dev/null || die "'jq' required"
+}
 
 # --- Project auto-detection: longest project path that is a prefix of $PWD ---
 detect(){
@@ -303,6 +307,11 @@ cmd_provision(){
   done
 }
 
+# `link` is pure filesystem work, so it runs before the Solo requirement and
+# preserves its own exit code (non-zero on conflicts).
+if [ "${1:-}" = "link" ]; then shift; cmd_link "${1:-}"; exit $?; fi
+
+need_solo
 case "${1:-}" in
   project) cmd_project;;
   agents)  cmd_agents;;
@@ -312,7 +321,6 @@ case "${1:-}" in
   status)  cmd_status;;
   gather)  cmd_gather;;
   ps)      cmd_ps;;
-  link)      shift; cmd_link "${1:-}";;
   provision) shift; cmd_provision "${1:-}";;
   notes)     shift; cmd_notes "${1:-}" "${2:-}";;
   *) sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; exit 1;;
