@@ -107,8 +107,13 @@ cmd_spawn(){
   [ -n "$lane" ] && [ -n "$obj" ] || die "usage: solo-orch spawn <lane> \"<objective>\""
   local p sp tool tid; p=$(need_pid); sp=$(ensure_scratchpad "$p"); tool=$(agent_tool_id)
   [ -n "$tool" ] && [ "$tool" != null ] || die "no enabled '${AGENT_TOOL:-claude}' agent tool (see: solo-orch agents)"
-  tid=$(solo todos create --project-id "$p" --title "[lane:$lane] $obj" \
-        --body "Follow $CHILD_DOC. Lane=$lane." --tag lane --tag "$lane" --json | jq -r '.data.todo.id')
+  # Solo caps a todo title at 200 chars, and a good objective is usually longer
+  # than that — the title gets a readable first line, the body keeps it whole.
+  local title="[lane:$lane] $obj"
+  if [ "${#title}" -gt 200 ]; then title="${title:0:197}..."; fi
+  tid=$(solo todos create --project-id "$p" --title "$title" \
+        --body "$(printf 'Follow %s. Lane=%s.\n\n## Objective\n\n%s\n' "$CHILD_DOC" "$lane" "$obj")" \
+        --tag lane --tag "$lane" --json | jq -r '.data.todo.id')
   local prompt="You are the '$lane' worker for this Solo project (id $p).
 Read and follow $CHILD_DOC EXACTLY.
 First export your context so the helper lib works:
