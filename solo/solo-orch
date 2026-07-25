@@ -21,6 +21,10 @@
 #   solo-orch gather               print each agent's recent output (this project)
 #   solo-orch ps                   ALL processes across ALL projects (control plane)
 #
+# Cross-machine setup (quiver-hq is the transport):
+#   solo-orch link [--dry-run]     symlink quiver-hq/local/* into each project
+#   solo-orch provision [--dry-run] register every solo.yml project with Solo
+#
 # Env overrides:  AGENT_TOOL=codex solo-orch spawn ...   (default: claude)
 #
 set -euo pipefail
@@ -128,6 +132,92 @@ cmd_ps(){ solo processes list --json \
   | jq -r '.data.processes[]|"\(.projectName)\t\(.kind)\t\(.name)\t\(.status)"' \
   | sort | column -t -s $'\t'; }
 
+# --- Cross-machine setup -----------------------------------------------------
+# quiver-hq is the transport. It cannot track files inside projects/* (those are
+# submodule gitlinks), so the personal Claude layer lives in quiver-hq/local/
+# and is symlinked into each project, where the work repos already gitignore it.
+QUIVER_ROOT="${QUIVER_ROOT:-$(cd "$SOLO_HOME/.." 2>/dev/null && pwd || echo "")}"
+
+# link_one <src-abs> <dst-abs> <rel-target> — idempotent, never destroys work.
+link_one(){
+  local src="$1" dst="$2" rel="$3"
+  if [ -L "$dst" ]; then
+    [ "$(readlink "$dst")" = "$rel" ] && { echo "  ok       ${dst#$QUIVER_ROOT/}"; return 0; }
+    [ "$DRY" = 1 ] || { rm -f "$dst"; ln -s "$rel" "$dst"; }
+    echo "  relink   ${dst#$QUIVER_ROOT/}"; return 0
+  fi
+  if [ -e "$dst" ]; then
+    # A real file. Only replace it when it is byte-identical to the canonical
+    # copy; otherwise it holds divergent work and we leave it for the human.
+    if cmp -s "$src" "$dst"; then
+      [ "$DRY" = 1 ] || { rm -f "$dst"; ln -s "$rel" "$dst"; }
+      echo "  adopt    ${dst#$QUIVER_ROOT/}"
+    else
+      echo "  CONFLICT ${dst#$QUIVER_ROOT/} differs from local/ — left alone" >&2
+      CONFLICTS=$((CONFLICTS+1))
+    fi
+    return 0
+  fi
+  [ -d "$(dirname "$dst")" ] || { echo "  no dir   $(dirname "${dst#$QUIVER_ROOT/}")" >&2; return 0; }
+  [ "$DRY" = 1 ] || ln -s "$rel" "$dst"
+  echo "  link     ${dst#$QUIVER_ROOT/}"
+}
+
+cmd_link(){
+  DRY=0; [ "${1:-}" = "--dry-run" ] && DRY=1
+  CONFLICTS=0
+  [ -n "$QUIVER_ROOT" ] && [ -d "$QUIVER_ROOT/local" ] \
+    || die "no local/ under '$QUIVER_ROOT' (set QUIVER_ROOT to your quiver-hq checkout)"
+  [ "$DRY" = 1 ] && echo "DRY RUN — nothing will be written"
+  local pdir proj dest
+  for pdir in "$QUIVER_ROOT"/local/*/; do
+    [ -d "$pdir" ] || continue
+    proj="$(basename "$pdir")"
+    dest="$QUIVER_ROOT/projects/$proj"
+    if [ ! -d "$dest" ]; then echo "skip $proj (no projects/$proj here)"; continue; fi
+    echo "$proj:"
+    # projects/<proj>/CLAUDE.local.md -> ../../local/<proj>/CLAUDE.local.md
+    [ -f "$pdir/CLAUDE.local.md" ] && \
+      link_one "$pdir/CLAUDE.local.md" "$dest/CLAUDE.local.md" "../../local/$proj/CLAUDE.local.md"
+    # Repo-controlled Solo config, same story: the submodule can't carry it.
+    [ -f "$pdir/solo.yml" ] && \
+      link_one "$pdir/solo.yml" "$dest/solo.yml" "../../local/$proj/solo.yml"
+    # projects/<proj>/.claude/agents/X -> ../../../../local/<proj>/agents/X
+    local a b
+    for a in "$pdir"agents/*.local.md; do
+      [ -e "$a" ] || continue
+      b="$(basename "$a")"
+      link_one "$a" "$dest/.claude/agents/$b" "../../../../local/$proj/agents/$b"
+    done
+  done
+  if [ "$CONFLICTS" -gt 0 ]; then
+    echo >&2
+    echo "$CONFLICTS file(s) differ from local/ and were left untouched." >&2
+    echo "Diff them, fold anything worth keeping into local/, then re-run." >&2
+    return 1
+  fi
+}
+
+cmd_provision(){
+  DRY=0; [ "${1:-}" = "--dry-run" ] && DRY=1
+  [ -n "$QUIVER_ROOT" ] || die "set QUIVER_ROOT to your quiver-hq checkout"
+  [ "$DRY" = 1 ] && echo "DRY RUN — nothing will be written"
+  local registered d path name
+  registered="$(solo projects list --json | jq -r '.data.projects[].path')"
+  for d in "$QUIVER_ROOT" "$QUIVER_ROOT"/projects/*/; do
+    path="$(cd "$d" 2>/dev/null && pwd)" || continue
+    [ -f "$path/solo.yml" ] || continue
+    name="$(sed -n 's/^name:[[:space:]]*//p' "$path/solo.yml" | head -1)"
+    [ -n "$name" ] || name="$(basename "$path")"
+    if printf '%s\n' "$registered" | grep -qxF "$path"; then
+      echo "  ok      $name ($path)"; continue
+    fi
+    if [ "$DRY" = 1 ]; then echo "  would register $name ($path)"; continue; fi
+    solo projects create "$name" "$path" --json \
+      | jq -r '"  created \(.data.project.name) [id=\(.data.project.id)]"'
+  done
+}
+
 case "${1:-}" in
   project) cmd_project;;
   agents)  cmd_agents;;
@@ -137,5 +227,7 @@ case "${1:-}" in
   status)  cmd_status;;
   gather)  cmd_gather;;
   ps)      cmd_ps;;
-  *) sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'; exit 1;;
+  link)      shift; cmd_link "${1:-}";;
+  provision) shift; cmd_provision "${1:-}";;
+  *) sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; exit 1;;
 esac
