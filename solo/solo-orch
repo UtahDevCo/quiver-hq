@@ -24,6 +24,7 @@
 # Cross-machine setup (quiver-hq is the transport):
 #   solo-orch link [--dry-run]     symlink quiver-hq/local/* into each project
 #   solo-orch provision [--dry-run] register every solo.yml project with Solo
+#   solo-orch notes push|pull      scratchpads <-> quiver-hq/notes/<project>/
 #
 # Env overrides:  AGENT_TOOL=codex solo-orch spawn ...   (default: claude)
 #
@@ -198,6 +199,90 @@ cmd_link(){
   fi
 }
 
+# --- Scratchpad <-> notes/ bridge --------------------------------------------
+# Solo has no cross-machine sync; scratchpads live in a local SQLite db. So the
+# durable copy is a plain Markdown file under quiver-hq/notes/<project>/, which
+# git carries like anything else.
+#
+# File shape is "# <title>" followed by the body, matching what Solo's own
+# save-to-file produces. Solo stores the title as metadata rather than in the
+# content, so the H1 is added on push and stripped on pull.
+#
+# Only ever use this on prose. Solo puts the title at the top of the file, which
+# on a file with YAML frontmatter would land above the ---, so agent definitions
+# stay in local/ and are handled by `link`.
+slugify(){ printf '%s' "$1" | tr '[:upper:]' '[:lower:]' \
+  | sed 's/[^a-z0-9]\{1,\}/-/g; s/^-//; s/-$//'; }
+
+sp_content(){ solo scratchpads read "$2" --project-id "$1" --json --mode content \
+  | jq -r '.data.scratchpad.content'; }
+
+notes_push(){ # pid dir
+  local p="$1" dir="$2" list id name file tmp n=0 c=0
+  list="$(mktemp)"; tmp="$(mktemp)"
+  solo scratchpads list --project-id "$p" --json \
+    | jq -r '.data.scratchpads[]|"\(.id)\t\(.name)"' > "$list"
+  [ -s "$list" ] || { echo "  (no scratchpads)"; rm -f "$list" "$tmp"; return 0; }
+  [ "$DRY" = 1 ] || mkdir -p "$dir"
+  while IFS=$'\t' read -r id name; do
+    [ -n "$id" ] || continue
+    file="$dir/$(slugify "$name").md"
+    printf '# %s\n\n%s\n' "$name" "$(sp_content "$p" "$id")" > "$tmp"
+    n=$((n+1))
+    if [ -f "$file" ] && cmp -s "$tmp" "$file"; then echo "  same     $(basename "$file")"; continue; fi
+    [ "$DRY" = 1 ] || cp "$tmp" "$file"
+    echo "  write    $(basename "$file")  <- \"$name\""; c=$((c+1))
+  done < "$list"
+  echo "  $n scratchpad(s), $c changed"
+  rm -f "$list" "$tmp"
+}
+
+notes_pull(){ # pid dir
+  local p="$1" dir="$2" f name body id rev list tmp n=0 c=0
+  [ -d "$dir" ] || { echo "  (no $dir)"; return 0; }
+  list="$(mktemp)"; tmp="$(mktemp)"
+  solo scratchpads list --project-id "$p" --json \
+    | jq -r '.data.scratchpads[]|"\(.name)\t\(.id)\t\(.revision)"' > "$list"
+  for f in "$dir"/*.md; do
+    [ -e "$f" ] || continue
+    n=$((n+1))
+    name="$(sed -n '1s/^#[[:space:]]*//p' "$f")"
+    [ -n "$name" ] || { echo "  SKIP     $(basename "$f") — no leading '# title'" >&2; continue; }
+    # Body is everything after the H1, minus the blank line that follows it.
+    sed '1d' "$f" | sed '1{/^$/d;}' > "$tmp"
+    id="$(awk -F'\t' -v n="$name" '$1==n{print $2; exit}' "$list")"
+    rev="$(awk -F'\t' -v n="$name" '$1==n{print $3; exit}' "$list")"
+    if [ -n "$id" ]; then
+      if [ "$(sp_content "$p" "$id")" = "$(cat "$tmp")" ]; then
+        echo "  same     \"$name\""; continue
+      fi
+      [ "$DRY" = 1 ] || solo scratchpads update "$id" --project-id "$p" \
+        --expected-revision "$rev" --content-file "$tmp" --json >/dev/null
+      echo "  update   \"$name\" (id $id)"; c=$((c+1))
+    else
+      [ "$DRY" = 1 ] || solo scratchpads create --project-id "$p" \
+        --name "$name" --content-file "$tmp" --json >/dev/null
+      echo "  create   \"$name\""; c=$((c+1))
+    fi
+  done
+  echo "  $n file(s), $c changed"
+  rm -f "$list" "$tmp"
+}
+
+cmd_notes(){
+  local sub="${1:-}"; DRY=0; [ "${2:-}" = "--dry-run" ] && DRY=1
+  [ -n "$QUIVER_ROOT" ] || die "set QUIVER_ROOT to your quiver-hq checkout"
+  local p name dir
+  p="$(need_pid)"; name="$(detect | cut -f2)"
+  dir="$QUIVER_ROOT/notes/$name"
+  [ "$DRY" = 1 ] && echo "DRY RUN — nothing will be written"
+  case "$sub" in
+    push) echo "$name: scratchpads -> ${dir#$QUIVER_ROOT/}"; notes_push "$p" "$dir";;
+    pull) echo "$name: ${dir#$QUIVER_ROOT/} -> scratchpads"; notes_pull "$p" "$dir";;
+    *) die "usage: solo-orch notes <push|pull> [--dry-run]";;
+  esac
+}
+
 cmd_provision(){
   DRY=0; [ "${1:-}" = "--dry-run" ] && DRY=1
   [ -n "$QUIVER_ROOT" ] || die "set QUIVER_ROOT to your quiver-hq checkout"
@@ -229,5 +314,6 @@ case "${1:-}" in
   ps)      cmd_ps;;
   link)      shift; cmd_link "${1:-}";;
   provision) shift; cmd_provision "${1:-}";;
-  *) sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; exit 1;;
+  notes)     shift; cmd_notes "${1:-}" "${2:-}";;
+  *) sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; exit 1;;
 esac
