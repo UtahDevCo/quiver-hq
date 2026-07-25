@@ -197,7 +197,10 @@ cmd_link(){
     # projects/<proj>/CLAUDE.local.md -> ../../local/<proj>/CLAUDE.local.md
     [ -f "$pdir/CLAUDE.local.md" ] && \
       link_one "$pdir/CLAUDE.local.md" "$dest/CLAUDE.local.md" "../../local/$proj/CLAUDE.local.md"
-    # Repo-controlled Solo config, same story: the submodule can't carry it.
+    # Solo config, only for projects whose own repo shouldn't carry it — zamp,
+    # where it would be a personal file in an employer repo. Everywhere else
+    # solo.yml is committed to the project itself, so nothing lands in local/
+    # and this is skipped.
     if [ -f "$pdir/solo.yml" ]; then
       link_one "$pdir/solo.yml" "$dest/solo.yml" "../../local/$proj/solo.yml"
       hide_locally "$dest" solo.yml
