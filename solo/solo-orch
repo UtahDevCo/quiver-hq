@@ -143,6 +143,19 @@ cmd_ps(){ solo processes list --json \
 # and is symlinked into each project, where the work repos already gitignore it.
 QUIVER_ROOT="${QUIVER_ROOT:-$(cd "$SOLO_HOME/.." 2>/dev/null && pwd || echo "")}"
 
+# hide_locally <repo-dir> <pattern> — keep a personal file out of a work repo's
+# status without editing its tracked .gitignore. info/exclude is never committed.
+hide_locally(){
+  local repo="$1" pat="$2" ex
+  git -C "$repo" check-ignore -q "$pat" 2>/dev/null && return 0
+  ex="$(git -C "$repo" rev-parse --git-path info/exclude 2>/dev/null)" || return 0
+  [ -n "$ex" ] || return 0
+  case "$ex" in /*) ;; *) ex="$repo/$ex";; esac
+  grep -qxF "$pat" "$ex" 2>/dev/null && return 0
+  [ "$DRY" = 1 ] || { mkdir -p "$(dirname "$ex")"; printf '%s\n' "$pat" >> "$ex"; }
+  echo "  hide     ${repo#$QUIVER_ROOT/}/$pat (local exclude)"
+}
+
 # link_one <src-abs> <dst-abs> <rel-target> — idempotent, never destroys work.
 link_one(){
   local src="$1" dst="$2" rel="$3"
@@ -185,8 +198,10 @@ cmd_link(){
     [ -f "$pdir/CLAUDE.local.md" ] && \
       link_one "$pdir/CLAUDE.local.md" "$dest/CLAUDE.local.md" "../../local/$proj/CLAUDE.local.md"
     # Repo-controlled Solo config, same story: the submodule can't carry it.
-    [ -f "$pdir/solo.yml" ] && \
+    if [ -f "$pdir/solo.yml" ]; then
       link_one "$pdir/solo.yml" "$dest/solo.yml" "../../local/$proj/solo.yml"
+      hide_locally "$dest" solo.yml
+    fi
     # projects/<proj>/.claude/agents/X -> ../../../../local/<proj>/agents/X
     local a b
     for a in "$pdir"agents/*.local.md; do
