@@ -92,6 +92,52 @@ multica daemon status
 
 Then create agents and assign their runtimes in the Multica web application.
 
+## Soloterm Orchestration
+
+[Soloterm](https://soloterm.com) (Solo.app) is the local orchestration and
+visibility layer. `solo-orch` (in `solo/`, symlinked onto `PATH`) lets any
+Claude/Codex/Gemini session act as a "mother" that spawns child agents,
+scratchpads, terminals, and todos in the running Solo app — one system shared
+across every project under `projects/`, all visible in the Solo sidebar.
+
+Full documentation: [`solo/README.md`](solo/README.md).
+
+### First-Time Setup
+
+```bash
+./solo/install.sh
+```
+
+This symlinks the `solo` CLI and `solo-orch` onto `PATH`, registers Solo's MCP
+server with Claude Code, and adds a global import to `~/.claude/CLAUDE.md` so
+**every** Claude session learns `solo-orch` automatically. Then, in the Solo
+app, enable **Settings → Integrations → Local CLI/HTTP access** and **Solo MCP**.
+Verify with `solo doctor` (expect `Ready: yes`).
+
+Register each project once so `solo-orch` can auto-detect it from `$PWD`:
+
+```bash
+solo projects create <name> "/absolute/path"
+```
+
+### Operations
+
+Run from any registered project directory (project is auto-detected):
+
+```bash
+solo-orch project                    # which Solo project $PWD maps to
+solo-orch agents                     # tools you can spawn (claude, codex, …)
+solo-orch note "Goal … lane map …"   # write shared context to the scratchpad
+solo-orch spawn <lane> "<objective>" # create a lane todo + spawn ONE agent
+solo-orch status                     # this project's agents + todos
+solo-orch gather                     # tail each agent's output
+solo-orch ps                         # ALL processes across ALL projects
+```
+
+Children spawn one-per-lane, each owning a disjoint file set; they coordinate
+through the per-project `orchestration` scratchpad (revision-guarded) and one
+todo per lane. `AGENT_TOOL=codex solo-orch spawn …` selects a non-Claude tool.
+
 ## Secret Management
 
 `quiver-secrets` stores project environment values in 1Password.
