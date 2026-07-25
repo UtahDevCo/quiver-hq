@@ -20,6 +20,7 @@
 #   solo-orch status               agents + todos for THIS project
 #   solo-orch gather               print each agent's recent output (this project)
 #   solo-orch ps                   ALL processes across ALL projects (control plane)
+#   solo-orch sweep [--quiet]      triage board: EVERY project, with ATTENTION flags
 #
 # Cross-machine setup (quiver-hq is the transport):
 #   solo-orch link [--dry-run]     symlink quiver-hq/local/* into each project
@@ -136,6 +137,98 @@ cmd_gather(){ local p; p=$(need_pid); \
 cmd_ps(){ solo processes list --json \
   | jq -r '.data.processes[]|"\(.projectName)\t\(.kind)\t\(.name)\t\(.status)"' \
   | sort | column -t -s $'\t'; }
+
+# --- Sweep: the lead agent's triage board ------------------------------------
+# One call, every project. The point is that a lead agent should spend its first
+# tool call getting the WHOLE board, not N calls walking projects one at a time.
+#
+# Stall detection needs memory across sweeps, and Solo has no CLI for its KV
+# store, so the fingerprint of each agent's output tail is cached here. Machine-
+# local by design: it describes running processes, which don't travel.
+SWEEP_STATE="${SWEEP_STATE:-$HOME/.cache/solo-orch/sweep.tsv}"
+STALL_SECS="${STALL_SECS:-900}"   # running agent, output unchanged this long
+
+# git_line <dir> — "N modified, N ahead" for a work tree, or "" if not a repo.
+git_line(){
+  local d="$1" dirty ahead br
+  git -C "$d" rev-parse --git-dir >/dev/null 2>&1 || return 0
+  dirty=$(git -C "$d" status --porcelain 2>/dev/null | grep -c . || true)
+  br=$(git -C "$d" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')
+  ahead=$(git -C "$d" rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)
+  printf '%s\t%s\t%s' "$br" "$dirty" "$ahead"
+}
+
+cmd_sweep(){
+  local quiet=0; [ "${1:-}" = "--quiet" ] && quiet=1
+  local prev="$SWEEP_STATE" next attn body now
+  mkdir -p "$(dirname "$prev")"; : >> "$prev"
+  next="$(mktemp)"; attn="$(mktemp)"; body="$(mktemp)"; now=$(date +%s)
+
+  solo projects list --json | jq -r '.data.projects[]|"\(.id)\t\(.name)\t\(.path)"' \
+  | while IFS=$'\t' read -r pid pname ppath; do
+    local procs todos g agents_run cmds_run open wip blocked
+    procs=$(solo processes list --project-id "$pid" --json)
+    todos=$(solo todos list --project-id "$pid" --completed false --json)
+    agents_run=$(echo "$procs" | jq '[.data.processes[]|select(.kind=="agent" and .status=="running")]|length')
+    cmds_run=$(echo "$procs"  | jq '[.data.processes[]|select(.kind=="command" and .status=="running")]|length')
+    open=$(echo    "$todos" | jq '[.data.todos[]|select(.status=="open")]|length')
+    wip=$(echo     "$todos" | jq '[.data.todos[]|select(.status=="in_progress")]|length')
+    blocked=$(echo "$todos" | jq '[.data.todos[]|select(.isBlocked)]|length')
+    g=$(git_line "$ppath")
+
+    { printf '\n%s  (id %s)  %s\n' "$pname" "$pid" "$ppath"
+      printf '  work    agents %s running  |  commands %s running  |  todos %s open %s wip %s blocked\n' \
+        "$agents_run" "$cmds_run" "$open" "$wip" "$blocked"
+      [ -n "$g" ] && printf '  git     %s\n' "$(echo "$g" | awk -F'\t' '{printf "%s — %s modified, %s unpushed", $1,$2,$3}')"
+    } >> "$body"
+
+    # Per-agent rows, with stall fingerprints. Stopped agents are just history —
+    # they'd bury the live ones, so only live/broken agents get a row.
+    echo "$procs" | jq -r '.data.processes[]|select(.kind=="agent" and .status!="stopped")|"\(.id)\t\(.name)\t\(.status)\t\(.uptimeSeconds // 0)"' \
+    | while IFS=$'\t' read -r aid aname astatus aup; do
+      local out tail_h since age last
+      out=$(solo processes output "$aid" --project-id "$pid" --lines 40 --json 2>/dev/null \
+            | jq -r '.data.text // ""') || out=""
+      tail_h=$(printf '%s' "$out" | shasum | cut -c1-12)
+      since=$(awk -F'\t' -v k="$aid" -v h="$tail_h" '$1==k && $2==h {print $3; found=1} END{if(!found) print ""}' "$prev")
+      [ -n "$since" ] || since=$now
+      printf '%s\t%s\t%s\n' "$aid" "$tail_h" "$since" >> "$next"
+      age=$(( now - since ))
+      last=$(printf '%s' "$out" | grep -v '^[[:space:]]*$' | tail -1 | cut -c1-72) || last=""
+      printf '  agent   %-18s [%s] %s  up %dm  quiet %dm\n            ↳ %s\n' \
+        "$aname" "$aid" "$astatus" $((aup/60)) $((age/60)) "${last:-—}" >> "$body"
+      if [ "$astatus" = running ] && [ "$age" -ge "$STALL_SECS" ]; then
+        echo "STALLED   $pname/$aname [proc $aid] — no new output in $((age/60))m" >> "$attn"
+      fi
+      case "$astatus" in failed|exited) echo "DEAD      $pname/$aname [proc $aid] — $astatus" >> "$attn";; esac
+    done
+
+    # Todos the lead is accountable for.
+    echo "$todos" | jq -r '.data.todos[]|select(.isBlocked)|"  \(.id)  \(.title)"' \
+    | while read -r l; do [ -n "$l" ] && echo "BLOCKED   $pname/$l" >> "$attn"; done
+    if [ "$wip" -gt 0 ] && [ "$agents_run" -eq 0 ]; then
+      echo "ORPHANED  $pname — $wip todo(s) in_progress with no agent running" >> "$attn"
+    fi
+    if [ "$open" -gt 0 ] && [ "$agents_run" -eq 0 ]; then
+      echo "UNSTAFFED $pname — $open open todo(s), nobody working" >> "$attn"
+    fi
+    # Uncommitted work is only a flag when nobody is at the wheel — while an
+    # agent is running, a dirty tree is just work in progress.
+    if [ -n "$g" ]; then
+      local dirty ahead; dirty=$(echo "$g"|cut -f2); ahead=$(echo "$g"|cut -f3)
+      [ "${dirty:-0}" -gt 0 ] && [ "$agents_run" -eq 0 ] \
+        && echo "DIRTY     $pname — $dirty uncommitted file(s), no agent running" >> "$attn"
+      [ "${ahead:-0}" -gt 0 ]  && echo "UNPUSHED  $pname — $ahead commit(s) ahead of upstream" >> "$attn"
+    fi
+    true
+  done
+
+  echo "SWEEP $(date '+%Y-%m-%d %H:%M')   stall threshold ${STALL_SECS}s"
+  echo
+  if [ -s "$attn" ]; then echo "ATTENTION"; sed 's/^/  /' "$attn"; else echo "ATTENTION  (none — board is clean)"; fi
+  [ "$quiet" = 1 ] || cat "$body"
+  mv "$next" "$prev"; rm -f "$attn" "$body"
+}
 
 # --- Cross-machine setup -----------------------------------------------------
 # quiver-hq is the transport. It cannot track files inside projects/* (those are
@@ -339,7 +432,9 @@ case "${1:-}" in
   status)  cmd_status;;
   gather)  cmd_gather;;
   ps)      cmd_ps;;
+  sweep)   shift; cmd_sweep "${1:-}";;
   provision) shift; cmd_provision "${1:-}";;
   notes)     shift; cmd_notes "${1:-}" "${2:-}";;
-  *) sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; exit 1;;
+  # Usage is the header comment block: everything up to the first non-comment.
+  *) awk 'NR>1 && !/^#/{exit} NR>1{sub(/^# ?/,""); print}' "$0"; exit 1;;
 esac

@@ -7,6 +7,7 @@ quiver-hq sub-project, with full visibility in the Soloterm control plane.
 ```
 quiver-hq/solo/
   solo-orch            # the command (install.sh symlinks it onto PATH)
+  solo-lead-agent.md   # protocol the standing lead follows (portfolio loop)
   solo-child-agent.md  # protocol each spawned worker follows
   solo-child-lib.sh    # helper the worker sources (revision-safe append)
   install.sh           # one-time per-machine setup
@@ -44,7 +45,26 @@ solo-orch status                        # this project's agents + todos
 solo-orch gather                        # tail each agent's output
 solo-orch term scratch                  # open an ad-hoc terminal
 solo-orch ps                            # EVERY process across ALL projects
+solo-orch sweep                         # triage board for ALL projects + flags
 ```
+
+## The lead loop — managing the whole portfolio
+`sweep` is the one call that replaces walking projects by hand. It reports every
+project's agents, todos, and git state, and computes the flags worth reacting to:
+`STALLED` `DEAD` `ORPHANED` `UNSTAFFED` `BLOCKED` `DIRTY` `UNPUSHED`.
+
+```bash
+solo-orch sweep --quiet                 # just the ATTENTION block
+STALL_SECS=1800 solo-orch sweep         # loosen the stall threshold (default 900s)
+```
+
+Stall detection compares each agent's output tail against the previous sweep,
+cached in `~/.cache/solo-orch/sweep.tsv` (machine-local — it describes running
+processes, which don't travel).
+
+A lead agent runs `SWEEP → TRIAGE → ACT → RECORD → next wake` on a loop; the
+protocol is `solo-lead-agent.md`. In Claude Code: `/lead` for one pass,
+`/loop /lead` for a standing loop.
 
 ## Visibility (the control plane)
 - **Soloterm app sidebar**: every project, every spawned agent/terminal/command,

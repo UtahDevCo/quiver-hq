@@ -28,7 +28,12 @@ solo-orch status                   # this project's agents + todos
 solo-orch gather                   # tail each agent's output
 solo-orch term [name]              # open a terminal
 solo-orch ps                       # ALL processes across ALL projects (control plane)
+solo-orch sweep [--quiet]          # triage board for ALL projects, with flags
 ```
+
+**Lead loop:** to manage the portfolio (not one task), run `/lead` — one pass of
+`SWEEP → TRIAGE → ACT → RECORD → next wake` over every project. `/loop /lead` makes
+it standing. Protocol: `~/dev/quiver-hq/solo/solo-lead-agent.md`.
 
 **Model:** children spawn one-per-lane, each owning a **disjoint** file set (prevents
 races). Shared memory = the per-project `orchestration` scratchpad (revision-guarded).

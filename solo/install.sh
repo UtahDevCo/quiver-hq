@@ -7,7 +7,8 @@
 #   1. Puts the `solo` CLI on PATH  (~/.local/bin/solo -> Solo.app solo-cli)
 #   2. Registers Solo's MCP server with Claude Code (user scope)
 #   3. Symlinks `solo-orch` onto PATH  (~/.local/bin/solo-orch -> this dir)
-#   4. Runs `solo doctor` and reminds you about the two GUI toggles
+#   4. Symlinks the /lead skill into ~/.claude/skills/
+#   5. Runs `solo doctor` and reminds you about the two GUI toggles
 #
 set -euo pipefail
 
@@ -54,7 +55,19 @@ else
   echo "✓ added solo-orch import to ~/.claude/CLAUDE.md"
 fi
 
-# 4. Health check -------------------------------------------------------------
+# 4. /lead skill --------------------------------------------------------------
+# Symlinked rather than copied so editing the protocol in the repo takes effect
+# immediately, and every machine tracks the same version.
+SKILLS="$HOME/.claude/skills"
+mkdir -p "$SKILLS"
+if [ -e "$SKILLS/lead" ] && [ ! -L "$SKILLS/lead" ]; then
+  echo "✗ $SKILLS/lead exists and is not a symlink — left alone" >&2
+else
+  ln -sfn "$HERE/skills/lead" "$SKILLS/lead"
+  echo "✓ linked /lead skill -> $HERE/skills/lead"
+fi
+
+# 5. Health check -------------------------------------------------------------
 echo
 echo "── solo doctor ──"
 solo doctor 2>&1 | sed -n '1,8p' || true
