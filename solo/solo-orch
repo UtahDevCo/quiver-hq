@@ -148,14 +148,28 @@ cmd_ps(){ solo processes list --json \
 SWEEP_STATE="${SWEEP_STATE:-$HOME/.cache/solo-orch/sweep.tsv}"
 STALL_SECS="${STALL_SECS:-900}"   # running agent, output unchanged this long
 
-# git_line <dir> — "N modified, N ahead" for a work tree, or "" if not a repo.
+# git_line <dir> — "branch \t dirty \t ahead \t tracked|no-upstream", or "" if
+# not a repo. A branch with no upstream is measured against the remote's default
+# branch instead: a never-pushed branch is the case most worth flagging, and
+# @{u}..HEAD just errors there, which would silently read as "0 unpushed".
 git_line(){
-  local d="$1" dirty ahead br
+  local d="$1" dirty ahead br base b up=tracked
   git -C "$d" rev-parse --git-dir >/dev/null 2>&1 || return 0
   dirty=$(git -C "$d" status --porcelain 2>/dev/null | grep -c . || true)
   br=$(git -C "$d" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')
-  ahead=$(git -C "$d" rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)
-  printf '%s\t%s\t%s' "$br" "$dirty" "$ahead"
+  ahead=$(git -C "$d" rev-list --count '@{u}..HEAD' 2>/dev/null) || ahead=""
+  if [ -z "$ahead" ]; then
+    up=no-upstream
+    base=$(git -C "$d" symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null) || base=""
+    if [ -z "$base" ]; then
+      for b in origin/main origin/master; do
+        git -C "$d" rev-parse --verify -q "$b" >/dev/null 2>&1 && { base="$b"; break; }
+      done
+    fi
+    if [ -n "$base" ]; then ahead=$(git -C "$d" rev-list --count "$base..HEAD" 2>/dev/null || echo 0)
+    else ahead=0; fi
+  fi
+  printf '%s\t%s\t%s\t%s' "$br" "$dirty" "$ahead" "$up"
 }
 
 cmd_sweep(){
@@ -179,7 +193,8 @@ cmd_sweep(){
     { printf '\n%s  (id %s)  %s\n' "$pname" "$pid" "$ppath"
       printf '  work    agents %s running  |  commands %s running  |  todos %s open %s wip %s blocked\n' \
         "$agents_run" "$cmds_run" "$open" "$wip" "$blocked"
-      [ -n "$g" ] && printf '  git     %s\n' "$(echo "$g" | awk -F'\t' '{printf "%s — %s modified, %s unpushed", $1,$2,$3}')"
+      [ -n "$g" ] && printf '  git     %s\n' "$(echo "$g" | awk -F'\t' \
+        '{printf "%s — %s modified, %s unpushed%s", $1,$2,$3,($4=="no-upstream"?" (branch never pushed)":"")}')"
     } >> "$body"
 
     # Per-agent rows, with stall fingerprints. Stopped agents are just history —
@@ -215,10 +230,18 @@ cmd_sweep(){
     # Uncommitted work is only a flag when nobody is at the wheel — while an
     # agent is running, a dirty tree is just work in progress.
     if [ -n "$g" ]; then
-      local dirty ahead; dirty=$(echo "$g"|cut -f2); ahead=$(echo "$g"|cut -f3)
+      local dirty ahead up br
+      br=$(echo "$g"|cut -f1); dirty=$(echo "$g"|cut -f2)
+      ahead=$(echo "$g"|cut -f3); up=$(echo "$g"|cut -f4)
       [ "${dirty:-0}" -gt 0 ] && [ "$agents_run" -eq 0 ] \
         && echo "DIRTY     $pname — $dirty uncommitted file(s), no agent running" >> "$attn"
-      [ "${ahead:-0}" -gt 0 ]  && echo "UNPUSHED  $pname — $ahead commit(s) ahead of upstream" >> "$attn"
+      if [ "${ahead:-0}" -gt 0 ]; then
+        if [ "$up" = no-upstream ]; then
+          echo "UNPUSHED  $pname — $ahead commit(s) on $br, which has never been pushed" >> "$attn"
+        else
+          echo "UNPUSHED  $pname — $ahead commit(s) ahead of upstream" >> "$attn"
+        fi
+      fi
     fi
     true
   done
