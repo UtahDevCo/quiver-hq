@@ -43,7 +43,18 @@ else
   echo "· claude CLI not found; skipping MCP registration"
 fi
 
-# 3. Health check -------------------------------------------------------------
+# 3. Global CLAUDE.md import (every Claude session learns solo-orch) ----------
+CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+IMPORT='@~/dev/quiver-hq/solo/CLAUDE.solo-orch.md'
+mkdir -p "$HOME/.claude"
+if [ -f "$CLAUDE_MD" ] && grep -qF "$IMPORT" "$CLAUDE_MD"; then
+  echo "✓ ~/.claude/CLAUDE.md already imports solo-orch instructions"
+else
+  printf '\n%s\n' "$IMPORT" >> "$CLAUDE_MD"
+  echo "✓ added solo-orch import to ~/.claude/CLAUDE.md"
+fi
+
+# 4. Health check -------------------------------------------------------------
 echo
 echo "── solo doctor ──"
 solo doctor 2>&1 | sed -n '1,8p' || true
