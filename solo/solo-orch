@@ -67,8 +67,13 @@ need_pid(){ local d; d=$(detect); [ -n "$d" ] || die "no Solo project matches $P
   Register it once with:  solo projects create <name> \"$PWD\""; echo "$d" | cut -f1; }
 
 ensure_scratchpad(){ # pid -> id (get-or-create the 'orchestration' scratchpad)
+  # Case-insensitive, oldest-first. Solo's UI title-cases a scratchpad name when
+  # you touch it, so an exact match would miss "Orchestration" and quietly create
+  # a second pad — splitting the one memory every agent here reads from.
   local id; id=$(solo scratchpads list --project-id "$1" --json \
-    | jq -r --arg n "$SCRATCH_NAME" '.data.scratchpads[]|select(.name==$n)|.id' | head -1)
+    | jq -r --arg n "$SCRATCH_NAME" '[.data.scratchpads[]
+        | select((.name|ascii_downcase)==($n|ascii_downcase))]
+        | sort_by(.id) | .[0].id // empty')
   if [ -z "$id" ] || [ "$id" = null ]; then
     id=$(solo scratchpads create --project-id "$1" --name "$SCRATCH_NAME" \
          --content $'# Orchestration\n\n## Findings\n' --tag orchestration --json \
