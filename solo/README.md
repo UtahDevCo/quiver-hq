@@ -5,16 +5,16 @@ quiver-hq sub-project, with full visibility in the Soloterm control plane.
 
 ## Layout
 ```
-quiver-hq/
-  bin/solo-orch          # the command (already on PATH via quiver-hq/bin)
-  solo/
-    solo-child-agent.md  # protocol each spawned worker follows
-    solo-child-lib.sh    # helper the worker sources (revision-safe append)
-    install.sh           # one-time per-machine setup
-    README.md
+quiver-hq/solo/
+  solo-orch            # the command (install.sh symlinks it onto PATH)
+  solo-child-agent.md  # protocol each spawned worker follows
+  solo-child-lib.sh    # helper the worker sources (revision-safe append)
+  install.sh           # one-time per-machine setup
+  README.md
 ```
-`solo-orch` finds `solo/` via `../solo`, so the whole thing is self-contained
-and portable — clone quiver-hq on any machine, run `solo/install.sh`, done.
+`solo-orch` finds its assets in its own dir (resolving symlinks), so the whole
+thing is self-contained and portable — clone quiver-hq on any machine, run
+`solo/install.sh`, done.
 
 ## Per-machine setup (once)
 ```bash

@@ -6,15 +6,19 @@
 # What it does (nothing project-specific, nothing destructive):
 #   1. Puts the `solo` CLI on PATH  (~/.local/bin/solo -> Solo.app solo-cli)
 #   2. Registers Solo's MCP server with Claude Code (user scope)
-#   3. Runs `solo doctor` and reminds you about the two GUI toggles
-#
-# `solo-orch` itself needs no install — it lives in quiver-hq/bin (already on PATH).
+#   3. Symlinks `solo-orch` onto PATH  (~/.local/bin/solo-orch -> this dir)
+#   4. Runs `solo doctor` and reminds you about the two GUI toggles
 #
 set -euo pipefail
 
 APP="/Applications/Solo.app/Contents/MacOS"
 LOCAL_BIN="$HOME/.local/bin"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p "$LOCAL_BIN"
+
+# 0. solo-orch on PATH --------------------------------------------------------
+ln -sf "$HERE/solo-orch" "$LOCAL_BIN/solo-orch"
+echo "✓ linked solo-orch -> $HERE/solo-orch"
 
 # 1. solo CLI shim ------------------------------------------------------------
 if command -v solo >/dev/null 2>&1; then

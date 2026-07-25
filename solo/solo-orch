@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+#
+# solo-orch — project-agnostic Soloterm orchestration (committed in quiver-hq/solo).
+#
+# The SAME command works in EVERY registered Solo project: it auto-detects the
+# project from your current directory ($PWD) by matching Solo's project paths.
+# Shared child assets live next to this script (SOLO_HOME). Put it on PATH via
+# quiver-hq/solo/install.sh (symlinks it into ~/.local/bin).
+# All CLI shapes verified against solo-cli 0.8.2.
+#
+# First-time setup on a machine:  quiver-hq/solo/install.sh
+# Register a new project once:     solo projects create <name> "<path>"
+#
+# Commands:
+#   solo-orch project              show which Solo project $PWD maps to
+#   solo-orch agents               list agent tools you can spawn (Claude, Codex, …)
+#   solo-orch spawn <lane> "<obj>" create a lane todo + spawn ONE agent for it
+#   solo-orch term  [name]         open a named terminal in this project
+#   solo-orch note  "<text>"       append a note to this project's orchestration scratchpad
+#   solo-orch status               agents + todos for THIS project
+#   solo-orch gather               print each agent's recent output (this project)
+#   solo-orch ps                   ALL processes across ALL projects (control plane)
+#
+# Env overrides:  AGENT_TOOL=codex solo-orch spawn ...   (default: claude)
+#
+set -euo pipefail
+
+# Resolve this script's real dir even when invoked through a symlink on PATH.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  D="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+  SOURCE="$(readlink "$SOURCE")"; [[ "$SOURCE" != /* ]] && SOURCE="$D/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+if [ -z "${SOLO_HOME:-}" ]; then
+  if   [ -f "$SCRIPT_DIR/solo-child-lib.sh" ]; then SOLO_HOME="$SCRIPT_DIR"
+  elif [ -d "$SCRIPT_DIR/../solo" ];          then SOLO_HOME="$(cd "$SCRIPT_DIR/../solo" && pwd)"
+  else SOLO_HOME="$HOME/.solo"; fi
+fi
+CHILD_DOC="$SOLO_HOME/solo-child-agent.md"
+CHILD_LIB="$SOLO_HOME/solo-child-lib.sh"
+SCRATCH_NAME="orchestration"
+
+die(){ echo "solo-orch: $*" >&2; exit 1; }
+command -v solo >/dev/null || die "'solo' not on PATH — run quiver-hq/solo/install.sh"
+command -v jq   >/dev/null || die "'jq' required"
+
+# --- Project auto-detection: longest project path that is a prefix of $PWD ---
+detect(){
+  solo projects list --json | jq -r --arg p "$PWD" '
+    .data.projects
+    | map(. as $x | select($p==$x.path or ($p|startswith($x.path+"/"))))
+    | sort_by(.path|length) | last
+    | select(.!=null) | "\(.id)\t\(.name)\t\(.path)"'
+}
+need_pid(){ local d; d=$(detect); [ -n "$d" ] || die "no Solo project matches $PWD.
+  Register it once with:  solo projects create <name> \"$PWD\""; echo "$d" | cut -f1; }
+
+ensure_scratchpad(){ # pid -> id (get-or-create the 'orchestration' scratchpad)
+  local id; id=$(solo scratchpads list --project-id "$1" --json \
+    | jq -r --arg n "$SCRATCH_NAME" '.data.scratchpads[]|select(.name==$n)|.id' | head -1)
+  if [ -z "$id" ] || [ "$id" = null ]; then
+    id=$(solo scratchpads create --project-id "$1" --name "$SCRATCH_NAME" \
+         --content $'# Orchestration\n\n## Findings\n' --tag orchestration --json \
+         | jq -r '.data.scratchpad.id')
+  fi
+  echo "$id"
+}
+scratch_rev(){ solo scratchpads list --project-id "$1" --json \
+  | jq -r --argjson id "$2" '.data.scratchpads[]|select(.id==$id)|.revision'; }
+append_guarded(){ # pid sp text  (revision-guarded, retries on conflict)
+  local p="$1" sp="$2" text="$3" rev a
+  for a in 1 2 3 4 5; do
+    rev=$(scratch_rev "$p" "$sp")
+    if solo scratchpads append "$sp" --project-id "$p" --content "$text" \
+         --expected-revision "$rev" --newline --json | jq -e '.ok==true' >/dev/null; then return 0; fi
+    sleep 0.4
+  done; return 1
+}
+agent_tool_id(){ solo agents list --json \
+  | jq -r --arg t "${AGENT_TOOL:-claude}" '.data.agentTools[]|select(.toolType==$t and .enabled)|.id' | head -1; }
+
+cmd_project(){ local d; d=$(detect); [ -n "$d" ] || die "no project matches $PWD"; \
+  echo "$d" | awk -F'\t' '{print "id="$1"  name="$2"  path="$3}'; }
+
+cmd_agents(){ solo agents list --json \
+  | jq -r '.data.agentTools[]|"\(.id)\t\(.name)\t\(.toolType)\t"+(if .enabled then "enabled" else "disabled" end)' \
+  | column -t -s $'\t'; }
+
+cmd_spawn(){
+  local lane="${1:-}" obj="${2:-}"
+  [ -n "$lane" ] && [ -n "$obj" ] || die "usage: solo-orch spawn <lane> \"<objective>\""
+  local p sp tool tid; p=$(need_pid); sp=$(ensure_scratchpad "$p"); tool=$(agent_tool_id)
+  [ -n "$tool" ] && [ "$tool" != null ] || die "no enabled '${AGENT_TOOL:-claude}' agent tool (see: solo-orch agents)"
+  tid=$(solo todos create --project-id "$p" --title "[lane:$lane] $obj" \
+        --body "Follow $CHILD_DOC. Lane=$lane." --tag lane --tag "$lane" --json | jq -r '.data.todo.id')
+  local prompt="You are the '$lane' worker for this Solo project (id $p).
+Read and follow $CHILD_DOC EXACTLY.
+First export your context so the helper lib works:
+  export SOLO_PROJECT_ID=$p SOLO_SCRATCHPAD_ID=$sp SOLO_LANE=$lane SOLO_TODO_ID=$tid SOLO_CHILD_LIB=$CHILD_LIB
+Objective: $obj
+Do ONLY the '$lane' lane. Append findings via solo_append, then complete your todo."
+  solo processes spawn --project-id "$p" --kind agent --agent-tool-id "$tool" \
+    --name "$lane-worker" --arg "$prompt" --json \
+    | jq -r '"spawned \(.data.process.name) [id=\(.data.process.id)] \(.data.process.status)"' \
+    && echo "  (todo=$tid scratchpad=$sp tool=${AGENT_TOOL:-claude})"
+}
+
+cmd_term(){ local p; p=$(need_pid); solo processes spawn --project-id "$p" --kind terminal \
+  --name "${1:-terminal}" --json | jq -r '"terminal \(.data.process.name) [id=\(.data.process.id)] \(.data.process.status)"'; }
+
+cmd_note(){ local p sp; p=$(need_pid); sp=$(ensure_scratchpad "$p"); \
+  append_guarded "$p" "$sp" "$*" && echo "noted → scratchpad $sp" || die "append failed"; }
+
+cmd_status(){ local p; p=$(need_pid); echo "PROJECT: $(cmd_project)"; \
+  echo "AGENTS:"; solo processes list --project-id "$p" --json \
+    | jq -r '.data.processes[]|select(.kind=="agent")|"  \(.id)\t\(.name)\t\(.status)"'; \
+  echo "TODOS:";  solo todos list --project-id "$p" --json \
+    | jq -r '.data.todos[]|"  \(.id)\t\(.status)\t\(.title)"'; }
+
+cmd_gather(){ local p; p=$(need_pid); \
+  solo processes list --project-id "$p" --json \
+    | jq -r '.data.processes[]|select(.kind=="agent")|"\(.id)\t\(.name)"' \
+  | while IFS=$'\t' read -r id name; do echo "───── $name (id $id) ─────"; \
+      solo processes output "$id" --project-id "$p" --lines 30 --json | jq -r '.data.text'; done; }
+
+cmd_ps(){ solo processes list --json \
+  | jq -r '.data.processes[]|"\(.projectName)\t\(.kind)\t\(.name)\t\(.status)"' \
+  | sort | column -t -s $'\t'; }
+
+case "${1:-}" in
+  project) cmd_project;;
+  agents)  cmd_agents;;
+  spawn)   shift; cmd_spawn "${1:-}" "${2:-}";;
+  term)    shift; cmd_term "${1:-}";;
+  note)    shift; cmd_note "$*";;
+  status)  cmd_status;;
+  gather)  cmd_gather;;
+  ps)      cmd_ps;;
+  *) sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'; exit 1;;
+esac
