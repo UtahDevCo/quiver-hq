@@ -1,0 +1,5 @@
+# ~/.gitignore_global ignores *.local.md so it never lands in a work repo.
+# This directory is the canonical store for those files, so re-include them.
+# A .gitignore here outranks core.excludesFile.
+!*.local.md
+!**/*.local.md
