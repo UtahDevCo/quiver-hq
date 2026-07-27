@@ -226,11 +226,16 @@ cmd_sweep(){
       # changing and stall fingerprinting reads it as healthy — two workers sat on
       # a session-limit modal for two days reporting "quiet 0m". Match the prompt
       # text instead. Cheap, and these are the cases a human must clear anyway.
-      local parked=""
-      case "$out" in
+      #
+      # Match only the last few lines: a modal that has since been cleared stays
+      # in scrollback, and matching the whole 40-line tail flagged a session that
+      # had hit its limit an hour earlier and long since recovered.
+      local parked="" screen
+      screen=$(printf '%s' "$out" | grep -v '^[[:space:]]*$' | tail -12)
+      case "$screen" in
         *"Stop and wait for limit to reset"*|*"session limit"*|*"usage limit"*)
           parked="hit its session/usage limit";;
-        *"Do you want to proceed"*|*"Do you trust"*|*"esc to interrupt"*"❯ 1."*)
+        *"Do you want to proceed"*|*"Do you trust"*)
           parked="waiting on a permission prompt";;
       esac
 
@@ -243,7 +248,11 @@ cmd_sweep(){
       elif [ "$astatus" = running ] && [ "$age" -ge "$STALL_SECS" ]; then
         echo "STALLED   $pname/$aname [proc $aid] — no new output in $((age/60))m" >> "$attn"
       fi
-      case "$astatus" in failed|exited) echo "DEAD      $pname/$aname [proc $aid] — $astatus" >> "$attn";; esac
+      # Only `failed` is a problem. `exited` is also the normal terminal state of
+      # an agent you stopped on purpose, so flagging it turns every deliberate
+      # cleanup into an alert. An exited agent that abandoned live work is still
+      # caught — by ORPHANED, via its in_progress todo.
+      case "$astatus" in failed) echo "DEAD      $pname/$aname [proc $aid] — failed" >> "$attn";; esac
     done
 
     # Blocked todos are deliberately NOT an ATTENTION flag. A todo waiting on a
