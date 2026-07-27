@@ -109,7 +109,12 @@ cmd_spawn(){
   [ -n "$tool" ] && [ "$tool" != null ] || die "no enabled '${AGENT_TOOL:-claude}' agent tool (see: solo-orch agents)"
   # Solo caps a todo title at 200 chars, and a good objective is usually longer
   # than that — the title gets a readable first line, the body keeps it whole.
-  local title="[lane:$lane] $obj"
+  # Newlines and tabs are flattened FIRST: Solo rejects control characters in a
+  # title, and truncation alone only avoids them by luck (it works iff the first
+  # line happens to be longer than the cap).
+  local flat title
+  flat=$(printf '%s' "$obj" | tr '\n\r\t' '   ' | tr -s ' ')
+  title="[lane:$lane] $flat"
   if [ "${#title}" -gt 200 ]; then title="${title:0:197}..."; fi
   tid=$(solo todos create --project-id "$p" --title "$title" \
         --body "$(printf 'Follow %s. Lane=%s.\n\n## Objective\n\n%s\n' "$CHILD_DOC" "$lane" "$obj")" \
