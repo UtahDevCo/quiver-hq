@@ -52,8 +52,33 @@ solo_append "### [$SOLO_LANE] DONE
 solo todos complete "$SOLO_TODO_ID" --project-id "$SOLO_PROJECT_ID"
 ```
 
+## 7. Push learnings up to the brain
+Before you exit, ask: **did I learn something that outlives this lane?** A
+convention, a reusable pattern, a gotcha that cost you time, a dependency that
+behaved unexpectedly. If so, record it — you are the only session that will ever
+have this context:
+
+```bash
+brain_push <kind> "<title>" "<evidence path:line>" [meta|project]
+#   kind: practice|pattern|failure-mode|stack|workflow|module|invariant|decision
+brain_push failure-mode "Vitess rejects nested reads without companyId" \
+           "domains/billing/queries/get-invoice.ts:88"
+```
+
+This appends to `~/dev/quiver-hq/brain/inbox/` for Chris to review via
+`/brain-promote`. It is fire-and-forget — you do not wait, and you do not
+decide where it belongs.
+
+Rules: default to `project` (promotion can lift it later; a wrong `meta`
+practice silently applies everywhere). Always pass evidence. One call per
+learning. **Never write to `brain/meta/` and never set `verified`.**
+
+Nothing generalizable? Skip this step — an inbox of noise is worse than an empty
+one.
+
 ## Rules
 1. One lane only — never edit outside your ownership.
 2. Scratchpad is truth — read before acting, append (never overwrite) results.
 3. Cross-lane deps go through NEEDS notes; the mother integrates deliberately.
 4. Always leave a DONE block so the mother can integrate without re-reading your diff.
+5. Push durable learnings to the brain inbox; never write to `brain/meta/` directly.
