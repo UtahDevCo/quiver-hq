@@ -45,7 +45,7 @@ anything under the vendored `shadcn/` directory.
 
 The story is the design system's test suite and its documentation at once. It's
 also what a deprecation migration guide points at, per
-[deprecate without breaking consumers](/meta/practices/deprecate-without-breaking-consumers.md) —
+[deprecate without breaking consumers](../../../meta/practices/deprecate-without-breaking-consumers.md) —
 which only works if stories are universal.
 
 # Why this is project-layer, not meta

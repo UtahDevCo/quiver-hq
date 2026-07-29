@@ -50,6 +50,13 @@ block, ignore the body.
   path. An error, not a tolerated broken link (`brain/conventions.md`). The
   override is silently doing nothing.
 - **Orphaned `relations:`** — a `target` that doesn't exist.
+- **Body links** — resolve every relative markdown link in every body against the
+  filesystem. Two failure shapes: a genuinely missing file, and a *bundle-absolute*
+  path (`/meta/practices/x.md`) used where a relative one belongs — that one looks
+  correct and resolves nowhere. Skip `skills/*/SKILL.md`, whose bodies contain
+  illustrative links like `[Title](file.md)` by design.
+- **Wikilinks** — `[[name]]` is the auto-memory format, not OKF. Its presence means
+  an observation was hand-written into the bundle and promoted without conversion.
 - **Asymmetric relations** — `supersedes` without a matching `superseded-by`.
 - **Deprecated but referenced** — a `status: deprecated` concept still linked
   from a non-deprecated one, or still listed in an `index.md` without being

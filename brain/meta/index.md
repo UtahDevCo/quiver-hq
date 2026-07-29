@@ -70,7 +70,12 @@ Governance and the local extensions: [conventions](../conventions.md).
 
 # Failure modes
 
-*Things that look right and are not. Empty.*
+*Things that look right and are not. Each was paid for in production.*
+
+* [verify-a-write-actually-happened](failure-modes/verify-a-write-actually-happened.md) - A `catch` mapping an error class to success reports writes that never landed. Read the state back; assert on the field you wrote, not a derived one.
+* [audits-must-report-their-own-coverage](failure-modes/audits-must-report-their-own-coverage.md) - `.catch(() => null); continue` turns "couldn't check" into "checked, fine". Print attempted / inspected / skipped-by-reason and call the count a floor.
+* [probe-before-trusting-an-api-claim](failure-modes/probe-before-trusting-an-api-claim.md) - "The API doesn't support X" in a comment is a hypothesis. Probe before extending the workaround; commit the probe, including ones that falsified your own guess.
+* [self-reported-confidence-is-not-a-signal](failure-modes/self-reported-confidence-is-not-a-signal.md) - LLM confidence tracks prose register, not correctness. Never display it or route on it; surface citations, gaps, and model disagreement instead.
 
 # Workflows
 

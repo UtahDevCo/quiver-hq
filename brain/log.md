@@ -5,6 +5,17 @@ title: Brain bundle history
 
 # Bundle history
 
+## 2026-07-29 (later)
+
+- **Promoted the full inbox — 15 observations, 0 rejections, 0 contradictions.** 4 to `meta/failure-modes/`, 11 to `projects/zamp/`. The inbox is empty.
+- **Opened `meta/failure-modes/` with four entries**, three of them from `wiley` production incidents: a `catch` mapping 404 to success that swallowed every disable for months, a scanner whose `.catch(() => null); continue` reported "0 divergences" while silently skipping 92 of 1058 accounts, and a code comment asserting a third-party API limitation that was simply false — the workaround built on it wedged 11 customer accounts. These are the first concepts in the brain earned from outages rather than read from a conventions file, and they generalize with nothing wiley-specific left in the rule.
+- **Promoted the k1 confidence observation to meta despite being unable to reproduce its measurement.** The percentages (80/15/45 on one correct conclusion; 80 twice with one wrong) were recorded by a session with no connection to this one. Promoted because the asymmetry argument stands without them: a signal that is silent on the confident-and-wrong case cannot be used to catch it. The concept says so in a `# Provenance note`, so a future reader knows which part is attested and which is inherited.
+- **Normalized two frontmatter shapes.** The three wiley observations were hand-written using the *auto-memory* format (`name`/`description`/`metadata.type`), not the `brain_push` OKF shape — `metadata.type: project` there means a memory category, not a brain layer, so there was no layer proposal to override. Also normalized `author: agent:claude` to `claude/opus-5`; `agent:*` is a fourth actor form the [conventions](conventions.md) table does not define.
+- **Added `Workflow` and `Failure Mode` rows to the `stale_after` table.** This batch introduced both types and neither had a default. Failure modes get 1 year because the trap can be fixed upstream — an API gains the endpoint, a library patches the footgun.
+- **Held two zamp practices back from meta with the reason recorded in each body.** `real-db-test-for-prisma-changes` generalizes to "spend test effort on the failure modes your types and mocks structurally cannot see," and `triple-validation` to "validate at every trust boundary" — both true, both single-source, and both at risk of becoming platitudes that license anything. They promote when a second repo shows the shape.
+- **Two attestation candidates flagged in place**: `deprecated-ui-surfaces` (greppable, the cheap first `Invariant`) and `sharded-tables-companyid` (highest value, needs the sharded-table list joined against call sites). Both invariants ship with an empty `# Computation` section rather than a fabricated one.
+- **Meta index 85 → 89 lines**, 23 concepts. Well short of the ~40 split threshold.
+
 ## 2026-07-29
 
 - **Harvested** `projects/zamp` into `inbox/` — 31 observations from `AGENTS.md`, `.coderabbit.yaml`, `.cursor/rules/sharded-tables.mdc`, `CLAUDE.local.md`, the two reviewer subagents, `git-conventions.local.md`, the `add-ds-component` skill, and the design-system package. Declined: the 117 concrete components and zamp/indigo theme values (project-specific values, not standards), operational commands and port tables, and the 17 daily-scan/triage subagents (orchestration wiring, not knowledge).

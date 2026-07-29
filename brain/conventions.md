@@ -150,6 +150,12 @@ relations:
 `relations` supplements body links; it does not replace them. Prose links stay
 because they carry the *why*.
 
+**Paths differ between the two.** A `relations`/`overrides` `target` is
+bundle-absolute (`/meta/practices/x.md`). A body markdown link is
+filesystem-relative (`../../../meta/practices/x.md`), because that is what
+resolves in an editor and on GitHub. Using an absolute path in a body link
+produces a link that looks correct and goes nowhere.
+
 # Extension 3: `not:`
 
 Borrowed from the OKF `acme_retail` reference bundle. [^acme-sample] Negative
@@ -195,9 +201,10 @@ Consequence: an agent's output lands in `inbox/` as `status: draft`. It becomes
 
 | Concept type | Default `stale_after` |
 |---|---|
-| `Practice` | 1 year |
+| `Practice`, `Workflow` | 1 year |
 | `Stack` | 6 months — dependency choices move fast |
 | `Pattern`, `Module` | 1 year |
+| `Failure Mode` | 1 year — traps get fixed upstream; an API gains the endpoint, a library patches the footgun |
 | `Invariant` | the next dependency upgrade window |
 | `Practice Override` with `mode: suspend` | 90 days, and never more than 1 year |
 | `Decision` (ADR) | none — decisions are historical facts |
