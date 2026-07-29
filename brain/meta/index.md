@@ -23,6 +23,7 @@ Governance and the local extensions: [conventions](../conventions.md).
 # Practices — style
 
 * [minimal-comments](practices/minimal-comments.md) - Comment a genuinely non-obvious *why*, one terse line. Never restate the code. **Don't touch pre-existing comments authored by others.**
+* [kebab-case-files-named-exports](practices/kebab-case-files-named-exports.md) - `kebab-case.tsx` files, `PascalCase` identifiers, `UPPER_SNAKE` constants. **No default exports** — that half is load-bearing. Next.js `page`/`layout`/`route` are the framework exception.
 * [small-single-purpose-files](practices/small-single-purpose-files.md) - ~200 lines logic / ~300 components (tests, stories, config exempt). One primary export. Delete orphaned code in the change that orphaned it.
 
 # Practices — error handling
@@ -34,6 +35,10 @@ Governance and the local extensions: [conventions](../conventions.md).
 
 * [assert-on-whole-values](practices/assert-on-whole-values.md) - `toStrictEqual(new Error(...))`, not `.message`. Unwrap inline at the assertion site. No single-use intermediates.
 * [mock-at-narrowest-scope](practices/mock-at-narrowest-scope.md) - Escalate by blast radius: `spyOn` → deep-mock → module mock. Always assert `toHaveBeenCalledWith` *and* `toHaveBeenCalledTimes`.
+
+# Practices — security
+
+* [authorize-before-doing-work](practices/authorize-before-doing-work.md) - The authorization check is the first statement in a privileged entry point — before any read, write, or external call. Then log actor, action, target, note.
 
 # Practices — validation
 
@@ -74,7 +79,7 @@ Governance and the local extensions: [conventions](../conventions.md).
 
 # Workflows
 
-*Repeatable processes: review loops, triage, release. Empty.*
+* [corroboration-requires-independent-sources](workflows/corroboration-requires-independent-sources.md) - Two sources corroborate only if independent. Diff convention docs before counting them twice; weight independent code above documentation; report *unfalsifiable here* separately from *contradicted here*.
 
 # Using the brain
 

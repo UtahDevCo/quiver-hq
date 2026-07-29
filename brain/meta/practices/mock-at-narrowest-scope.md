@@ -59,3 +59,29 @@ pass while the feature is broken.
 
 The API names are Vitest-specific; the escalation principle and the
 assert-the-interaction rule apply to Jest, Sinon, and any spy library.
+
+# Evidence: single-source, deliberately kept
+
+This is the least-corroborated practice in the meta layer, and it stays here on
+Chris's assertion rather than on cross-repo agreement. Recorded plainly so a future
+reader does not mistake it for an observed convention.
+
+The 2026-07-29 corroboration pass over `tools`, `trikin`, and wiley found:
+
+| Repo | Finding |
+|---|---|
+| tools | tests exist (`bun:test`), but **no mocking anywhere** — they run against real data structures |
+| trikin | no mock setup in the test files examined |
+| wiley | **no test files at all** |
+
+None of that is disagreement. It is absence of evidence, which
+[corroboration-requires-independent-sources](../workflows/corroboration-requires-independent-sources.md)
+insists on distinguishing from evidence of absence: these repos do not mock because
+they barely test, not because they reject the escalation order.
+
+Kept as default-on because the advice is sound and the cost of following it is zero
+in a repo with no mocks. The part that generalizes beyond any particular runner is the second half: **a mock you don't assert against verifies
+almost nothing.** `toHaveBeenCalledWith` *and* `toHaveBeenCalledTimes`, always.
+
+Promote the API-specific details to firmer ground when a second repo starts mocking
+seriously; demote the whole thing if one does so and lands on a different order.
