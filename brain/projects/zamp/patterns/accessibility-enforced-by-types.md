@@ -42,7 +42,21 @@ required/optional affordances each have exactly one home.
 An unlabeled input is among the most common real accessibility defects, and it is
 invisible in a screenshot. Auditing for it forever is strictly worse than making
 it unrepresentable — see
-[make misuse unrepresentable](../practices/make-misuse-unrepresentable.md).
+[make misuse unrepresentable](../../../meta/practices/make-misuse-unrepresentable.md).
+
+# Why this is project-layer
+
+Held in `meta/patterns/` until 2026-07-29, then demoted on Chris's ruling: *don't
+worry about it outside of zamp.*
+
+Harvesting `tools` and `wiley` found neither implements the union. Both expose
+`aria-label` as an **optional prop** — `tools` with a JSDoc hint ("recommended for
+icon-only buttons"), `wiley` as `"aria-label"?: string`. That is precisely the
+weaker alternative this pattern exists to replace, so scoring them as corroboration
+would have been backwards. Only zamp's design system has the real thing.
+
+Still a `Pattern`, so it is opt-in and its absence elsewhere is not a defect. The
+section below is where it earns promotion back to meta if a second repo adopts it.
 
 # Where else to apply it
 

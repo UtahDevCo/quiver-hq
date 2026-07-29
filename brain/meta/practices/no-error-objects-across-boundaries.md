@@ -21,6 +21,14 @@ sources:
   - id: rsc-reviewer
     resource: projects/zamp/.claude/agents/rsc-boundary-reviewer.md
     title: rsc-boundary-reviewer — rule 4 (dedicated subagent enforces this)
+  - id: trikin-workers
+    resource: projects/trikin/workers/notifications/src/index.ts
+    title: "trikin — Cloudflare Worker boundary; everything crosses as { success, error: string }"
+    last_modified: 2026-07-29
+  - id: wiley-actions
+    resource: projects/wiley/web/app/settings/quiet-hours-drawer.tsx
+    title: "wiley — err instanceof Error ? err.message : fallback, consistently at the action boundary"
+    last_modified: 2026-07-29
 ---
 
 # The practice
@@ -32,6 +40,7 @@ Boundaries this covers:
 
 - server → client components (React Server Components)
 - `postMessage` / `structuredClone` / web workers
+- **the Cloudflare Worker `fetch` boundary** — see below
 - background job and queue payloads
 - cache entries and any persisted state
 
@@ -44,6 +53,22 @@ message in production rather than a crash in development.
 
 zamp considers it important enough to enforce with a dedicated reviewer subagent,
 which is a strong signal that types-plus-review isn't sufficient on its own.
+
+# Independently corroborated, from different physics
+
+`trikin` arrives at the same rule from an unrelated constraint: across a Cloudflare
+Worker `fetch` boundary, `Error` instances, stack traces, and `instanceof` checks do
+not survive at all. Its answer is a fixed envelope — `{ success: boolean, error?: string }`
+— used by both the worker (`workers/notifications/src/index.ts`) and the caller,
+with the debugging detail kept in a separate blob that is never returned to a client.
+
+`wiley` reaches it a third way, as an idiom repeated at every action boundary:
+`err instanceof Error ? err.message : "fallback"`.
+
+Three repos, three different reasons — RSC serialization, worker isolation, and
+plain UI-safety. That makes this one of the best-evidenced practices in the brain,
+and the envelope shape is worth copying wherever a boundary is fixed enough to
+have one.
 
 # If you need more than the message
 

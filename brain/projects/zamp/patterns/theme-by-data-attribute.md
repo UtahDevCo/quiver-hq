@@ -45,6 +45,17 @@ in **both** light and dark. A partial theme fails as a missing CSS variable at
 runtime — silently, and only on the screen that uses it — so the contract has to
 be written down rather than inferred.
 
+# Why this is project-layer
+
+Held in `meta/patterns/` until 2026-07-29, then demoted on Chris's ruling: *another
+zamp standard that we can ignore.*
+
+The mechanism is also not what the other repos do. Both `tools`
+(`.dark`, `.deep-space-blue`, `.flag-red` in `apps/wkt/app/globals.css`) and `wiley`
+(`.dark`) theme by **class selector**, not by `[data-theme]`, and neither uses the
+folder-per-theme layout. The completeness-contract idea below generalizes; the
+selector strategy and directory shape are zamp's.
+
 # Why a data attribute
 
 Attribute selection beats class-based theming when themes are **exclusive**

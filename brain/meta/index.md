@@ -43,7 +43,7 @@ Governance and the local extensions: [conventions](../conventions.md).
 
 * [constrain-the-palette-at-config](practices/constrain-the-palette-at-config.md) - Delete redundant token scales (Tailwind's five greys → one) so misuse doesn't compile.
 * [semantic-tokens-only](practices/semantic-tokens-only.md) - Reference semantic and intent tokens. Never raw palette steps or hardcoded values, CSS variables included. Inline `style` escape hatch requires a comment.
-* [typography-and-layout-as-utilities](practices/typography-and-layout-as-utilities.md) - Font utilities named by purpose on semantic HTML. No `Text`/`Heading`/`Flex`/`Box` primitives. `gap` over margins.
+* [typography-and-layout-as-utilities](practices/typography-and-layout-as-utilities.md) - Font utilities named by purpose on semantic HTML; `gap` over margins. Banning `Text`/`Heading`/`Flex`/`Box` outright is a zamp-only extension — a typography component elsewhere is fine.
 * [ds-vendor-wrap-export-layering](practices/ds-vendor-wrap-export-layering.md) - Generated primitives are third-party and unedited; a thin wrapper layer holds your opinions; the barrel is curated.
 * [ds-wrapper-passthrough](practices/ds-wrapper-passthrough.md) - Type wrappers off the primitive with `ComponentProps`, spread the rest, never a bare re-export. No manual ref forwarding in React 19.
 
@@ -58,11 +58,6 @@ Governance and the local extensions: [conventions](../conventions.md).
 # Patterns — design system
 
 * [token-architecture-three-layers](patterns/token-architecture-three-layers.md) - Scale → intent quartets (`accent`/`background`/`border`/`foreground`) → component semantics. `oklch()`; radius derived from one base by `calc()`.
-* [theme-by-data-attribute](patterns/theme-by-data-attribute.md) - Folder per theme, `[data-theme="name"]` scoping, dark mode nested. Write the completeness contract down; a second theme is the cheapest audit of your token layer.
-
-# Patterns — API design
-
-* [accessibility-enforced-by-types](patterns/accessibility-enforced-by-types.md) - A discriminated union over `label` | `placeholder` | `aria-label` makes an unlabeled input a compile error.
 
 # Stacks
 

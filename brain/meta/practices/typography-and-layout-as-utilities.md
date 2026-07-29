@@ -9,12 +9,6 @@ verified:
 status: stable
 stale_after: 2027-07-29
 not:
-  - term: "<Flex>, <Box>, <Grid>, <Container>, <Section> layout primitives"
-    why: "reimplements CSS in props, renders a bare div, and loses semantic meaning"
-    instead: "a semantic element (<section>, <header>, <ul>, <nav>) with layout utility classes"
-  - term: "<Text>, <Heading>, <Code>, <Em>, <Strong> typography primitives"
-    why: "a component wrapper around a font size, with worse semantics than the HTML tag"
-    instead: "the correct HTML element plus a font utility"
   - term: "margins for spacing between siblings"
     why: "margins collapse, don't compose, and attach spacing to the wrong element"
     instead: "gap or space utilities on the parent, or the design-system container's own spacing"
@@ -24,6 +18,14 @@ sources:
     title: .coderabbit.yaml — typography, layout, and spacing rules
     author: human:christopher
     last_modified: 2026-07-25
+  - id: tools-gap
+    resource: projects/tools/apps/wkt/app/components/user-avatar.tsx
+    title: "tools — gap utilities for sibling spacing, no margin stacks"
+    last_modified: 2026-07-29
+  - id: wiley-gap
+    resource: projects/wiley/web/components/forms/form-drawer.tsx
+    title: "wiley — grid + gap replaces margin stacks"
+    last_modified: 2026-07-29
 ---
 
 # The practice
@@ -47,7 +49,19 @@ cover the need in some capacity.
 Naming by purpose keeps the design decision in the token layer where it can be
 changed once, instead of distributed across every call site.
 
-# Why utilities beat layout primitives
+# Scope: the prohibition is not universal
+
+The positive guidance above applies everywhere. **Banning `<Text>`/`<Heading>`/
+`<Flex>`/`<Box>` outright is a zamp-only extension** — see
+[the zamp override](../../projects/zamp/overrides/no-text-heading-layout-primitives.md).
+`tools` uses a deliberate `Typography` component with purpose-named variants and is
+not deviating from anything.
+
+Independently corroborated outside zamp: **`gap` over margins** (`tools`, `wiley`).
+The purpose-named font-utility set is Chris's declared standard rather than a
+cross-repo observation.
+
+# Why utilities beat layout primitives (where the prohibition applies)
 
 `<Flex>` renders a `<div>`. Choosing utilities forces you to pick a real
 element every time, which is where the accessibility payoff comes from — you end

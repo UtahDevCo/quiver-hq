@@ -9,7 +9,7 @@ verified:
 status: stable
 stale_after: 2027-07-29
 relations:
-  - { kind: depends-on, target: /meta/patterns/theme-by-data-attribute.md }
+  - { kind: depends-on, target: /projects/zamp/patterns/theme-by-data-attribute.md }
 sources:
   - id: themes
     resource: projects/zamp/utils/design-system/src/themes/

@@ -1,7 +1,7 @@
 ---
 type: Practice
 title: Co-locate a schema with what it validates
-description: A validator lives next to the function it guards, not in a centralized schema file.
+description: A validator lives next to what it guards, not in a centralized schema file. The adjacency is the rule; the filename convention is per-project.
 tags: [validation, file-organization, zod]
 generated: { by: claude/opus-5, at: 2026-07-29T14:03:11Z }
 verified:
@@ -11,7 +11,7 @@ stale_after: 2027-07-29
 not:
   - term: "a centralized schemas.ts collecting a module's validators"
     why: "the schema drifts from the code it validates and becomes a merge-conflict magnet"
-    instead: "*.schema.ts beside the function it guards"
+    instead: "a schema file adjacent to its consumer — *.schema.ts, types.ts, or a local schemas/ directory"
 sources:
   - id: agents-md
     resource: projects/zamp/AGENTS.md
@@ -21,12 +21,38 @@ sources:
   - id: coderabbit
     resource: projects/zamp/.coderabbit.yaml
     title: .coderabbit.yaml — schema variables are camelCase
+  - id: wiley-schemas
+    resource: projects/wiley/web/components/forms/schemas/contacts.ts
+    title: "wiley — schemas/ directory beside the drawer and action that share it"
+    last_modified: 2026-07-29
+  - id: trikin-types
+    resource: projects/trikin/web/src/app/admin/notifications/types.ts
+    title: "trikin — types.ts beside the actions.ts that consumes it"
+    last_modified: 2026-07-29
 ---
 
 # The practice
 
-Put the schema in a `*.schema.ts` next to the function it validates. Schema
-variables are camelCase.
+Put the schema **adjacent to its consumer**. Never in a centralized file that
+collects a module's validators.
+
+# The filename convention is local, the adjacency is not
+
+Corroborated in three repos, each spelling it differently:
+
+| Repo | Shape |
+|---|---|
+| zamp | `*.schema.ts` beside the function; camelCase schema variables |
+| wiley | `components/forms/schemas/<name>.ts`, shared by the drawer and the action |
+| trikin | `types.ts` beside the `actions.ts` that consumes it |
+
+wiley's is a *directory* of schemas, which looks like the centralization this
+practice warns against and is not — it sits inside the feature that owns it, beside
+its consumers, rather than at the app root. The test is distance to the consumer,
+not whether the word "schemas" appears in the path.
+
+Match the surrounding module, per
+[follow-local-conventions](follow-local-conventions.md).
 
 # Why this evidence is stronger than a preference
 

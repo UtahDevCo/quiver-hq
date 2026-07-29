@@ -8,7 +8,7 @@ Resolve against the [meta layer](../../meta/index.md) — see
 
 # Overrides
 
-*Meta practices this project narrows, extends, replaces, or suspends. Empty.*
+* [no-text-heading-layout-primitives](overrides/no-text-heading-layout-primitives.md) - `extend` on [typography-and-layout-as-utilities](../../meta/practices/typography-and-layout-as-utilities.md). zamp bans the component alternatives outright; other repos deliberately use a `Typography` component.
 
 # Practices
 
@@ -42,6 +42,14 @@ Project-local practices — not general enough (yet) for the meta layer.
 
 * [add-ds-component](workflows/add-ds-component.md) - Install and wrap the primitive, fix generator import bugs, write stories from the fetched docs, polish. The barrel export is left to the human.
 * [git-branch-and-pr-naming](workflows/git-branch-and-pr-naming.md) - Linear ticket prefix, lowercase in branches and uppercase in PR titles. Both CI-gated; commits are not.
+
+# Patterns
+
+Opt-in, and zamp-only — both were demoted from the meta layer on 2026-07-29 once
+`tools` and `wiley` showed they are not how Chris works everywhere.
+
+* [theme-by-data-attribute](patterns/theme-by-data-attribute.md) - Folder per theme, `[data-theme="name"]` scoping, explicit completeness contract. The other repos theme by class selector.
+* [accessibility-enforced-by-types](patterns/accessibility-enforced-by-types.md) - A discriminated union making an unlabeled input a compile error. Only zamp implements it.
 
 # Gems
 

@@ -10,7 +10,7 @@ status: stable
 stale_after: 2027-07-29
 relations:
   - { kind: generalizes, target: /meta/practices/constrain-the-palette-at-config.md }
-  - { kind: generalizes, target: /meta/patterns/accessibility-enforced-by-types.md }
+  - { kind: generalizes, target: /projects/zamp/patterns/accessibility-enforced-by-types.md }
 not:
   - term: "a review rule saying 'don't use X'"
     why: "requires a human to notice every time, forever, and fails silently when they don't"
@@ -21,7 +21,7 @@ sources:
     title: Deleting unused color scales (zamp)
     author: human:christopher
   - id: a11y-types
-    resource: /meta/patterns/accessibility-enforced-by-types.md
+    resource: /projects/zamp/patterns/accessibility-enforced-by-types.md
     title: Discriminated union forcing an accessible label (zamp)
     author: human:christopher
 ---
@@ -57,7 +57,7 @@ Both come from zamp's design system:
 - **Accessibility** — a field's props are a discriminated union over
   `label` | `placeholder` | `aria-label`, so an unlabeled input is a type error
   rather than an audit finding. See
-  [accessibility enforced by types](../patterns/accessibility-enforced-by-types.md).
+  [accessibility enforced by types](../../projects/zamp/patterns/accessibility-enforced-by-types.md).
 
 # When this does not apply
 
