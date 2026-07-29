@@ -52,14 +52,26 @@ def main() -> int:
         print(f"ERROR matches is {type(matches).__name__}, expected list", file=sys.stderr)
         return 2
 
-    if matches:
-        print(f"VIOLATED {len(matches)} match(es)\n  command: {command}")
-        for m in matches:
-            print(f"  - {m}")
-        return 1
+    verdict = f"VIOLATED {len(matches)} match(es)" if matches else "PASS"
+    print(f"{verdict}\n  command: {command}")
+    for m in matches:
+        print(f"  - {m}")
 
-    print(f"PASS\n  command: {command}")
-    return 0
+    # A pass with no coverage figure is the failure mode in
+    # meta/failure-modes/audits-must-report-their-own-coverage.md: it reads as
+    # "checked everything, found nothing" when it may mean "checked almost nothing."
+    coverage = receipt.get("coverage")
+    if isinstance(coverage, dict):
+        print("  coverage:")
+        for k, v in coverage.items():
+            if isinstance(v, list):
+                print(f"    {k}: {len(v)}" + (f" (first: {v[0]})" if v else ""))
+            else:
+                print(f"    {k}: {v}")
+    elif not matches:
+        print("  coverage: not reported — this verdict is a floor, not a total")
+
+    return 1 if matches else 0
 
 
 if __name__ == "__main__":

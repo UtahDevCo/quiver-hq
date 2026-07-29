@@ -18,6 +18,7 @@ The receipt shape is fixed in [conventions](../conventions.md):
 # Checks
 
 * [checks/zamp-no-new-deprecated-ui-imports.sh](checks/zamp-no-new-deprecated-ui-imports.sh) - Diff-scoped grep for newly added `@util/ui` and `Rt*` imports in zamp. Enforces [no-new-deprecated-ui-imports](../projects/zamp/invariants/no-new-deprecated-ui-imports.md).
+* [checks/zamp-sharded-companyid.py](checks/zamp-sharded-companyid.py) - Brace-matching check that every Prisma call on a sharded table carries `companyId` at depth 1 of `where`/`data`. Derives the model list from `@shardKey` and fails on drift from `SHARDED_TABLES`. Enforces [sharded-tables-companyid](../projects/zamp/invariants/sharded-tables-companyid.md).
 
 # Writing a check
 
@@ -34,3 +35,11 @@ The receipt shape is fixed in [conventions](../conventions.md):
    (`@util/ui-templates` vs `@util/ui`).
 5. **Never loosen a check to make it pass.** Report "sanctioned check failed to
    run" instead.
+6. **Report coverage in the receipt.** Put counts in a `coverage` object; the
+   attester prints it. A `PASS` with no coverage figure reads as "checked
+   everything" when it may mean "checked almost nothing" —
+   [audits-must-report-their-own-coverage](../meta/failure-modes/audits-must-report-their-own-coverage.md).
+7. **Three outcomes, not two.** Anything the check cannot *prove* is a violation is
+   `skipped`, not `matches`. A check that reports plausible-but-unproven findings
+   gets ignored, and then it protects nothing. The shard check's first run produced
+   four such false positives.
