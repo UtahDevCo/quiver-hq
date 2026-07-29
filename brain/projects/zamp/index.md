@@ -30,8 +30,9 @@ Project-local practices — not general enough (yet) for the meta layer.
 
 * [sharded-tables-companyid](invariants/sharded-tables-companyid.md) - Every Prisma operation on a sharded table carries companyId at the top level of `where`/`data`. A nested relation does not count.
 * [relation-load-strategy](invariants/relation-load-strategy.md) - Nested reads touching sharded tables need `relationLoadStrategy: "query"` — in four specific cases, not blanket.
+* [no-new-deprecated-ui-imports](invariants/no-new-deprecated-ui-imports.md) - **Attested.** No added line imports `@util/ui` or an `Rt*` component. Diff-scoped; validated against real history.
 
-*Neither has an executable check attached yet. Both are attestation candidates; `sharded-tables-companyid` is the highest-value one in the repo.*
+*The two Prisma invariants have no executable check yet. `sharded-tables-companyid` is the highest-value remaining candidate — it needs the sharded-table list joined against call sites.*
 
 # Decisions
 

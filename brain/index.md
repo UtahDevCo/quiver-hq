@@ -20,5 +20,6 @@ v0.2 bundle.
 # Tooling
 
 * [skills](skills/) - The five skills that manage this bundle: harvest, promote, recall, audit, push.
+* [references](references/index.md) - Attesters and executable checks for `Invariant` concepts. Deterministic, no LLM in the loop.
 * [install.sh](install.sh) - Per-machine wiring. Run once per machine after cloning; idempotent.
 * [CLAUDE.brain.md](CLAUDE.brain.md) - Imported into `~/.claude/CLAUDE.md`. Edit here, not there.
