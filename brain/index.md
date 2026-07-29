@@ -20,3 +20,5 @@ v0.2 bundle.
 # Tooling
 
 * [skills](skills/) - The five skills that manage this bundle: harvest, promote, recall, audit, push.
+* [install.sh](install.sh) - Per-machine wiring. Run once per machine after cloning; idempotent.
+* [CLAUDE.brain.md](CLAUDE.brain.md) - Imported into `~/.claude/CLAUDE.md`. Edit here, not there.

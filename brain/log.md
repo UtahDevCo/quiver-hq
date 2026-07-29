@@ -17,6 +17,8 @@ title: Brain bundle history
 - **Resolved the tension** flagged during harvest: [follow-local-conventions](meta/practices/follow-local-conventions.md) governs *internal implementation idiom* only, and explicitly does not override the design-system practices. The boundary written into the concept: if a user or downstream consumer can see it, it's uniform; if only the module's maintainer sees it, it's local.
 - **Renamed on promotion** for clarity over the observation slugs: `test-assertion-style` → `assert-on-whole-values`, `test-mocking-discipline` → `mock-at-narrowest-scope`, `error-propagation-to-edges` → `error-propagation-and-capture`. The new names state the rule rather than the topic.
 - **Inbox now holds 11 zamp project concepts.** The meta layer is complete for this repo.
+- **Added [install.sh](install.sh)** — four pieces of wiring live outside the repo and so did not travel with the first push: the `.brain` entry in `~/.gitignore_global`, the two `~/.claude/CLAUDE.md` imports, the five skill symlinks, and the per-project `.brain` symlinks. Without the CLAUDE.md imports the brain is invisible to every session, which is a silent failure — hence the installer. Modelled on `solo/install.sh`.
+- **Moved the global CLAUDE.md prose** into [CLAUDE.brain.md](CLAUDE.brain.md) so it is versioned and edits reach every machine without re-running the installer, matching `solo/CLAUDE.solo-orch.md`. The meta index is imported as a *second top-level* line rather than nested inside that file: if nested imports ever fail to resolve, the index disappears from every session with no error.
 
 ## 2026-07-28
 
