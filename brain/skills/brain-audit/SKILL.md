@@ -40,6 +40,12 @@ it is being applied to every project on an agent's word.
 
 ### 4. Structural
 
+**Parse YAML frontmatter only.** `conventions.md` and the skill files contain
+illustrative `relations:` / `overrides:` examples in prose and fenced code blocks
+(`/meta/patterns/headless-table.md`, `/path/to/new.md`). A naive `grep` for
+`target:` across the bundle reports all of those as broken. Read the frontmatter
+block, ignore the body.
+
 - **Dangling `overrides:`** — a `Practice Override` pointing at a nonexistent
   path. An error, not a tolerated broken link (`brain/conventions.md`). The
   override is silently doing nothing.

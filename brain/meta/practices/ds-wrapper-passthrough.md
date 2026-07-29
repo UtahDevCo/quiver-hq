@@ -1,0 +1,54 @@
+---
+type: Practice
+title: Wrapper components are explicit passthroughs typed off the primitive
+description: Derive props from the primitive, add your own, merge classes, spread the rest. Never a bare re-export.
+tags: [design-system, react, typescript, api-design]
+generated: { by: claude/opus-5, at: 2026-07-29T14:05:03Z }
+verified:
+  - { by: human:christopher, at: 2026-07-29T15:38:27Z }
+status: stable
+stale_after: 2027-07-29
+relations:
+  - { kind: instance-of, target: /meta/practices/ds-vendor-wrap-export-layering.md }
+not:
+  - term: "export { Button } from './shadcn/button'"
+    why: "a bare re-export leaves nowhere to add a prop later without a breaking import change"
+    instead: "an explicit function component that spreads props through"
+  - term: "hand-writing the wrapper's prop type"
+    why: "drifts from the primitive on every upgrade"
+    instead: "ComponentProps<typeof Primitive> & { yourProps }"
+sources:
+  - id: wrappers
+    resource: projects/zamp/utils/design-system/src/components/
+    title: "zamp wrappers — input.tsx, button.tsx, alert.tsx"
+    author: human:christopher
+    last_modified: 2026-07-25
+---
+
+# The practice
+
+```tsx
+export type InputProps = Omit<ShadcnInputProps, "aria-invalid"> & { error?: boolean };
+
+export function Input({ error, ...props }: InputProps) {
+  return <ShadcnInput {...props} aria-invalid={error || undefined} />;
+}
+```
+
+- Prop types **derive** from the primitive: `ComponentProps<typeof Primitive>`,
+  narrowed with `Omit` where the wrapper takes ownership of a prop.
+- Added props are a union on top, not a rewrite.
+- Class composition through a `cn()` merge helper; variants via
+  `class-variance-authority`.
+- Always spread the remainder: `{...props}`.
+- **No manual ref forwarding** — React 19 primitives already forward.
+- JSDoc on the primary export, linking both the component docs and the
+  underlying primitive's API reference.
+- Every named export of the generated file is either wrapped or re-exported.
+  Missing a sub-component is the common failure — check the full export list.
+
+# Why an explicit passthrough beats a re-export
+
+The wrapper's value is that it exists *before* you need it. Adding a passthrough
+later is a breaking import change across the codebase; adding a prop to an
+existing passthrough is free. The cost of the empty wrapper is three lines.

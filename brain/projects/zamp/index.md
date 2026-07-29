@@ -10,6 +10,12 @@ Resolve against the [meta layer](../../meta/index.md) — see
 
 *Meta practices this project narrows, extends, replaces, or suspends. Empty.*
 
+# Practices
+
+Project-local practices — not general enough (yet) for the meta layer.
+
+* [story-per-component](practices/story-per-component.md) - Every design-system component ships a colocated Storybook story. Storybook is zamp-only, so this is scoped here.
+
 # Modules
 
 *What the major pieces are and how they fit. Empty.*

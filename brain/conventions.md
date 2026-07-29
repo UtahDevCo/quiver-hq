@@ -49,6 +49,40 @@ project-specific until proven otherwise, and belongs in
 `projects/<name>/` with a `relations: [{kind: instance-of, ...}]` link if it
 looks like it might generalize later.
 
+**Chris's assertion outranks corroboration.** When Chris says "this is my
+standard," it goes to `meta/` on the strength of that alone — a human declaring
+intent is better evidence than two repos agreeing by accident. Record the
+assertion in `sources` as `author: human:christopher` so a future reviewer can
+tell a declared standard from an inferred one.
+
+# `Practice` vs `Pattern`: default-on vs opt-in
+
+This distinction matters more than any other type boundary, because it decides
+whether an agent should volunteer something unprompted.
+
+- **`Practice`** is **default-on**. Follow it unless an override says otherwise.
+  Deviating is a defect. "Use semantic design tokens, never hardcoded palette
+  colors" is a Practice.
+- **`Pattern`** is **opt-in**. It is available, tested, and worth reaching for
+  *when the problem arises* — but its absence is not a defect. "Here's a drawer
+  with overlay/push modes and focus trapping" is a Pattern.
+
+An agent applies Practices without being asked. It offers Patterns when the
+problem appears, and never retrofits them into working code unprompted.
+
+Getting this backwards is the most annoying possible failure mode: an agent that
+treats a Pattern as a Practice will rewrite code that was already fine.
+
+# The brain describes; it does not retrofit
+
+Recording a practice does **not** authorize changing existing repos to match it.
+New work follows the brain. Existing code gets migrated only when Chris asks, or
+when you're already editing that code for another reason.
+
+A project that predates a practice is not out of compliance — it is simply
+older. Only an explicit `mode: suspend` override represents real
+non-compliance.
+
 # Extension 1: `Practice Override`
 
 OKF has no inheritance. A project narrows, extends, replaces, or suspends a
