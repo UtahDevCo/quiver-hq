@@ -15,9 +15,29 @@ first — `/brain-recall` does it for you, or read `<project>/.brain/index.md`.
 
 Governance and the local extensions: [conventions](../conventions.md).
 
-# Practices — enforcement
+# Practices — enforcement and judgment
 
 * [make-misuse-unrepresentable](practices/make-misuse-unrepresentable.md) - When the team has settled on one of several interchangeable options, delete the alternatives from the toolchain rather than documenting a preference.
+* [follow-local-conventions](practices/follow-local-conventions.md) - Match the surrounding module for internal idiom — read two or three siblings before choosing a pattern. Global uniformity applies only to visible surface (tokens, component APIs, published exports).
+
+# Practices — style
+
+* [minimal-comments](practices/minimal-comments.md) - Comment a genuinely non-obvious *why*, one terse line. Never restate the code. **Don't touch pre-existing comments authored by others.**
+* [small-single-purpose-files](practices/small-single-purpose-files.md) - ~200 lines logic / ~300 components (tests, stories, config exempt). One primary export. Delete orphaned code in the change that orphaned it.
+
+# Practices — error handling
+
+* [error-propagation-and-capture](practices/error-propagation-and-capture.md) - Return a propagating error untouched; attach context only when you originate it; capture once, where you stop it. Never capture-then-rethrow.
+* [no-error-objects-across-boundaries](practices/no-error-objects-across-boundaries.md) - Error instances don't serialize. Pass `error.message` across server/client, workers, job payloads, and caches.
+
+# Practices — testing
+
+* [assert-on-whole-values](practices/assert-on-whole-values.md) - `toStrictEqual(new Error(...))`, not `.message`. Unwrap inline at the assertion site. No single-use intermediates.
+* [mock-at-narrowest-scope](practices/mock-at-narrowest-scope.md) - Escalate by blast radius: `spyOn` → deep-mock → module mock. Always assert `toHaveBeenCalledWith` *and* `toHaveBeenCalledTimes`.
+
+# Practices — validation
+
+* [colocate-schemas-with-what-they-validate](practices/colocate-schemas-with-what-they-validate.md) - `*.schema.ts` beside the function it guards, never a centralized schema file.
 
 # Practices — design system
 
@@ -30,6 +50,10 @@ Governance and the local extensions: [conventions](../conventions.md).
 # Practices — API design
 
 * [deprecate-without-breaking-consumers](practices/deprecate-without-breaking-consumers.md) - Keep the old export working. `@deprecated` carries a prop-by-prop mapping that names its own gaps, and points at runnable examples.
+
+# Practices — review
+
+* [conventional-comments](practices/conventional-comments.md) - `<label> [decorations]: <subject>`. `issue` blocks, `suggestion` doesn't, `praise` at least once per review. **Applies to your own review output.**
 
 # Patterns — design system
 

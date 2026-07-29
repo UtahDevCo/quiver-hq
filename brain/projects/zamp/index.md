@@ -15,6 +15,7 @@ Resolve against the [meta layer](../../meta/index.md) — see
 Project-local practices — not general enough (yet) for the meta layer.
 
 * [story-per-component](practices/story-per-component.md) - Every design-system component ships a colocated Storybook story. Storybook is zamp-only, so this is scoped here.
+* [directive-driven-filenames](practices/directive-driven-filenames.md) - `'use client'` → `*.client.tsx`, `'use server'` → `*.action.ts`. Promotion candidate once wiley corroborates.
 
 # Modules
 
