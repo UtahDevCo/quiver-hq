@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+# Render all of your open GitHub PR stacks as trees, from the live base<-head graph.
+#
+# Unlike `gh stack view` (which only knows the checked-out stack), this reads every
+# open PR you authored and rebuilds each chain from its base/head branches, so
+# independent stacks all show at once and it stays correct if local stack metadata
+# drifts. Pure bash + gh (uses gh's embedded jq) — no python/jq needed.
+#
+# Usage:
+#   gh-stacks [--author LOGIN] [--repo OWNER/REPO] [--no-color]
+#
+#   # via alias:  gh alias set stacks '!exec gh-stacks'
+#   gh stacks
+set -euo pipefail
+
+AUTHOR="@me"
+REPO=""
+NO_COLOR=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --author) AUTHOR="$2"; shift 2 ;;
+    --repo)   REPO="$2";   shift 2 ;;
+    --no-color) NO_COLOR=1; shift ;;
+    -h|--help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+
+if [[ -t 1 && $NO_COLOR -eq 0 ]]; then
+  C_NUM=$'\033[36m'; C_DIM=$'\033[90m'; C_OK=$'\033[32m'; C_WARN=$'\033[33m'; C_ERR=$'\033[31m'; C_RST=$'\033[0m'
+else
+  C_NUM=""; C_DIM=""; C_OK=""; C_WARN=""; C_ERR=""; C_RST=""
+fi
+
+# Join fields with the unit-separator (U+001F): a non-whitespace delimiter, so `read`
+# won't collapse an empty field (e.g. a blank reviewDecision) and shift the columns.
+SEP=$'\037'
+JQ='.[] | [
+  (.number|tostring), .baseRefName, .headRefName, (.isDraft|tostring),
+  (.reviewDecision // ""),
+  ( (.statusCheckRollup // []) as $r
+    | ($r | map((.conclusion // .state // .status // "") | ascii_upcase)) as $s
+    | if   ($s | any([ "FAILURE","ERROR","TIMED_OUT","CANCELLED","ACTION_REQUIRED"] | index(.))) then "F"
+      elif ($s | any([ "PENDING","IN_PROGRESS","QUEUED","WAITING","REQUESTED"]      | index(.))) then "P"
+      elif ($s | length) > 0 then "S"
+      else "" end ),
+  .title
+] | join("'"$SEP"'")'
+
+FIELDS="number,title,baseRefName,headRefName,isDraft,reviewDecision,statusCheckRollup"
+cmd=(gh pr list --author "$AUTHOR" --state open --limit 200 --json "$FIELDS" --jq "$JQ")
+[[ -n "$REPO" ]] && cmd+=(--repo "$REPO")
+
+declare -A F_BASE F_HEAD F_DRAFT F_REVIEW F_CI F_TITLE NUM_BY_HEAD CHILDREN
+ORDER=()
+
+while IFS="$SEP" read -r num base head draft review ci title; do
+  [[ -z "${num:-}" ]] && continue
+  F_BASE[$num]="$base"; F_HEAD[$num]="$head"; F_DRAFT[$num]="$draft"
+  F_REVIEW[$num]="$review"; F_CI[$num]="$ci"; F_TITLE[$num]="$title"
+  NUM_BY_HEAD[$head]="$num"
+  ORDER+=("$num")
+done < <("${cmd[@]}")
+
+if [[ ${#ORDER[@]} -eq 0 ]]; then
+  echo "No open PRs."
+  exit 0
+fi
+
+ROOTS=()
+for num in "${ORDER[@]}"; do
+  parent="${NUM_BY_HEAD[${F_BASE[$num]}]:-}"
+  if [[ -n "$parent" ]]; then
+    CHILDREN[$parent]="${CHILDREN[$parent]:-} $num"
+  else
+    ROOTS+=("$num")
+  fi
+done
+
+sort_nums() { printf '%s\n' "$@" | sort -n; }
+mapfile -t ROOTS < <(sort_nums "${ROOTS[@]}")
+
+label() {
+  local num="$1" sym rev draft=""
+  case "${F_CI[$num]}" in
+    F) sym="${C_ERR}✗${C_RST}" ;;
+    P) sym="${C_WARN}●${C_RST}" ;;
+    S) sym="${C_OK}✓${C_RST}" ;;
+    *) sym=" " ;;
+  esac
+  case "${F_REVIEW[$num]}" in
+    APPROVED)          rev="  ${C_OK}approved${C_RST}" ;;
+    CHANGES_REQUESTED) rev="  ${C_ERR}changes${C_RST}" ;;
+    REVIEW_REQUIRED)   rev="  ${C_WARN}review${C_RST}" ;;
+    *) rev="" ;;
+  esac
+  [[ "${F_DRAFT[$num]}" == "true" ]] && draft=" ${C_DIM}[draft]${C_RST}"
+  printf '%s %s#%s%s  %s%s%s' "$sym" "$C_NUM" "$num" "$C_RST" "${F_TITLE[$num]}" "$draft" "$rev"
+}
+
+walk() {
+  local num="$1" prefix="$2" is_last="$3" is_root="$4" connector child_prefix
+  if [[ "$is_root" == "1" ]]; then
+    connector=""; child_prefix="$prefix"
+  elif [[ "$is_last" == "1" ]]; then
+    connector="└─ "; child_prefix="$prefix   "
+  else
+    connector="├─ "; child_prefix="$prefix│  "
+  fi
+  printf '%s%s%s\n' "$prefix" "$connector" "$(label "$num")"
+  local kids; read -ra kids <<< "${CHILDREN[$num]:-}"
+  mapfile -t kids < <(sort_nums "${kids[@]:-}")
+  local n=${#kids[@]} i=0
+  for kid in "${kids[@]:-}"; do
+    [[ -z "$kid" ]] && continue
+    i=$((i+1))
+    if [[ $i -eq $n ]]; then walk "$kid" "$child_prefix" 1 0; else walk "$kid" "$child_prefix" 0 0; fi
+  done
+}
+
+first=1
+for root in "${ROOTS[@]}"; do
+  [[ $first -eq 1 ]] || echo
+  first=0
+  printf '%s◆ base: %s%s\n' "$C_DIM" "${F_BASE[$root]}" "$C_RST"
+  walk "$root" "" 1 1
+done

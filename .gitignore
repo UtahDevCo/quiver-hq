@@ -1,6 +1,7 @@
 # Binaries
 bin/*
 !bin/quiver-monitor
+!bin/gh-stacks
 controller
 quiver-secrets
 interactive-mission
