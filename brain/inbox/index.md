@@ -42,4 +42,4 @@ Never set `verified:`. That is the promotion gate and it is Chris's alone.
 
 # Currently queued
 
-Four wiley/API observations awaiting review, two of them in the memory shape.
+*Empty.*

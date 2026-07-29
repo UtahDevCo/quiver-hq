@@ -76,6 +76,10 @@ Governance and the local extensions: [conventions](../conventions.md).
 * [audits-must-report-their-own-coverage](failure-modes/audits-must-report-their-own-coverage.md) - `.catch(() => null); continue` turns "couldn't check" into "checked, fine". Print attempted / inspected / skipped-by-reason and call the count a floor.
 * [probe-before-trusting-an-api-claim](failure-modes/probe-before-trusting-an-api-claim.md) - "The API doesn't support X" in a comment is a hypothesis. Probe before extending the workaround; commit the probe, including ones that falsified your own guess.
 * [self-reported-confidence-is-not-a-signal](failure-modes/self-reported-confidence-is-not-a-signal.md) - LLM confidence tracks prose register, not correctness. Never display it or route on it; surface citations, gaps, and model disagreement instead.
+* [a-listing-endpoint-is-not-the-uniqueness-domain](failure-modes/a-listing-endpoint-is-not-the-uniqueness-domain.md) - `if (!found) create()` assumes the listing covers everything the create checks. When it doesn't, the write is rejected forever and never learns the id it needed.
+* [a-dead-control-may-be-a-duplicate](failure-modes/a-dead-control-may-be-a-duplicate.md) - A setting whose value never reaches the backend may be a redundant second writer, not missing plumbing. Removal is a no-op; connecting it changes behaviour for everyone whose two values disagree.
+* [request-parameters-may-not-reach-the-wire](failure-modes/request-parameters-may-not-reach-the-wire.md) - Vendor SDKs discard unsupported settings, return 200, and report it only in `result.warnings`. An absent error is not evidence the request was honoured.
+* [automatic-behavior-is-unmeasured-until-recorded](failure-modes/automatic-behavior-is-unmeasured-until-recorded.md) - Prompt caching and similar automatic optimizations leave nothing to grep. Record the vendor's counter or the saving is only assumed.
 
 # Workflows
 
