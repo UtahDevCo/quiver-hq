@@ -1,6 +1,5 @@
-# Visit https://soloterm.com to learn more
 name: zamp
-icon: null
+icon: apps/admin/public/favicon.ico
 processes:
   VSCode:
     command: code-insiders . || code .
