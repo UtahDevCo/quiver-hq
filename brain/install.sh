@@ -42,7 +42,11 @@ fi
 CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 mkdir -p "$HOME/.claude"
 touch "$CLAUDE_MD"
+# CLAUDE.style.md is a repo-root peer rather than part of the brain. It is wired
+# here because this is the only installer that touches ~/.claude/CLAUDE.md, and a
+# third installer for one import line is not worth the surface area.
 for IMPORT in \
+  '@~/dev/quiver-hq/CLAUDE.style.md' \
   '@~/dev/quiver-hq/brain/CLAUDE.brain.md' \
   '@~/dev/quiver-hq/brain/meta/index.md'
 do
