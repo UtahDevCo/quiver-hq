@@ -85,3 +85,14 @@ both backed by passing tests rather than by reasoning:
 
 * `scope-the-parameter-so-the-wrong-base-is-unreachable` - a per-function sibling to `make-misuse-unrepresentable`: when two same-typed values are incompatible bases for one calculation, don't pass the container that holds both. Priced off the commission instead of the fee, Trikin overpays 42.9% and nothing throws.
 * `derive-the-other-side-of-a-money-split-by-subtraction` - `remainder = total - part`, so the parts sum to the whole by construction. Also pins `Math.round`'s tie-breaking asymmetry, which loses a cent on negative amounts only.
+
+**2026-07-31 — six from releasing the k1 adversarial panel and building its
+measurement set.** Five proposed `meta`, one `project: k1`. Two are recorded
+against my own errors rather than against a code defect:
+
+* `a-local-model-override-measures-a-model-you-do-not-ship` - `.env.local` pinned an older judge than production, so the reliability number described a model no user is served: 3 invalid outputs in 18 runs against 0 in 13.
+* `check-what-the-evaluator-reads-before-regenerating-data` - **my error.** I called 16 of 28 measurement cases spoiled by that wrong model id. The eval case carries only question, bundle, member answers, and label, so the judge is re-run and the stored verdict is never read. Regenerating would have spent ~28 paid multi-provider runs to change nothing.
+* `reading-an-artifact-can-consume-the-blind-measurement` - **also mine.** A polling probe captured the verdict chip, which would have destroyed blindness for every constructed case before the labeller opened one, with `capturedBlind` still recording `true`.
+* `a-missing-runtime-secret-ships-a-healthy-build-with-the-feature-inert` - a monorepo with two `apphosting.yaml` files, a backend `rootDirectory` pointing at one of them, and a feature that falls back by design. Green deploy, passing smoke test, nothing switched on.
+* `wait-for-the-work-to-start-before-waiting-for-it-to-finish` - a fixed sleep after submit let slow requests read as finished, so the next navigation aborted them in flight. Two edges instead of one fixed 38 of 40 generations and turned the remaining two into a named failure that was a real bug.
+* `an-idempotency-guard-makes-a-dropped-write-look-like-success` (`project: k1`) - identical text into a fresh conversation returns HTTP 200 with nothing rendered and nothing stored. Cause is a hypothesis (content-derived message id hitting a 409 guard); the symptom is reproducible and user-reachable.
