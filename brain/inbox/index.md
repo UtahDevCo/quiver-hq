@@ -96,3 +96,18 @@ against my own errors rather than against a code defect:
 * `a-missing-runtime-secret-ships-a-healthy-build-with-the-feature-inert` - a monorepo with two `apphosting.yaml` files, a backend `rootDirectory` pointing at one of them, and a feature that falls back by design. Green deploy, passing smoke test, nothing switched on.
 * `wait-for-the-work-to-start-before-waiting-for-it-to-finish` - a fixed sleep after submit let slow requests read as finished, so the next navigation aborted them in flight. Two edges instead of one fixed 38 of 40 generations and turned the remaining two into a named failure that was a real bug.
 * `an-idempotency-guard-makes-a-dropped-write-look-like-success` (`project: k1`) - identical text into a fresh conversation returns HTTP 200 with nothing rendered and nothing stored. Cause is a hypothesis (content-derived message id hitting a 409 guard); the symptom is reproducible and user-reachable.
+
+**2026-07-31 — two from closing out the wiley billing incident.** Both proposed
+`meta`, both recorded against my own premature all-clear rather than against a
+code defect:
+
+* `fixing-the-write-path-does-not-fix-the-written-rows` - the fix shipped and $2,614 was recovered, and 140 subscriptions still carried the bad counter the old grant path wrote. Past the boundary the corrected check is simply false, so control falls to the counter and the defect reproduces from stored data. $1,619.54 still at risk, 9 leaking on their next period, 11 due to leak the following morning.
+* `an-assertion-with-no-samples-is-not-a-pass` - the post-deploy check printed PASS having examined 0 candidates. Report `audited=N` beside the verdict, and when N is 0 name the date the check will first have real samples.
+
+**2026-07-31 — three from a K-1 field the model could not see.** All proposed
+`meta`. One diagnosis, one test, one probe, from the same bug: the chat reported
+Box L absent while the matrix UI displayed it.
+
+* `a-models-account-of-its-own-context-is-a-claim-about-the-payload` - user insists the data is there, model insists it cannot see it, both correct. Two accessors on one normalized record and only the UI's was extended. Diagnosis is `grep` the field name and count the readers.
+* `test-that-the-prompt-names-the-fields-the-payload-ships` - nothing type-checks a prompt against its data. k1's prompt asked for a basis walk with a capital-contributions column against a bundle that never carried one, through two prompt revisions.
+* `measure-field-coverage-before-writing-instructions-that-assume-it` - a declared optional column populated in 0 of 679 rows. The instruction premised on it would have had the model read the gap as zero and book a whole ending balance as a first-year increase.
