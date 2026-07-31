@@ -246,12 +246,6 @@ in
       # 0. Ensure basic system tools are in PATH immediately
       export PATH="$HOME/.local/bin:$HOME/bin:$HOME/.nix-profile/bin:$PATH"
 
-      # 0.5. PWD-aware CLAUDE_CODE_OAUTH_TOKEN: set by default, unset in zamp folders
-      export CLAUDE_CODE_OAUTH_TOKEN="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"
-      case "$PWD/" in
-        "$HOME/dev/quiver-hq/projects/zamp/"*) unset CLAUDE_CODE_OAUTH_TOKEN ;;
-        "$HOME/dev/quiver-hq/projects/zamp-worktrees/"*) unset CLAUDE_CODE_OAUTH_TOKEN ;;
-      esac
       # Prisma 7 on NixOS: point to nix-provided schema-engine so prisma generate
       # skips the CDN download (linux-nixos binaries are not always published).
       export PRISMA_SCHEMA_ENGINE_BINARY="${pkgs.prisma-engines}/bin/schema-engine"
