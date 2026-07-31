@@ -1,13 +1,14 @@
 ---
 type: Failure Mode
 title: An audit that silently skips what it cannot read reports a falsely reassuring zero
-description: Print attempted, inspected, and skipped-by-reason. "Zero findings" and "zero findings among what I could read" are different claims, and only the first one stops the investigation.
+description: Print attempted, inspected, and skipped-by-reason. "Zero findings", "zero findings among what I could read", and "zero candidates to look at" are three different claims, and only the first one stops the investigation.
 tags: [auditing, observability, error-handling, scripts]
 generated: { by: claude/opus-5, at: 2026-07-29T00:00:00Z }
 verified:
   - { by: human:christopher, at: 2026-07-29T20:23:37Z }
+  - { by: human:christopher, at: 2026-07-31T20:18:38Z }
 status: stable
-stale_after: 2027-07-29
+stale_after: 2027-07-31
 not:
   - term: "`const x = await fetch(id).catch(() => null); if (x === null) continue;`"
     why: "converts \"couldn't check\" into \"checked, fine\" at every call site, and the summary count then reads as complete"
@@ -15,10 +16,18 @@ not:
   - term: "reporting `Found 0 divergences` from a scan that had unreadable items"
     why: "a clean report is exactly what makes someone close the investigation"
     instead: "`0 findings among 966/1058 readable (91%) — this is a floor, not a total`"
+  - term: "a verification loop that prints PASS having iterated an empty candidate set"
+    why: "no item failed because no item was examined; the verdict is true and carries no information"
+    instead: "print `audited=N` beside the verdict, and when N is 0 say the run was vacuous and name what would give it real samples"
   - term: "auditing only your own datastore when two systems can diverge"
     why: "damage in the system you don't control is invisible by construction, especially if failed writes roll your side back"
     instead: "audit the side you don't own; that is where the divergence lives"
 sources:
+  - id: wiley-postfix-vacuous-pass
+    resource: projects/wiley/web/scripts/verify-daily-billing-postfix.ts
+    title: wiley — post-deploy check printed PASS with 0 candidates to audit, 2026-07-31
+    author: claude/opus-5
+    last_modified: 2026-07-31
   - id: wiley-quiet-hours-sweep
     resource: projects/wiley
     title: wiley — NetSapiens quiet-hours fleet sweep over 1058 accounts, 2026-07-29
@@ -54,6 +63,36 @@ natural way to write a resilient scanner, and it launders "couldn't check" into
 - Then actually close the gap. Here, checking the 92 showed all returned 404 from
   `getDomain` — not provisioned upstream at all — which legitimately reduced the
   floor to the total. That conclusion required a second script, not an assumption.
+
+# The empty candidate set
+
+The same falsely reassuring zero arrives by a second route, with no error handling
+involved at all. A check that filters a population down to the interesting cases,
+then loops, reports success when the filter matches nothing:
+
+```ts
+const freeSkips = periods.filter((p) => p.skipReason === "PROMO_FREE_MONTH");
+let violations = 0;
+for (const p of freeSkips) { /* ... */ }
+console.log(violations === 0 ? "PASS" : "FAIL");   // PASS when freeSkips is []
+```
+
+A script written to confirm a deployed billing fix ran the morning after and
+printed `PASS`. That day's billing pass had produced 8 periods, 2 of them manual
+retries from the previous run, and **0** of the skip type the fix governs. Nothing
+was unreadable and nothing was swallowed. The loop simply had no work.
+
+Reported as a pass it would have closed the verification. The deployed logic was
+not exercised until the following day, when 11 subscriptions crossed the boundary
+it controls. Printing `audited=0` beside the verdict is what makes the PASS
+legible; without it the last line stands alone and misleads.
+
+Two habits follow. Count `unevaluated` separately from pass and fail, because a
+candidate that could not be judged is neither. And when a post-deploy check comes
+back vacuous, name the date or condition that will give it real samples, so the run
+schedules its own replacement instead of closing the question. In the same session
+a second property was unfalsifiable for a different reason: the corrected signup
+grant could not be checked at all, because nobody had signed up since the deploy.
 
 # The two-system corollary
 
