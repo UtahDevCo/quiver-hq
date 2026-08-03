@@ -104,3 +104,16 @@ Box L absent while the matrix UI displayed it.
 * `a-models-account-of-its-own-context-is-a-claim-about-the-payload` - user insists the data is there, model insists it cannot see it, both correct. Two accessors on one normalized record and only the UI's was extended. Diagnosis is `grep` the field name and count the readers.
 * `test-that-the-prompt-names-the-fields-the-payload-ships` - nothing type-checks a prompt against its data. k1's prompt asked for a basis walk with a capital-contributions column against a bundle that never carried one, through two prompt revisions.
 * `measure-field-coverage-before-writing-instructions-that-assume-it` - a declared optional column populated in 0 of 679 rows. The instruction premised on it would have had the model read the gap as zero and book a whole ending balance as a first-year increase.
+
+Two more from the same k1 thread, after auditing 168 stored extractions against
+their source PDFs. Both are about what a check is worth, and both were paid for by
+shipping the wrong thing first and measuring it:
+
+* `a-witness-the-model-generates-cannot-check-the-model` - had the extractor echo the row it read from, then transcribe rows verbatim before filling fields. Both witnesses reproduced the misread: the check fired on 0 of 25 known-wrong readings. Compare against a field the failing step did not produce, and score the detector on known-bad cases before shipping it.
+* `a-b-a-prompt-fix-before-shipping-it` - the instruction that named the failure exactly measured 23 of 48 clean runs against 25 of 48 without it. Run-to-run variance at temperature 0 exceeded the effect. Negative result kept in the test file so the reasoning is not re-run.
+
+**2026-08-03 — one from validating the regenerated K-1 corpus.** Proposed `meta`.
+The corpus fixed everything I had asked for and still contradicted the returns it
+came from, because the invariant I supplied was the wrong law.
+
+* `a-per-record-validator-cannot-catch-a-wrong-rule` - **my error.** I told the generator that capital plus liabilities can never go negative. Section 704(d) limits the deduction, not the allocation, so it enforced it by shrinking the allocation. 175 of 175 documents pass 12 internal checks; the partners' K-1s miss the partnership's Schedule K by 305,247 on one year. Only a check spanning records against an independently computed total could see it.
