@@ -117,3 +117,11 @@ The corpus fixed everything I had asked for and still contradicted the returns i
 came from, because the invariant I supplied was the wrong law.
 
 * `a-per-record-validator-cannot-catch-a-wrong-rule` - **my error.** I told the generator that capital plus liabilities can never go negative. Section 704(d) limits the deduction, not the allocation, so it enforced it by shrinking the allocation. 175 of 175 documents pass 12 internal checks; the partners' K-1s miss the partnership's Schedule K by 305,247 on one year. Only a check spanning records against an independently computed total could see it.
+
+**2026-08-04 — three from auditing wiley's free-month over-grant in production.** Proposed
+`meta`. A monitor named in a commit message as the proof a billing fix held had been
+reporting PASS while reading a field that does not exist.
+
+* `a-filter-that-matches-nothing-every-run-is-a-broken-predicate` - `skipReason` is written nowhere; the writer records the reason in `error`. The filter matched 0 of 2472 documents on every date. Assert the predicate matches something collection-wide and abort with a distinct exit code when it does not. **Corrects the "empty candidate set" diagnosis in `audits-must-report-their-own-coverage`, which cites this same file and blames that day's small population; it carries two human `verified` entries.**
+* `a-checker-that-never-matched-a-row-has-untested-verdict-logic` - repairing the selector exposed a second defect: the verdict called every post-boundary comp a violation, but a promo month is post-boundary by design, so it reported FAIL on two correct production days. Zero matched rows means zero executions of the pass/fail branch.
+* `duplicated-predicates-rot-first-in-the-code-nobody-runs` - six copies of one filter, and the three wrong ones were the verification, the audit, and the production cleanup. Users correct runtime copies; nothing corrects a monitor that reports zero.

@@ -9,7 +9,7 @@ generated: { by: claude/opus-5, at: 2026-08-03T15:10:00Z }
 status: draft
 sources:
   - id: measurement
-    resource: projects/k1/data/K1_Corpus_v2/manifest.json
+    resource: projects/k1/data/K1_Corpus_v2/manifest.json (deleted; read at k1 commit cfeff2c)
     title: "Alpha 2021 partner K-1s sum to -144,753 against a Schedule K of -450,000; 175/175 documents pass every internal check"
     last_modified: 2026-08-03
   - id: spec
