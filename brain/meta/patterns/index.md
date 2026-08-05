@@ -6,6 +6,10 @@ Opt-in. Reach for these when the problem arises; their absence is not a defect.
 
 * [token-architecture-three-layers](token-architecture-three-layers.md) - Scale, then intent quartets, then component semantics. The repeating role set is the load-bearing part.
 
+# React
+
+* [split-components-on-structural-discriminator](split-components-on-structural-discriminator.md) - When a prop union discriminates on whether data exists yet, two sibling components beat one polymorphic one. Split on differing *shape*, not differing *value*.
+
 # Demoted to the zamp layer, 2026-07-29
 
 Both were held here until harvesting `tools` and `wiley` showed they are zamp

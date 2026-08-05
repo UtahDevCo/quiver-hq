@@ -1,17 +1,17 @@
 # Meta brain — always-on index
 
 Higher-order practices that apply to **every** project. This index is loaded into
-every session; the linked concepts are not. Read a concept in full before relying
-on it, and prefer it over your own defaults.
+every session; the concepts it links are not. **Read a concept in full before relying
+on it**, and prefer it over your own defaults.
 
-- **Practices are default-on.** Follow them unless a project override says
-  otherwise. Deviating is a defect.
-- **Patterns are opt-in.** Reach for them when the problem arises. Their absence
-  is not a defect, and you should never retrofit one into working code unprompted.
+- **Practices are default-on.** Follow them unless a project override says otherwise.
+  Deviating is a defect.
+- **Patterns are opt-in.** Reach for them when the problem arises. Their absence is
+  not a defect, and you should never retrofit one into working code unprompted.
 
 A project may narrow, extend, replace, or suspend anything here via a
-`Practice Override` in `brain/projects/<name>/overrides/`. Resolve overrides
-first — `/brain-recall` does it for you, or read `<project>/.brain/index.md`.
+`Practice Override` in `brain/projects/<name>/overrides/`. Resolve overrides first —
+`/brain-recall` does it for you, or read `<project>/.brain/index.md`.
 
 Governance and the local extensions: [conventions](../conventions.md).
 
@@ -21,24 +21,29 @@ Governance and the local extensions: [conventions](../conventions.md).
 
 * [make-misuse-unrepresentable](practices/make-misuse-unrepresentable.md) - When you have a house choice among interchangeable options, delete the alternatives from the toolchain instead of documenting a preference.
 * [follow-local-conventions](practices/follow-local-conventions.md) - Consistency with the surrounding module beats applying a preferred pattern everywhere. Read the neighbours before choosing.
+* [prefer-curated-examples-over-call-sites](practices/prefer-curated-examples-over-call-sites.md) - Learn a shared component's API from its stories, not the nearest call site. Copying a call site can launder an inverted convention.
 
 ## Style
 
 * [minimal-comments](practices/minimal-comments.md) - Prefer self-documenting code. A comment that restates the code is noise; only a genuinely non-obvious why earns a line.
 * [kebab-case-files-named-exports](practices/kebab-case-files-named-exports.md) - Files are kebab-case, component identifiers are PascalCase, and nothing uses a default export. The no-default-export half is the load-bearing part.
 * [small-single-purpose-files](practices/small-single-purpose-files.md) - Around 200 lines for logic and 300 for components, one primary export, and dead code removed in the change that orphaned it.
+* [named-functions-over-iifes](practices/named-functions-over-iifes.md) - An IIFE inverts reading order; a named function costs the same and says what it computes.
 
 ## Error handling
 
 * [error-propagation-and-capture](practices/error-propagation-and-capture.md) - Never rewrap an error you are merely passing along, and never report it twice. One failure, one report, at one place.
 * [no-error-objects-across-boundaries](practices/no-error-objects-across-boundaries.md) - Error instances do not serialize. Pass the message string across any process, runtime, or storage boundary.
 * [check-how-the-callee-reports-refusal](practices/check-how-the-callee-reports-refusal.md) - An action that returns `error.message` reports failure through a value the caller can drop; deleting the client guard then silences every failure mode, not just the one being fixed.
+* [one-throwable-per-try-catch](practices/one-throwable-per-try-catch.md) - A catch per kind of side effect. A wide catch collapses distinct failures into one useless error group.
+* [uniform-error-handling-shape-per-function](practices/uniform-error-handling-shape-per-function.md) - Extraction is a commitment: don't mix extracted Result helpers with an inline try/catch in one function.
 
 ## Testing
 
 * [assert-on-whole-values](practices/assert-on-whole-values.md) - Compare the entire error or object rather than picking at one field, and skip intermediate variables in tests.
 * [mock-at-narrowest-scope](practices/mock-at-narrowest-scope.md) - Spy on one export before replacing a module. A mock you don't assert against verifies almost nothing.
 * [wait-for-the-work-to-start-then-to-finish](practices/wait-for-the-work-to-start-then-to-finish.md) - A fixed sleep after submit let slow requests read as already finished, so the next action aborted them in flight; two edges fixed 38 of 40 runs and named the other two.
+* [dont-test-framework-guarantees](practices/dont-test-framework-guarantees.md) - Don't assert step order or that Promise.all parallelized. Test payload contracts and deliberate non-obvious choices.
 
 ## Security
 
@@ -66,11 +71,26 @@ Governance and the local extensions: [conventions](../conventions.md).
 
 * [colocate-schemas-with-what-they-validate](practices/colocate-schemas-with-what-they-validate.md) - A validator lives next to what it guards, not in a centralized schema file. The adjacency is the rule; the filename convention is per-project.
 
+## React
+
+* [use-client-is-a-javascript-boundary](practices/use-client-is-a-javascript-boundary.md) - The directive marks where JS ships, not where interactivity lives. A Server Component can render an interactive button.
+
+## Database
+
+* [prefer-metadata-only-schema-changes](practices/prefer-metadata-only-schema-changes.md) - Migration cost is a design input. Append enum values; inserting mid-list rewrites every row.
+
+## Background jobs
+
+* [poll-with-capped-backoff](practices/poll-with-capped-backoff.md) - Size the window to the provider's worst case. attempts × interval is an unstated timeout that misattributes the failure.
+* [cap-external-file-size-before-ingest](practices/cap-external-file-size-before-ingest.md) - State the maximum and fail legibly; otherwise the ceiling arrives as an OOM that looks like infrastructure.
+
 ## Design system
 
 * [constrain-the-palette-at-config](practices/constrain-the-palette-at-config.md) - Remove redundant token scales from the toolchain config so misuse doesn't compile, rather than banning them in review.
 * [semantic-tokens-only](practices/semantic-tokens-only.md) - Use semantic and intent tokens. Hardcoded values and raw palette steps both break theming and dark mode.
 * [typography-and-layout-as-utilities](practices/typography-and-layout-as-utilities.md) - Use font utilities and real HTML elements. Component primitives for text and layout add a layer that buys nothing and costs semantics.
+* [flex-column-children-stretch-by-default](practices/flex-column-children-stretch-by-default.md) - w-full is a no-op on a flex-column child; opt out with self-start, never parent items-start.
+* [read-primitive-defaults-before-overriding](practices/read-primitive-defaults-before-overriding.md) - A re-stated default is a pinned copy of a value you don't own, and it drifts silently.
 * [ds-vendor-wrap-export-layering](practices/ds-vendor-wrap-export-layering.md) - When using a component generator — treat generated primitives as third-party, put your opinions in a thin wrapper layer, and curate the public surface.
 * [ds-wrapper-passthrough](practices/ds-wrapper-passthrough.md) - Derive props from the primitive, add your own, merge classes, spread the rest. Never a bare re-export.
 
