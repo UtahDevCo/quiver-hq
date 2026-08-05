@@ -125,3 +125,34 @@ reporting PASS while reading a field that does not exist.
 * `a-filter-that-matches-nothing-every-run-is-a-broken-predicate` - `skipReason` is written nowhere; the writer records the reason in `error`. The filter matched 0 of 2472 documents on every date. Assert the predicate matches something collection-wide and abort with a distinct exit code when it does not. **Corrects the "empty candidate set" diagnosis in `audits-must-report-their-own-coverage`, which cites this same file and blames that day's small population; it carries two human `verified` entries.**
 * `a-checker-that-never-matched-a-row-has-untested-verdict-logic` - repairing the selector exposed a second defect: the verdict called every post-boundary comp a violation, but a promo month is post-boundary by design, so it reported FAIL on two correct production days. Zero matched rows means zero executions of the pass/fail branch.
 * `duplicated-predicates-rot-first-in-the-code-nobody-runs` - six copies of one filter, and the three wrong ones were the verification, the audit, and the production cleanup. Users correct runtime copies; nothing corrects a monitor that reports zero.
+
+**2026-08-05 — 16 routed out of zamp's `patterns.md`.** Chris supplied a ~90-item
+distillation of recurring PR-review feedback (now kept as the citable source at
+`local/zamp/patterns.md`). A grep sweep confirmed most of it was absent from
+`AGENTS.md`, `.coderabbit.yaml`, `.cursor/rules`, the `pr-review` checklist, and
+this brain — so it is net-new material, not a re-distillation. The ~45 operational
+"flag this in review" items went into the `pr-review.local.md` checklist instead of
+here; these 16 are the ones that pass the brand-new-empty-repo test. All evidence
+is zamp-only, so none of them is corroborated across repos yet.
+
+*Proposed `meta` (15):*
+
+* `treat-migration-friction-as-a-first-class-design-cost` - **read first.** Append enum values, never mid-insert: appending is a metadata-only `ALTER`, inserting shifts every later ordinal and forces a table rebuild. The out-of-group comment is load-bearing — without it the next tidy-up silently reintroduces the rewrite.
+* `read-a-primitives-defaults-before-overriding-them` - defaults arrive from four places (primitive, parent layout, HTML element, JSX). A re-stated default is a pinned copy of a value the primitive owns, so it drifts silently when the primitive changes.
+* `flex-column-children-stretch-by-default` - `w-full` is a no-op; `self-start` is the opt-out. Parent `items-start` "works" and lands the regression on the *siblings*, which is why it gets misdiagnosed.
+* `curated-docs-beat-call-sites-when-learning-an-api` - copying the nearest call site launders an inverted convention into new code, and each copy strengthens the wrong precedent. Concrete case: `<FieldGroup><FieldSet>` reversed at `nps-survey.client.tsx:114`.
+* `poll-external-jobs-with-capped-backoff-sized-to-the-worst-case` - `attempts × interval` is an unstated timeout; when the provider legitimately runs long the job reports failure, so the fix gets attempted at the wrong layer.
+* `cap-externally-generated-files-before-ingesting-them` - without a stated cap the ceiling is discovered as an OOM, which reads as an infrastructure fault rather than an oversized input.
+* `no-forwardref-in-react-19` - `ref` is an ordinary prop now. Worth stating explicitly because every pre-19 example on the internet will reproduce the wrapper by default.
+* `type-children-as-propswithchildren` - keeps a hand-written `children:` type meaningful as a signal that children are deliberately narrowed. Two zamp authors independently, which is weaker than two repos.
+* `ts-pattern-match-over-nested-ternaries-for-status-dispatch` - `.exhaustive()` converts "someone added a variant" into a compile error; the ternary chain's trailing fallback renders a plausible empty state instead. Carries a dependency, so the stack choice may want splitting from the practice.
+* `named-local-functions-over-iifes-for-derived-values` - an IIFE inverts reading order: the body becomes mandatory reading before the assignment makes sense.
+* `one-throwable-per-try-catch-when-side-effects-are-mixed` - an observability argument. A wide catch collapses storage, queue, and constraint failures into one Sentry group, destroying the one answer an incident needs.
+* `try-catch-extraction-is-a-commitment-not-a-one-off` - the mixed form is worse than either consistent alternative; shows up when an incremental refactor extracts only the step it was already touching.
+* `use-client-is-a-js-boundary-marker-not-an-interactivity-marker` - the wrong mental model pushes the boundary upward, and a scaffolded `onClick={() => {}}` commits a whole subtree to the client for nothing.
+* `dont-test-your-frameworks-guarantees` - these tests are actively negative: they fail on harmless renames, which triggers wholesale test deletion. The positive half (realtime payload contracts, deliberate error-swallows) is the more useful half.
+* `split-polymorphic-components-when-the-discriminator-is-structural` - a `Pattern`, deliberately opt-in. Records the shape-vs-value test, because applied indiscriminately it produces component sprawl.
+
+*Proposed `project: zamp` (1):*
+
+* `orchestrator-cleanup-belongs-in-onfailure` - a correctness bug, not a style choice: an outer catch fires before Inngest's retries, marking a record `FAILED` that then succeeds on retry. Also pins the `event.data.event.data` envelope trap. May be better merged into the existing `inngest-background-conventions` concept than promoted separately.
