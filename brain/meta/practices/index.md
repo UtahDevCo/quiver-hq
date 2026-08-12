@@ -22,6 +22,10 @@ Default-on. Follow unless a project override says otherwise.
 * [assert-on-whole-values](assert-on-whole-values.md) - toStrictEqual the whole error; unwrap inline; no single-use intermediates.
 * [mock-at-narrowest-scope](mock-at-narrowest-scope.md) - spyOn before module mocks; always assert how it was called.
 
+# Measurement
+
+* [report-a-rate-per-condition-never-pooled](report-a-rate-per-condition-never-pooled.md) - Three degradations pooled to 77.4%, which no condition exhibited. Split by condition, hold the sample fixed, and report detection beside accuracy.
+
 # Validation
 
 * [colocate-schemas-with-what-they-validate](colocate-schemas-with-what-they-validate.md) - Schema sits beside the function it guards.

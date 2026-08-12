@@ -40,6 +40,10 @@ Governance and the local extensions: [conventions](../conventions.md).
 
 * [authorize-before-doing-work](practices/authorize-before-doing-work.md) - The authorization check is the first statement in a privileged entry point — before any read, write, or external call. Then log actor, action, target, note.
 
+# Practices — measurement
+
+* [report-a-rate-per-condition-never-pooled](practices/report-a-rate-per-condition-never-pooled.md) - Three degradations pooled to 77.4%, a rate no condition exhibited. Split by condition, hold the document sample fixed, and report detection beside accuracy.
+
 # Practices — validation
 
 * [colocate-schemas-with-what-they-validate](practices/colocate-schemas-with-what-they-validate.md) - `*.schema.ts` beside the function it guards, never a centralized schema file.
@@ -81,10 +85,16 @@ Governance and the local extensions: [conventions](../conventions.md).
 * [request-parameters-may-not-reach-the-wire](failure-modes/request-parameters-may-not-reach-the-wire.md) - Vendor SDKs discard unsupported settings, return 200, and report it only in `result.warnings`. An absent error is not evidence the request was honoured.
 * [automatic-behavior-is-unmeasured-until-recorded](failure-modes/automatic-behavior-is-unmeasured-until-recorded.md) - Prompt caching and similar automatic optimizations leave nothing to grep. Record the vendor's counter or the saving is only assumed.
 * [fixing-the-write-path-does-not-fix-the-written-rows](failure-modes/fixing-the-write-path-does-not-fix-the-written-rows.md) - Fixing the code and recovering the losses are both backward-looking. The rows the broken code wrote are still read, so sweep them as a third task.
+* [a-capability-probe-needs-a-positive-control](failure-modes/a-capability-probe-needs-a-positive-control.md) - Seed a distinctive value and prove it landed, or "it is gone" and "it was never there" are one reading. Six of ten forms returned 202 while changing nothing.
+* [probe-inputs-must-make-outcomes-distinguishable](failure-modes/probe-inputs-must-make-outcomes-distinguishable.md) - An input already in the state you requested makes no-op, append and replace produce identical bytes. Ask which other behaviours would have produced this reading.
+* [measure-the-noise-floor-before-ranking-two-prompts](failure-modes/measure-the-noise-floor-before-ranking-two-prompts.md) - A single-sample benchmark cannot return "no difference"; it always produces a delta with a plausible mechanism. Two identical runs at temperature 0 read 2.7, 4.7 and 11.3 points apart, so the floor is not a constant either.
+* [a-measurement-must-use-the-input-container-production-uses](failure-modes/a-measurement-must-use-the-input-container-production-uses.md) - The declared MIME type and container are part of the input. Identical rasters read 48% bare and 92.9% inside a PDF, and the intake accepts only PDFs. Read the intake code before generating a corpus.
+* [a-generator-cannot-produce-the-failure-it-has-no-state-for](failure-modes/a-generator-cannot-produce-the-failure-it-has-no-state-for.md) - A field the generator always populates is unmeasured when blank, not passing. 99.8% synthetic against 83.3% real, and every error was the state the generator cannot emit.
 
 # Workflows
 
 * [corroboration-requires-independent-sources](workflows/corroboration-requires-independent-sources.md) - Two sources corroborate only if independent. Diff convention docs before counting them twice; weight independent code above documentation; report *unfalsifiable here* separately from *contradicted here*.
+* [pair-both-arms-in-one-window-or-drift-picks-the-winner](workflows/pair-both-arms-in-one-window-or-drift-picks-the-winner.md) - Comparing a fresh capture against a stored baseline lets provider drift masquerade as the treatment; a control group cannot detect it. Interleave both arms per item, report discordant counts and a sign test, and pool two runs before deciding.
 
 # Using the brain
 

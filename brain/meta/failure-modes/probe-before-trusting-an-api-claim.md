@@ -10,6 +10,8 @@ status: stable
 stale_after: 2027-07-29
 relations:
   - { kind: depends-on, target: /meta/practices/minimal-comments.md }
+  - { kind: generalizes, target: /meta/failure-modes/a-capability-probe-needs-a-positive-control.md }
+  - { kind: generalizes, target: /meta/failure-modes/probe-inputs-must-make-outcomes-distinguishable.md }
 not:
   - term: "extending a workaround whose justification is a code comment about an external system"
     why: "later readers treat the comment as settled and build more logic on top; the confidence is doing work no test ever justified"
@@ -26,6 +28,11 @@ sources:
     title: wiley — syncQuietHoursToNetSapiens delete-then-recreate workaround, disproved 2026-07-29
     author: claude/opus-5
     last_modified: 2026-07-29
+  - id: wiley-allowlist-removal
+    resource: projects/wiley/web/scripts/_probe-allowlist-removal-matrix.ts
+    title: "wiley 60d9eb8 — a probe that confirmed the claim, and needed two design fixes before it could have failed"
+    author: claude/opus-5
+    last_modified: 2026-08-08
 ---
 
 # The trap
@@ -68,3 +75,17 @@ This is the one case where a comment earns its keep under
 [minimal-comments](../practices/minimal-comments.md): it documents a
 non-obvious *why* about an external system. It just has to be true, and cite how
 that was established.
+
+# Then check the probe could have failed
+
+Running the probe is the first half. A probe against the same vendor on 2026-08-08
+confirmed a limitation and still had two defects that would each have produced the
+same confirmation from an API with no limitation at all:
+
+- No positive control, so an absent value and a value that was never written read
+  identically. See [a capability probe needs a positive control](a-capability-probe-needs-a-positive-control.md).
+- Inputs already in the requested state, so append, replace and no-op left the
+  store byte-identical. See [probe inputs must make outcomes distinguishable](probe-inputs-must-make-outcomes-distinguishable.md).
+
+A committed probe raises how much the next reader trusts the claim, which is the
+point of committing it and also the reason a badly designed one is worse than none.
