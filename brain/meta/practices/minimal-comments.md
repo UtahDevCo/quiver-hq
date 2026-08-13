@@ -21,6 +21,10 @@ sources:
     title: zamp CLAUDE.local.md — code comments
     author: human:christopher
     last_modified: 2026-07-25
+  - id: trikin-agents
+    resource: projects/trikin/AGENTS.md
+    title: "trikin AGENTS.md — comments only for complex logic, non-obvious decisions, or important workarounds, stated independently of zamp"
+    last_modified: 2026-07-30
 ---
 
 # The practice

@@ -28,6 +28,11 @@ sources:
     resource: projects/k1/data/stored-extractions
     title: "Two paired runs of one comparison, same 100 documents: 5 discordant rows and 76 discordant rows"
     last_modified: 2026-08-12
+  - id: rasterize-paired
+    resource: projects/k1/data/paired-checks/2026-08-13-rasterize-the-upload.json
+    title: "The unpaired 130/24 claim, paired twice over 103 documents: 33 fixed / 91 broke, sign reversed"
+    author: claude/opus-5
+    last_modified: 2026-08-13
 not:
   - term: "add a control group that the edit should not affect"
     why: "the control is captured in the same window as the treatment, so a degraded window moves both and the comparison against a STORED baseline still misattributes the drift"
@@ -39,8 +44,14 @@ not:
     why: "the loss landed on fields no rule in the change could reach, which identifies the window rather than the change"
     instead: "break the movement down by field and ask whether the treatment could have touched what moved"
   - term: "reusing a fixture captured earlier today as the baseline arm, since it is the same prompt"
-    why: "hours are enough; this exact shortcut produced a 130-fixed / 24-broken result at p = 8e-19 that the paired instrument could not reproduce"
+    why: "hours are enough; this exact shortcut produced a 130-fixed / 24-broken result at p = 8e-19 that the paired instrument reversed to 33 fixed / 91 broke"
     instead: "recapture the baseline, and pay the 2x, because the stored fixture is a different experiment"
+  - term: "keep the unpaired result's direction and discount its size"
+    why: "measured twice, both signs flipped: rasterizing read +8.0 points unpaired and -2.3 paired, and the item J edit read 197/15 unpaired against 43/38 paired"
+    instead: "take nothing from an unpaired run, including the sign, and re-run it paired before writing anything down"
+  - term: "a mechanism that explains the unpaired result corroborates it"
+    why: "the rasterization run was credited with removing code-letter confusion, and the paired runs show it causes it: box 20 lost 51 rows and gained 10"
+    instead: "treat a mechanism story as equally available to an artifact, because it raises confidence without raising accuracy"
 ---
 
 # The workflow
@@ -136,7 +147,7 @@ twice in one session by comparing two ledgers captured hours apart. Both times t
 unpaired instrument produced a large, significant, mechanism-shaped result:
 
 ```
-  rasterizing the input   130 fixed /  24 broke   p = 8e-19    unpaired, unproven
+  rasterizing the input   130 fixed /  24 broke   p = 8e-19    unpaired
   an item J prompt edit   197 fixed /  15 broke   p ≈ 0        unpaired
   the same item J edit      0 fixed /   5 broke   p = 0.0625   paired, one window
 ```
@@ -144,6 +155,28 @@ unpaired instrument produced a large, significant, mechanism-shaped result:
 The unpaired instrument did not exaggerate a real effect. It invented one. That is
 the specific danger: the p-value is computed over a large discordant count, so it
 looks *more* trustworthy the more drift there was between the captures.
+
+# Both unpaired results have since been paired, and both signs flipped
+
+The rasterization row was settled on 2026-08-13, over 103 documents and 1327 box
+rows, both arms adjacent per document, run twice:
+
+```
+  run 1   arm A 98.5%   arm B 96.2%   14 fixed / 44 broke   p = 1.0e-4
+  run 2   arm A 98.3%   arm B 96.2%   19 fixed / 47 broke   p = 7.6e-4
+  pooled                              33 fixed / 91 broke
+```
+
+Rasterizing costs 2.3 points. The unpaired run had called it an 8.0-point gain, and
+credited it with removing code-letter confusion specifically. The paired runs put
+the damage in exactly those boxes: box 20 is 10 fixed against 51 broken, with 19 and
+18 next. The mechanism the unpaired result named as its evidence is the mechanism the
+change breaks.
+
+That is two attempts out of two where the sign was wrong. So the half-measure is
+also wrong: an unpaired result is not a real effect with an inflated size, and
+keeping its direction while discounting its magnitude would have shipped both of
+these changes.
 
 The shortcut is attractive at exactly the wrong moment, because a fixture at the
 right prompt hash is already sitting on disk and recapturing it costs money for
@@ -170,5 +203,6 @@ Pool the discordant counts across two runs before deciding anything.
 
 Related: [measure the noise floor](../failure-modes/measure-the-noise-floor-before-ranking-two-prompts.md)
 establishes the spread that makes unpaired comparison hopeless;
-[[a-consensus-merge-inherits-whichever-sample-it-clones]] is the same lesson one
-layer down, where arrival order rather than capture time was the hidden variable.
+[a consensus merge inherits whichever sample it clones](../../projects/k1/failure-modes/a-consensus-merge-inherits-whichever-sample-it-clones.md)
+is the same lesson one layer down, where arrival order rather than capture time was
+the hidden variable.

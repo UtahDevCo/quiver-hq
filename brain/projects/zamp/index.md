@@ -8,48 +8,48 @@ Resolve against the [meta layer](../../meta/index.md) — see
 
 # Overrides
 
-* [no-text-heading-layout-primitives](overrides/no-text-heading-layout-primitives.md) - `extend` on [typography-and-layout-as-utilities](../../meta/practices/typography-and-layout-as-utilities.md). zamp bans the component alternatives outright; other repos deliberately use a `Typography` component.
-
-# Practices
-
-Project-local practices — not general enough (yet) for the meta layer.
-
-* [real-db-test-for-prisma-changes](practices/real-db-test-for-prisma-changes.md) - New or changed Prisma calls ship with a real-DB test. Shard-key and join defects are invisible to types and to mocked prisma.
-* [triple-validation](practices/triple-validation.md) - Client, server action, and domain mutation each validate — because background jobs bypass the first two.
-* [state-management-direction](practices/state-management-direction.md) - Read through async server components; write through server actions. Client-side tRPC and react-query are deprecated.
-* [inngest-background-conventions](practices/inngest-background-conventions.md) - Naming, step selection, and error semantics for background functions. Test the underlying mutation unless the function holds real orchestration.
-* [story-per-component](practices/story-per-component.md) - Every design-system component ships a colocated Storybook story. Storybook is zamp-only, so this is scoped here.
-* [directive-driven-filenames](practices/directive-driven-filenames.md) - `'use client'` → `*.client.tsx`, `'use server'` → `*.action.ts`. Promotion candidate once wiley corroborates.
-
-# Modules
-
-* [monorepo-and-domain-structure](modules/monorepo-and-domain-structure.md) - pnpm workspace on Turborepo. Business logic in versioned domain packages following CQRS; apps consume them.
-* [design-system-next](modules/design-system-next.md) - A Next.js overlay, not the next generation. Use it when you need router integration.
-
-# Invariants
-
-* [sharded-tables-companyid](invariants/sharded-tables-companyid.md) - **Attested.** Every Prisma operation on a sharded table carries companyId at the top level of `where`/`data`. A nested relation does not count. Source drift between `@shardKey` and `SHARDED_TABLES` is an error.
-* [relation-load-strategy](invariants/relation-load-strategy.md) - Nested reads touching sharded tables need `relationLoadStrategy: "query"` — in four specific cases, not blanket.
-* [no-new-deprecated-ui-imports](invariants/no-new-deprecated-ui-imports.md) - **Attested.** No added line imports `@util/ui` or an `Rt*` component. Diff-scoped; validated against real history.
-
-*`relation-load-strategy` has no executable check yet — it needs relation topology, not just call sites, and is the hardest of the three.*
-
-# Decisions
-
-* [deprecated-ui-surfaces](decisions/deprecated-ui-surfaces.md) - `@util/ui` and the `Rt*` generation are retired but still importable. Existing usages in untouched files are not violations.
-
-# Workflows
-
-* [add-ds-component](workflows/add-ds-component.md) - Install and wrap the primitive, fix generator import bugs, write stories from the fetched docs, polish. The barrel export is left to the human.
-* [git-branch-and-pr-naming](workflows/git-branch-and-pr-naming.md) - Linear ticket prefix, lowercase in branches and uppercase in PR titles. Both CI-gated; commits are not.
+* [no-text-heading-layout-primitives](overrides/no-text-heading-layout-primitives.md) - `extend` on [typography-and-layout-as-utilities](../../meta/practices/typography-and-layout-as-utilities.md) — Typography and layout primitives are banned outright
 
 # Patterns
 
-Opt-in, and zamp-only — both were demoted from the meta layer on 2026-07-29 once
-`tools` and `wiley` showed they are not how Chris works everywhere.
+* [accessibility-enforced-by-types](patterns/accessibility-enforced-by-types.md) - A discriminated union requiring a label, placeholder, or aria-label turns an accessibility rule into a compile error.
+* [theme-by-data-attribute](patterns/theme-by-data-attribute.md) - A theme is a directory satisfying a token contract, scoped to [data-theme="name"], with dark mode as a nested selector.
 
-* [theme-by-data-attribute](patterns/theme-by-data-attribute.md) - Folder per theme, `[data-theme="name"]` scoping, explicit completeness contract. The other repos theme by class selector.
-* [accessibility-enforced-by-types](patterns/accessibility-enforced-by-types.md) - A discriminated union making an unlabeled input a compile error. Only zamp implements it.
+# Workflows
+
+* [add-ds-component](workflows/add-ds-component.md) - Install and wrap the primitive, fix known generator import bugs, write stories from the fetched docs, then polish and deprecate. The barrel export is left to the human.
+* [git-branch-and-pr-naming](workflows/git-branch-and-pr-naming.md) - Linear ticket prefix, lowercase in branches and uppercase in PR titles. Both are CI-gated; commits are not.
+
+# Failure modes
+
+* [an-exemption-total-sums-taxableamount-because-deduction-rules-can-be-taxable](failure-modes/an-exemption-total-sums-taxableamount-because-deduction-rules-can-be-taxable.md) - minZero(taxableAmount).plus(minZero(nontaxableAmount)) is load-bearing, and TN Schedule A deduction 1 (food) is TAXABLE at 4%. Copying the idiom to a schedule whose rule is EXEMPT invites a taxed base being reported as exempt.
+* [minzero-clamps-each-bucket-before-the-sum-so-refunds-do-not-net](failure-modes/minzero-clamps-each-bucket-before-the-sum-so-refunds-do-not-net.md) - Clamping happens per bucket after the groupBy and before the plus, so taxableAmount -100 with nontaxableAmount 500 yields 500 rather than 400.
+
+# Practices
+
+* [directive-driven-filenames](practices/directive-driven-filenames.md) - A 'use client' file is named *.client.tsx; a 'use server' file is named *.action.ts. Which side of the boundary a file lives on is visible in the tree.
+* [inngest-background-conventions](practices/inngest-background-conventions.md) - Naming, step selection, and error semantics for background functions. Test the underlying mutation unless the function holds real orchestration logic.
+* [real-db-test-for-prisma-changes](practices/real-db-test-for-prisma-changes.md) - Shard-key and join-strategy defects are invisible to type-checking and to mocked prisma. Only a real database catches them.
+* [state-management-direction](practices/state-management-direction.md) - Client-side tRPC and react-query are deprecated. Resolve data in async server components and pass it down as props.
+* [story-per-component](practices/story-per-component.md) - A new component .tsx without a matching .stories.tsx is incomplete. Vendored primitives are exempt.
+* [triple-validation](practices/triple-validation.md) - Client, server action, and domain mutation each validate — because background jobs bypass the first two.
+
+# Modules
+
+* [design-system-next](modules/design-system-next.md) - The name suggests a successor package. The code is a framework-integration layer that depends on the base package. Use it when you need router integration.
+* [monorepo-and-domain-structure](modules/monorepo-and-domain-structure.md) - pnpm workspace on Turborepo. Business logic in versioned domain packages following CQRS; apps consume them.
+
+# Invariants
+
+* [exemptamount-is-always-zero-exempt-sales-live-in-nontaxableamount](invariants/exemptamount-is-always-zero-exempt-sales-live-in-nontaxableamount.md) - The tax engine hardcodes exemptAmount to 0 at its only write site and routes RuleType.EXEMPT into nontaxableAmount, so summing exemptAmount is a provable no-op.
+* [no-new-deprecated-ui-imports](invariants/no-new-deprecated-ui-imports.md) - Changed lines must not introduce imports from the frozen @util/ui package or Rt* Radix Themes components. Scoped to the diff, because existing usages are not violations.
+* [relation-load-strategy](invariants/relation-load-strategy.md) - With relationJoins enabled, nested reads default to a join strategy that compiles to correlated subqueries and fails on Vitess with VT12001.
+* [ruletype-adjusted-is-dead-enum-surface](invariants/ruletype-adjusted-is-dead-enum-surface.md) - ADJUSTED appears in 0 of 53 rule CSVs and the engine handles it in the same branch as TAXABLE, so it reads as a distinct tax treatment that does not exist.
+* [sharded-tables-companyid](invariants/sharded-tables-companyid.md) - Reads, writes, and upserts against sharded tables must include companyId at the top level of where/data — a nested relation does not count.
+
+# Decisions
+
+* [deprecated-ui-surfaces](decisions/deprecated-ui-surfaces.md) - Three retired surfaces are still importable. New code uses design-system or design-system-next; existing usages in untouched files are not violations.
 
 # Gems
 

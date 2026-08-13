@@ -15,6 +15,12 @@ not:
   - term: "a review rule saying 'don't use X'"
     why: "requires a human to notice every time, forever, and fails silently when they don't"
     instead: "remove X from the config, types, or exports so using it doesn't work"
+  - term: "a comment above the call: `// discount applies to the fee, not the commission`"
+    why: "the next contributor reads the type, and both values are the same type on the same row, so the wrong program compiles"
+    instead: "narrow the parameter object so the wrong base is not in scope"
+  - term: "the field is not in the input type, so nothing can pass it"
+    why: "a definition loaded from stored JSON or a config file arrives as unknown, and structural narrowing ignores extra keys"
+    instead: "list the forbidden keys where the value is parsed and throw naming the key and the reason"
 sources:
   - id: palette
     resource: /meta/practices/constrain-the-palette-at-config.md
@@ -24,6 +30,14 @@ sources:
     resource: /projects/zamp/patterns/accessibility-enforced-by-types.md
     title: Discriminated union forcing an accessible label (zamp)
     author: human:christopher
+  - id: trikin-pricing
+    resource: projects/trikin/web/src/lib/pricing.ts
+    title: "trikin — priceAssignedPaymentRight's input type excludes the commission, and the test prices the $481.30 overpayment it prevents"
+    last_modified: 2026-07-30
+  - id: trikin-policy-parser
+    resource: projects/trikin/web/src/lib/underwriting/policy.ts
+    title: "trikin c657ba0 — TIME_KEYED_FIELDS rejects the forbidden key where the stored policy JSON is parsed"
+    last_modified: 2026-08-07
 ---
 
 # The practice
@@ -58,6 +72,29 @@ Both come from zamp's design system:
   `label` | `placeholder` | `aria-label`, so an unlabeled input is a type error
   rather than an audit finding. See
   [accessibility enforced by types](../../projects/zamp/patterns/accessibility-enforced-by-types.md).
+
+# Two moves that are not global deletion
+
+The practice above deletes an option from the whole toolchain. Two variants keep the
+value and remove its reach, and both come from trikin.
+
+**Narrow the parameter instead of the toolchain.** When a calculation has one
+correct input among several of the same type, pass the value rather than the
+container that holds all of them. `Cents` and `Cents` are one type and both names
+are plausible at the call site, so absence is the only mechanism that works:
+`priceAssignedPaymentRight({ assignedPaymentRightCents, discountBps })` cannot see
+the commission, and the sibling calculation lives in a module this one does not
+import. Priced off the wrong base, the one real transaction available reads
+$1,604.33 against a correct $1,123.03, a $481.30 overpayment on a receivable that
+can only be bought once.
+
+**Reject the forbidden key at the parse boundary, not only in the type.** Omitting a
+field from a type covers the call sites the compiler sees. A definition arriving as
+stored JSON, a database column, or a config file is `unknown`, and structural
+narrowing ignores extra keys, so the type-only version fails exactly when someone
+outside the codebase is breaking the rule. Enumerate the names where the value is
+parsed and throw with the key and the reason in the message, which makes removing
+the guard visibly a decision.
 
 # When this does not apply
 

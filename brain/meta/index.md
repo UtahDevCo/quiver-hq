@@ -15,86 +15,101 @@ first — `/brain-recall` does it for you, or read `<project>/.brain/index.md`.
 
 Governance and the local extensions: [conventions](../conventions.md).
 
-# Practices — enforcement and judgment
+# Practices
 
-* [make-misuse-unrepresentable](practices/make-misuse-unrepresentable.md) - When the team has settled on one of several interchangeable options, delete the alternatives from the toolchain rather than documenting a preference.
-* [follow-local-conventions](practices/follow-local-conventions.md) - Match the surrounding module for internal idiom — read two or three siblings before choosing a pattern. Global uniformity applies only to visible surface (tokens, component APIs, published exports).
+## Enforcement and judgment
 
-# Practices — style
+* [make-misuse-unrepresentable](practices/make-misuse-unrepresentable.md) - When you have a house choice among interchangeable options, delete the alternatives from the toolchain instead of documenting a preference.
+* [follow-local-conventions](practices/follow-local-conventions.md) - Consistency with the surrounding module beats applying a preferred pattern everywhere. Read the neighbours before choosing.
 
-* [minimal-comments](practices/minimal-comments.md) - Comment a genuinely non-obvious *why*, one terse line. Never restate the code. **Don't touch pre-existing comments authored by others.**
-* [kebab-case-files-named-exports](practices/kebab-case-files-named-exports.md) - `kebab-case.tsx` files, `PascalCase` identifiers, `UPPER_SNAKE` constants. **No default exports** — that half is load-bearing. Next.js `page`/`layout`/`route` are the framework exception.
-* [small-single-purpose-files](practices/small-single-purpose-files.md) - ~200 lines logic / ~300 components (tests, stories, config exempt). One primary export. Delete orphaned code in the change that orphaned it.
+## Style
 
-# Practices — error handling
+* [minimal-comments](practices/minimal-comments.md) - Prefer self-documenting code. A comment that restates the code is noise; only a genuinely non-obvious why earns a line.
+* [kebab-case-files-named-exports](practices/kebab-case-files-named-exports.md) - Files are kebab-case, component identifiers are PascalCase, and nothing uses a default export. The no-default-export half is the load-bearing part.
+* [small-single-purpose-files](practices/small-single-purpose-files.md) - Around 200 lines for logic and 300 for components, one primary export, and dead code removed in the change that orphaned it.
 
-* [error-propagation-and-capture](practices/error-propagation-and-capture.md) - Return a propagating error untouched; attach context only when you originate it; capture once, where you stop it. Never capture-then-rethrow.
-* [no-error-objects-across-boundaries](practices/no-error-objects-across-boundaries.md) - Error instances don't serialize. Pass `error.message` across server/client, workers, job payloads, and caches.
+## Error handling
 
-# Practices — testing
+* [error-propagation-and-capture](practices/error-propagation-and-capture.md) - Never rewrap an error you are merely passing along, and never report it twice. One failure, one report, at one place.
+* [no-error-objects-across-boundaries](practices/no-error-objects-across-boundaries.md) - Error instances do not serialize. Pass the message string across any process, runtime, or storage boundary.
+* [check-how-the-callee-reports-refusal](practices/check-how-the-callee-reports-refusal.md) - An action that returns `error.message` reports failure through a value the caller can drop; deleting the client guard then silences every failure mode, not just the one being fixed.
 
-* [assert-on-whole-values](practices/assert-on-whole-values.md) - `toStrictEqual(new Error(...))`, not `.message`. Unwrap inline at the assertion site. No single-use intermediates.
-* [mock-at-narrowest-scope](practices/mock-at-narrowest-scope.md) - Escalate by blast radius: `spyOn` → deep-mock → module mock. Always assert `toHaveBeenCalledWith` *and* `toHaveBeenCalledTimes`.
+## Testing
 
-# Practices — security
+* [assert-on-whole-values](practices/assert-on-whole-values.md) - Compare the entire error or object rather than picking at one field, and skip intermediate variables in tests.
+* [mock-at-narrowest-scope](practices/mock-at-narrowest-scope.md) - Spy on one export before replacing a module. A mock you don't assert against verifies almost nothing.
+* [wait-for-the-work-to-start-then-to-finish](practices/wait-for-the-work-to-start-then-to-finish.md) - A fixed sleep after submit let slow requests read as already finished, so the next action aborted them in flight; two edges fixed 38 of 40 runs and named the other two.
 
-* [authorize-before-doing-work](practices/authorize-before-doing-work.md) - The authorization check is the first statement in a privileged entry point — before any read, write, or external call. Then log actor, action, target, note.
+## Security
 
-# Practices — measurement
+* [authorize-before-doing-work](practices/authorize-before-doing-work.md) - The authorization check is the first statement in a privileged entry point — before validation-dependent reads, before queries, before side effects. Then log who did what.
 
-* [report-a-rate-per-condition-never-pooled](practices/report-a-rate-per-condition-never-pooled.md) - Three degradations pooled to 77.4%, a rate no condition exhibited. Split by condition, hold the document sample fixed, and report detection beside accuracy.
+## Money
 
-# Practices — validation
+* [money-in-integer-minor-units](practices/money-in-integer-minor-units.md) - Six monetary columns in a production schema were declared `real`, a type that cannot hold $1,782.59 exactly and drifts under addition.
+* [derive-the-other-side-of-a-split-by-subtraction](practices/derive-the-other-side-of-a-split-by-subtraction.md) - Round one side of a percentage split and subtract for the rest, so `part + remainder === total` holds by construction across all 10,001 rates.
 
-* [colocate-schemas-with-what-they-validate](practices/colocate-schemas-with-what-they-validate.md) - `*.schema.ts` beside the function it guards, never a centralized schema file.
+## Data you did not write
 
-# Practices — design system
+* [probe-a-field-before-depending-on-it](practices/probe-a-field-before-depending-on-it.md) - Count fill rate, uniqueness and the arithmetic a field's name claims, over every row you can reach. One declared field was populated in 0 of 679 rows; another named `total` held the agent's share in 100 of 100.
+* [diff-operation-order-not-just-payloads](practices/diff-operation-order-not-just-payloads.md) - Both rails, the trigger names, the field lists and a worked example correct to the cent all matched; the counterparty spec still inverted confirm-then-fund into fund-then-notify.
 
-* [constrain-the-palette-at-config](practices/constrain-the-palette-at-config.md) - Delete redundant token scales (Tailwind's five greys → one) so misuse doesn't compile.
-* [semantic-tokens-only](practices/semantic-tokens-only.md) - Reference semantic and intent tokens. Never raw palette steps or hardcoded values, CSS variables included. Inline `style` escape hatch requires a comment.
-* [typography-and-layout-as-utilities](practices/typography-and-layout-as-utilities.md) - Font utilities named by purpose on semantic HTML; `gap` over margins. Banning `Text`/`Heading`/`Flex`/`Box` outright is a zamp-only extension — a typography component elsewhere is fine.
-* [ds-vendor-wrap-export-layering](practices/ds-vendor-wrap-export-layering.md) - Generated primitives are third-party and unedited; a thin wrapper layer holds your opinions; the barrel is curated.
-* [ds-wrapper-passthrough](practices/ds-wrapper-passthrough.md) - Type wrappers off the primitive with `ComponentProps`, spread the rest, never a bare re-export. No manual ref forwarding in React 19.
+## Measurement
 
-# Practices — API design
+* [report-a-rate-per-condition-never-pooled](practices/report-a-rate-per-condition-never-pooled.md) - Three input degradations averaged to 77.4%; separately they were 92.1%, 92.1% and 48.0%, and only the split identifies which one to look at.
 
-* [deprecate-without-breaking-consumers](practices/deprecate-without-breaking-consumers.md) - Keep the old export working. `@deprecated` carries a prop-by-prop mapping that names its own gaps, and points at runnable examples.
+## Model output
 
-# Practices — review
+* [one-home-per-field-in-a-model-output-schema](practices/one-home-per-field-in-a-model-output-schema.md) - Two valid keys for the same value made the model pick per document; 53 codes across 9 of 175 documents landed in the key the normalizer did not read.
 
-* [conventional-comments](practices/conventional-comments.md) - `<label> [decorations]: <subject>`. `issue` blocks, `suggestion` doesn't, `praise` at least once per review. **Applies to your own review output.**
+## Validation
 
-# Patterns — design system
+* [colocate-schemas-with-what-they-validate](practices/colocate-schemas-with-what-they-validate.md) - A validator lives next to what it guards, not in a centralized schema file. The adjacency is the rule; the filename convention is per-project.
 
-* [token-architecture-three-layers](patterns/token-architecture-three-layers.md) - Scale → intent quartets (`accent`/`background`/`border`/`foreground`) → component semantics. `oklch()`; radius derived from one base by `calc()`.
+## Design system
+
+* [constrain-the-palette-at-config](practices/constrain-the-palette-at-config.md) - Remove redundant token scales from the toolchain config so misuse doesn't compile, rather than banning them in review.
+* [semantic-tokens-only](practices/semantic-tokens-only.md) - Use semantic and intent tokens. Hardcoded values and raw palette steps both break theming and dark mode.
+* [typography-and-layout-as-utilities](practices/typography-and-layout-as-utilities.md) - Use font utilities and real HTML elements. Component primitives for text and layout add a layer that buys nothing and costs semantics.
+* [ds-vendor-wrap-export-layering](practices/ds-vendor-wrap-export-layering.md) - When using a component generator — treat generated primitives as third-party, put your opinions in a thin wrapper layer, and curate the public surface.
+* [ds-wrapper-passthrough](practices/ds-wrapper-passthrough.md) - Derive props from the primitive, add your own, merge classes, spread the rest. Never a bare re-export.
+
+## API design
+
+* [deprecate-without-breaking-consumers](practices/deprecate-without-breaking-consumers.md) - Keep the original export, mark it @deprecated with a prop-by-prop mapping, and point at the replacement's live examples.
+
+## Review
+
+* [conventional-comments](practices/conventional-comments.md) - Every review comment carries an explicit label and blocking-ness, so the reader never has to guess whether feedback is a blocker.
+# Failure modes
+
+Things that look right and are not, each paid for in production. There are 32, so
+they live one level down rather than in this file. Open the group when you are
+about to do that kind of work, and read the concept before writing the code.
+
+* [Writes, migrations and stored data](failure-modes/index.md) - 5 concepts. Read before a backfill, a normalizer change, or any "the fix is deployed" claim.
+* [Checks that pass without checking](failure-modes/index.md) - 6 concepts. Read before trusting an audit, a monitor, a paginated sweep, or a cached guard.
+* [Probing someone else's system](failure-modes/index.md) - 6 concepts. Read before recording what a third-party API can or cannot do.
+* [Measuring a model](failure-modes/index.md) - 11 concepts. Read before comparing two prompts, two models, or two configurations. This is the largest group and the most expensive to ignore.
+* [Documents, config and tooling](failure-modes/index.md) - 4 concepts. Rendering, runtime secrets, git staging, mutation harnesses.
+
+Full list with one-line descriptions: [failure-modes/index.md](failure-modes/index.md).
+
+# Workflows
+
+* [corroboration-requires-independent-sources](workflows/corroboration-requires-independent-sources.md) - Before counting two repos as agreement, diff their convention docs. Generated or copied files make one document look like two, and the check costs one grep.
+* [pair-both-arms-in-one-window-or-drift-picks-the-winner](workflows/pair-both-arms-in-one-window-or-drift-picks-the-winner.md) - Comparing a fresh capture against a stored baseline lets provider drift masquerade as a treatment effect, and a control group cannot detect it because the control sits in the same degraded window. Capturing both arms as adjacent calls reversed the sign of a real decision, twice.
+* [rank-the-documents-before-building-from-them](workflows/rank-the-documents-before-building-from-them.md) - A 265-line knowledge base, the newest and clearest file in the folder, described a transaction the executed contract forbids. Write the authority ranking into the repo as step one.
+# Patterns
+
+* [token-architecture-three-layers](patterns/token-architecture-three-layers.md) - Scale, then intent quartets, then component semantics. The repeating role set is the load-bearing part.
+
+Opt-in, so reach for one when the problem appears. Full list, including the two that
+live in zamp's layer: [patterns/index.md](patterns/index.md).
 
 # Stacks
 
 *Default technology choices and the reasoning behind them. Empty.*
-
-# Failure modes
-
-*Things that look right and are not. Each was paid for in production.*
-
-* [verify-a-write-actually-happened](failure-modes/verify-a-write-actually-happened.md) - A `catch` mapping an error class to success reports writes that never landed. Read the state back; assert on the field you wrote, not a derived one.
-* [audits-must-report-their-own-coverage](failure-modes/audits-must-report-their-own-coverage.md) - `.catch(() => null); continue` turns "couldn't check" into "checked, fine". Print attempted / inspected / skipped-by-reason and call the count a floor. Zero candidates is not a pass either.
-* [probe-before-trusting-an-api-claim](failure-modes/probe-before-trusting-an-api-claim.md) - "The API doesn't support X" in a comment is a hypothesis. Probe before extending the workaround; commit the probe, including ones that falsified your own guess.
-* [self-reported-confidence-is-not-a-signal](failure-modes/self-reported-confidence-is-not-a-signal.md) - LLM confidence tracks prose register, not correctness. Never display it or route on it; surface citations, gaps, and model disagreement instead.
-* [a-listing-endpoint-is-not-the-uniqueness-domain](failure-modes/a-listing-endpoint-is-not-the-uniqueness-domain.md) - `if (!found) create()` assumes the listing covers everything the create checks. When it doesn't, the write is rejected forever and never learns the id it needed.
-* [a-dead-control-may-be-a-duplicate](failure-modes/a-dead-control-may-be-a-duplicate.md) - A setting whose value never reaches the backend may be a redundant second writer, not missing plumbing. Removal is a no-op; connecting it changes behaviour for everyone whose two values disagree.
-* [request-parameters-may-not-reach-the-wire](failure-modes/request-parameters-may-not-reach-the-wire.md) - Vendor SDKs discard unsupported settings, return 200, and report it only in `result.warnings`. An absent error is not evidence the request was honoured.
-* [automatic-behavior-is-unmeasured-until-recorded](failure-modes/automatic-behavior-is-unmeasured-until-recorded.md) - Prompt caching and similar automatic optimizations leave nothing to grep. Record the vendor's counter or the saving is only assumed.
-* [fixing-the-write-path-does-not-fix-the-written-rows](failure-modes/fixing-the-write-path-does-not-fix-the-written-rows.md) - Fixing the code and recovering the losses are both backward-looking. The rows the broken code wrote are still read, so sweep them as a third task.
-* [a-capability-probe-needs-a-positive-control](failure-modes/a-capability-probe-needs-a-positive-control.md) - Seed a distinctive value and prove it landed, or "it is gone" and "it was never there" are one reading. Six of ten forms returned 202 while changing nothing.
-* [probe-inputs-must-make-outcomes-distinguishable](failure-modes/probe-inputs-must-make-outcomes-distinguishable.md) - An input already in the state you requested makes no-op, append and replace produce identical bytes. Ask which other behaviours would have produced this reading.
-* [measure-the-noise-floor-before-ranking-two-prompts](failure-modes/measure-the-noise-floor-before-ranking-two-prompts.md) - A single-sample benchmark cannot return "no difference"; it always produces a delta with a plausible mechanism. Two identical runs at temperature 0 read 2.7, 4.7 and 11.3 points apart, so the floor is not a constant either.
-* [a-measurement-must-use-the-input-container-production-uses](failure-modes/a-measurement-must-use-the-input-container-production-uses.md) - The declared MIME type and container are part of the input. Identical rasters read 48% bare and 92.9% inside a PDF, and the intake accepts only PDFs. Read the intake code before generating a corpus.
-* [a-generator-cannot-produce-the-failure-it-has-no-state-for](failure-modes/a-generator-cannot-produce-the-failure-it-has-no-state-for.md) - A field the generator always populates is unmeasured when blank, not passing. 99.8% synthetic against 83.3% real, and every error was the state the generator cannot emit.
-
-# Workflows
-
-* [corroboration-requires-independent-sources](workflows/corroboration-requires-independent-sources.md) - Two sources corroborate only if independent. Diff convention docs before counting them twice; weight independent code above documentation; report *unfalsifiable here* separately from *contradicted here*.
-* [pair-both-arms-in-one-window-or-drift-picks-the-winner](workflows/pair-both-arms-in-one-window-or-drift-picks-the-winner.md) - Comparing a fresh capture against a stored baseline lets provider drift masquerade as the treatment; a control group cannot detect it. Interleave both arms per item, report discordant counts and a sign test, and pool two runs before deciding.
 
 # Using the brain
 

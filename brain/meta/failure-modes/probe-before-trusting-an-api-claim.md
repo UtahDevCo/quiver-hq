@@ -22,6 +22,9 @@ not:
   - term: "discarding a probe that disproved your own hypothesis"
     why: "the next person re-derives the same plausible wrong idea"
     instead: "record the falsified hypothesis too — negative results are the expensive ones to reproduce"
+  - term: "treating a recorded negative result as settled because it was measured once"
+    why: "one probe fixes a verb, a path shape, a casing and a set of parameter names, and a legacy API can refuse every combination but one"
+    instead: "re-run it using the shape a call in your own codebase already uses successfully, before building anything else on the claim"
 sources:
   - id: wiley-netsapiens-timeframes
     resource: projects/wiley
@@ -89,3 +92,25 @@ same confirmation from an API with no limitation at all:
 
 A committed probe raises how much the next reader trusts the claim, which is the
 point of committing it and also the reason a badly designed one is worse than none.
+
+# Re-probe with the shape that already works
+
+A probe fixes several choices at once: the verb, the path shape, the casing, the
+parameter names. A legacy or partitioned API can reject every combination except
+one, so a single negative result is a fact about that combination.
+
+The cheapest falsification is usually already in the repository. Find a call in the
+same family that runs successfully in production and copy its shape exactly, aimed
+at the operation the claim says is impossible.
+
+wiley carried *"answering rules are effectively CREATE-ONLY on this instance"* with
+four cards of workarounds on top, including telling customers their account needed
+manual repair in a vendor portal. The original probe had sent
+`POST action=update&enabled=no`. The same codebase ran `PUT action=Update&dnd_control=d`
+daily from another function. Different verb, different casing, different parameter
+names. The working shape aimed at the forbidden operation returned 202 and the
+change read back. Five routes were tried and two worked.
+
+Re-run the claim in the other direction too. A capability measured while turning
+something off has not been measured for turning it on, and it will be quoted as
+though it had.

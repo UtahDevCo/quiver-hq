@@ -112,7 +112,12 @@ artifact and a plausible real effect can live in the same experiment, and having
 just caught the artifact makes the other result feel audited. Catching one
 confound does not clear the rest.
 
-The open question is whether re-encoding the input helps at all. Answering it
-needs both containers interleaved per document in one window, which is what
-`projects/k1/web/scripts/ab-paired-input.ts` was written to do and has not yet
-been run.
+It was run on 2026-08-13, twice, over 103 documents and 1327 box rows with both
+arms adjacent per document. Rasterizing **costs** 2.3 points: 33 fixed against 91
+broken, pooled. The unpaired run had it 8.0 points the other way.
+
+Two further things the paired runs settled. Skew inside a real PDF costs about 5
+points rather than the 44 the bare-image rows imply, measured as 0 fixed against 13
+broken over 254 paired rows. And the damage from re-rendering concentrates in the
+boxes that print a code letter beside an amount, which is the exact failure the
+unpaired run had credited rasterizing with removing.
