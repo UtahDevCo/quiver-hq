@@ -9,6 +9,7 @@ session working inside a project can read it at a stable relative path.
 * [tools](tools/index.md) - Internal tooling. Frontend-design and chrome-devtools practices.
 * [trikin](trikin/index.md) - trikin.co.
 * [k1](k1/index.md) - Deterministic Schedule K-1 / Form 1065 extraction and tax engine. LLM extraction measurement lives here.
+* [quiver-photos-v2](quiver-photos-v2/index.md) - Google Photos backup tool. Go TUI (v3) plus Cloudflare Pages functions; releases auto-publish on a v3.* tag.
 
 # Deliberately excluded
 

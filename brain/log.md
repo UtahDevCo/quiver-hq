@@ -5,6 +5,10 @@ title: Brain bundle history
 
 # Bundle history
 
+## 2026-08-18
+
+- **Opened the `quiver-photos-v2` project layer with one verified workflow.** [release-auto-publishes-on-tag](projects/quiver-photos-v2/workflows/release-auto-publishes-on-tag.md) records that pushing a `v3.*` tag is the entire release: the V3 Release workflow builds every platform, notarizes macOS, and publishes the GitHub release with `draft: false`. The reason it earned a concept rather than a note is that `bin/release-v3.ts` still told you to "publish the draft release," which has been false since the workflow flipped to `draft: false`, so the stale instruction was costing a wait after every release. Carries a `verified` entry: Chris asked for the promotion by name after watching the v3.0.86 run publish on its own. The `not:` names the wait-for-the-draft habit. The other five inbox observations (wiley, k1, therapyanimalhub) were left in place, four of them proposing `meta` off single-repo evidence, pending a per-item call.
+
 ## 2026-08-13
 
 - **Cleared the inbox: 66 observations became 51 concepts, 6 refinements of existing ones, and 4 source upgrades.** Chris delegated the batch ("triage those brain files and promote the ones you like") rather than reviewing it concept by concept, so **none of the 51 new files carries a `verified` entry**. They are placed and active with `status: stable` and no human signature, which is exactly what the trust tier is supposed to mean. A `/brain-audit` will surface all 51 as unverified, and that is the correct reading.
