@@ -33,6 +33,10 @@ result-*
 projects/ts-interview-skeleton/
 .DS_Store
 
+# Foundation projects — live untracked on this machine (orphaned submodules)
+projects/foundation-integrations/
+projects/foundation-web/
+
 # Working data. Syncs between machines via quiver-sync (rsync) and is never
 # committed — it holds customer data and ages out by hand.
 # (scratch/agy predates this rule and stays tracked.)
