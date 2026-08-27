@@ -94,6 +94,7 @@
     unzip
     bubblewrap
     tmux
+    python3
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-cli
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-manager
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-ide
