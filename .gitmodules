@@ -32,3 +32,6 @@
 [submodule "projects/zamp-technical-success"]
 	path = projects/zamp-technical-success
 	url = git@github.com:zamptax/zamp-technical-success.git
+[submodule "projects/popreminders.com"]
+	path = projects/popreminders.com
+	url = git@github.com:deltaepsilon/popreminders.com.git
