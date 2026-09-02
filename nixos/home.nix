@@ -108,7 +108,18 @@ in
     nix-direnv 
     nodejs_24
     bun
-    gh 
+    # gh 2.99.0 adds `--attach` for media in PRs/issues/comments. nixpkgs is still
+    # on 2.98.0, so pin the release until it catches up (then drop this override).
+    (gh.overrideAttrs (old: {
+      version = "2.99.0";
+      src = fetchFromGitHub {
+        owner = "cli";
+        repo = "cli";
+        tag = "v2.99.0";
+        hash = "sha256-+66P7F+UBhqV+B/ak1LqzK8X5z+z9PLN2XhIB9FJyPg=";
+      };
+      vendorHash = "sha256-bVc4dhDapAp1YtO06C/nSrdxllpEhVFC2iZNPmjsJkI=";
+    }))
     (github-copilot-cli.overrideAttrs (oldAttrs: {
       doInstallCheck = false;
     }))
@@ -323,9 +334,28 @@ in
       # pk - Kill process(es) by port number
       # Usage: pk [port]
       #   With port: kills process on specified port
-      #   Without port: kills processes on ports 3000-3030 and every 10th port from 3030-3120
+      #   Without port: kills processes on the dev-server/aux ports used by the
+      #     quiver-hq subprojects (see QUIVER_DEV_PORTS below). Docker infra ports
+      #     (Postgres, Redis, MySQL, Vitess, etc.) are intentionally left alone.
       pk() {
           local port=$1
+
+          # Dev-server + aux dev-tool ports actually used by the subprojects.
+          #   3000 foundation-web / quiver-photos-v2 / zamp company
+          #   3001 zamp admin      3002 zamp partner    3003 zamp shopify
+          #   3004 zamp background 3005 zamp api        3007 zamp buyer
+          #   3050 foundation-integrations              3100 therapyanimalhub.com
+          #   3300 tools gtd       3310 tools wkt       3400 job-harvester
+          #   3600 wiley           3700 trikin          3800 k1
+          #   4000 chrisesplin.com 5173 k1-fork / zamp-technical-success
+          #   5556 zamp prisma studio                   6006/6007 storybook
+          #   8000 k1-fork / zamp-technical-success backend
+          #   8288 inngest         8787 stripe fwd      8788 wrangler pages
+          local QUIVER_DEV_PORTS=(
+              3000 3001 3002 3003 3004 3005 3007
+              3050 3100 3300 3310 3400 3600 3700 3800 4000
+              5173 5556 6006 6007 8000 8288 8787 8788
+          )
 
           # Function to kill a single port
           kill_port() {
@@ -354,16 +384,8 @@ in
               # Kill specific port
               kill_port $port
           else
-              # Kill ports 3000-3030
-              echo "Killing ports 3000-3030..."
-              for p in {3000..3030}; do
-                  kill_port $p
-              done
-
-              echo ""
-              echo "Killing every 10th port from 3030-3120..."
-              # Kill every 10th port from 3030 to 3120
-              for p in {3030..3120..10}; do
+              echo "Killing quiver-hq dev ports..."
+              for p in $QUIVER_DEV_PORTS; do
                   kill_port $p
               done
 
