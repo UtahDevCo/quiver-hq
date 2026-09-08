@@ -1,0 +1,31 @@
+{
+  "scan": "stl/melissa-neck-scan.stl",
+  "input_units": "m",
+  "scale_to_mm": 1000.0,
+  "axes": {
+    "left_right": "x",
+    "vertical": "y",
+    "posterior_anterior": "z",
+    "anterior_direction": "+z"
+  },
+  "neck": {
+    "expected_center_x_mm": -20.0,
+    "expected_center_z_mm": -345.0,
+    "section_levels_y_mm": [-87.5, -67.5, -47.5],
+    "section_search_radius_mm": 95.0,
+    "symmetry": {
+      "enabled": true,
+      "center_mode": "section_bounds_midpoint",
+      "samples": 161,
+      "smoothing_window": 7
+    }
+  },
+  "fit_gauge": {
+    "height_mm": 18.0,
+    "clearance_mm": 2.0,
+    "wall_thickness_mm": 2.4,
+    "rear_gap_mm": 24.0,
+    "contour_points": 160,
+    "edge_round_mm": 0.8
+  }
+}

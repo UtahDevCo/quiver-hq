@@ -1,0 +1,23 @@
+[project]
+name = "posture-collar-cad"
+version = "0.1.0"
+description = "Parametric scan-derived posture collar CAD tooling"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "cadquery>=2.6,<3",
+  "numpy>=2,<3",
+  "shapely>=2.1,<3",
+  "trimesh>=4.7,<5",
+]
+
+[project.scripts]
+collar-scan-info = "collar.scan:main"
+collar-fit-gauges = "collar.fit_gauges:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/collar"]
