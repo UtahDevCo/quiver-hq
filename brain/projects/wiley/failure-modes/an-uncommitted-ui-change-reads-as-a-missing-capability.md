@@ -1,12 +1,12 @@
 ---
-type: Observation
+type: Failure Mode
 title: An uncommitted UI change reads exactly like a missing capability
 description: A staged-but-unsaved portal reorder produced the same null diff as "the portal cannot reorder".
 kind: failure-mode
-proposed_layer: meta
 tags: [measurement, ui, probes, netsapiens]
 generated: { by: claude/opus-5, at: 2026-08-14T13:45:00Z }
-status: draft
+status: stable
+stale_after: 2027-09-14
 sources:
   - id: evidence
     resource: projects/wiley/web/scripts/snapshot-answering-rules.ts
@@ -14,7 +14,7 @@ sources:
     last_modified: 2026-08-14
 ---
 
-# Observation
+# Failure Mode
 
 To find out whether a vendor portal could reorder records that our API key could
 not, the method was: snapshot the backend, make the change in the portal,

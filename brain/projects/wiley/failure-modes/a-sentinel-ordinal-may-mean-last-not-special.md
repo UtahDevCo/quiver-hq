@@ -1,12 +1,12 @@
 ---
-type: Observation
+type: Failure Mode
 title: A sentinel ordinal may mean "last", not "this particular rule"
 description: 99 looked like a pin on the catch-all rule until an unrelated rule inherited it by becoming last.
 kind: failure-mode
-proposed_layer: meta
 tags: [ordering, api, inference, netsapiens]
 generated: { by: claude/opus-5, at: 2026-08-14T13:40:00Z }
-status: draft
+status: stable
+stale_after: 2027-09-14
 sources:
   - id: evidence
     resource: projects/wiley/web/scripts/probe-answerrule-priority.ts
@@ -18,7 +18,7 @@ sources:
     last_modified: 2026-08-14
 ---
 
-# Observation
+# Failure Mode
 
 Every account in a 290-account fleet held exactly two ordered rules, one at
 priority 0 and one at 99. Healthy accounts read `0:QuietHours 99:*`; three broken

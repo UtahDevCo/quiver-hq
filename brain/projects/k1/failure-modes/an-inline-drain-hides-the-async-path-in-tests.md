@@ -1,13 +1,12 @@
 ---
-type: Observation
+type: Failure Mode
 title: A synchronous inline drain masks the async fallback in any small-batch test
 description: When the request that enqueues work also drains a slot's worth inline, a batch small enough to finish inline never exercises the async/scheduled drainer, so a test on a small batch verifies the wrong path.
 kind: failure-mode
-proposed_layer: meta
-proposed_project: k1
 tags: [testing, ingestion, queues, verification, background-jobs]
 generated: { by: claude/opus-4-8, at: 2026-08-14T19:11:07Z }
-status: draft
+status: stable
+stale_after: 2027-09-14
 sources:
   - id: evidence
     resource: projects/k1/web/apps/web/app/api/projects/[tenantSlug]/[projectId]/uploads/route.ts
@@ -19,7 +18,7 @@ sources:
     last_modified: 2026-08-14
 ---
 
-# Observation
+# Failure Mode
 
 If the request that enqueues work also drains a slot's worth of it inline (here: the upload
 route claims and extracts up to `GOOGLE_INGESTION_MAX_ACTIVE` = 6 documents before returning),

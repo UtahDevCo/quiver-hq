@@ -66,6 +66,7 @@ Governance and the local extensions: [conventions](../conventions.md).
 ## Model output
 
 * [one-home-per-field-in-a-model-output-schema](practices/one-home-per-field-in-a-model-output-schema.md) - Two valid keys for the same value made the model pick per document; 53 codes across 9 of 175 documents landed in the key the normalizer did not read.
+* [enforce-model-gated-writes-in-code](practices/enforce-model-gated-writes-in-code.md) - A model told to flag its own low-confidence output does so inconsistently; a deterministic code check on the same signals is the actual gate.
 
 ## Validation
 

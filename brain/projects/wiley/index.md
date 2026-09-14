@@ -22,7 +22,11 @@ Resolve against the [meta layer](../../meta/index.md) — see
 
 # Failure modes
 
-*Things that look right here and are not. Empty.*
+* [a-sentinel-ordinal-may-mean-last-not-special](failure-modes/a-sentinel-ordinal-may-mean-last-not-special.md) - 99 looked like a pin on the catch-all rule until an unrelated rule inherited it by becoming last.
+* [an-uncommitted-ui-change-reads-as-a-missing-capability](failure-modes/an-uncommitted-ui-change-reads-as-a-missing-capability.md) - A staged-but-unsaved portal reorder produced the same null diff as "the portal cannot reorder".
+* [netsapiens-soft-delete-reserves-timeframe-name](failure-modes/netsapiens-soft-delete-reserves-timeframe-name.md) - A deleted answering rule / timeframe persists flagged "Deleted" and keeps its name reserved, so createTimeframe collides forever and only a vendor backend purge clears it.
+* [client-import-from-server-tainted-module-breaks-bundler-not-tsc](failure-modes/client-import-from-server-tainted-module-breaks-bundler-not-tsc.md) - Pulling a pure helper into a "use client" file from a module that also imports firebase-admin drags the server SDK into the browser bundle; tsc passes, the page fails to load.
+* [reconstruct-the-ledger-before-a-backcharge](failure-modes/reconstruct-the-ledger-before-a-backcharge.md) - Counting every skipped cycle as owed billed comped customers and dead cards; correct owed was a quarter of the naive figure.
 
 # Practices
 

@@ -1,13 +1,12 @@
 ---
-type: Observation
+type: Workflow
 title: Re-parent aptamigo.com affiliates under Dan with the maintenance script
 description: TAH affiliate onboarding leaves @aptamigo.com affiliates mis-parented; a recurring script re-parents them under Dan with a 10% override.
 kind: workflow
-proposed_layer: project
-proposed_project: therapyanimalhub.com
 tags: [affiliates, partner-applications, maintenance, production-write, turso]
 generated: { by: claude/opus-4.8, at: 2026-08-17T19:43:00Z }
-status: draft
+status: stable
+stale_after: 2027-09-14
 not:
   - term: "before.find(r => r.email === DAN_EMAIL).id"
     why: "the query selects the column as `userId`, so `.id` is undefined — parent resolves to null and orphans everyone"
@@ -30,7 +29,7 @@ sources:
     last_modified: 2026-08-17
 ---
 
-# Observation
+# Workflow
 
 TAH affiliate onboarding does not parent new `@aptamigo.com` signups under Dan, so they
 land mis-parented (usually with no parent at all). This has to be fixed periodically, not

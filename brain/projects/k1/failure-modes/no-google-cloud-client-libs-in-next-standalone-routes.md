@@ -1,13 +1,12 @@
 ---
-type: Observation
+type: Failure Mode
 title: Don't import @google-cloud/* gRPC clients into a Next standalone route
 description: Next's standalone tracer skips the client's dynamically-loaded gRPC config JSON, so the route builds green then 500s with MODULE_NOT_FOUND at runtime; use the REST API instead.
 kind: failure-mode
-proposed_layer: meta
-proposed_project: k1
 tags: [nextjs, cloud-run, app-hosting, google-cloud, standalone, bundling]
 generated: { by: claude/opus-4-8, at: 2026-08-14T19:11:07Z }
-status: draft
+status: stable
+stale_after: 2027-09-14
 sources:
   - id: evidence
     resource: projects/k1/web/apps/web/lib/server/drain-task-enqueue.ts
@@ -19,7 +18,7 @@ sources:
     last_modified: 2026-08-14
 ---
 
-# Observation
+# Failure Mode
 
 In a Next.js app built with `output: "standalone"` (Firebase App Hosting / Cloud Run),
 do not import `@google-cloud/tasks` — or any of the google-cloud gRPC client libraries

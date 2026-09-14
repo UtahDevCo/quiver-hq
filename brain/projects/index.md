@@ -13,6 +13,8 @@ managed by quiver-hq directly.
 * [k1](k1/index.md) - Deterministic Schedule K-1 / Form 1065 extraction and tax engine. LLM extraction measurement lives here.
 * [quiver-photos-v2](quiver-photos-v2/index.md) - Google Photos backup tool. Go TUI (v3) plus Cloudflare Pages functions; releases auto-publish on a v3.* tag.
 * [3d-printing](3d-printing/index.md) - Home 3D printing setup. QIDI Plus 4 (heated-chamber CoreXY), SUNLU dryer, Magigoo; PLA+/PETG/PETG-CF/TPU. Standalone folder, not a submodule.
+* [popreminders.com](popreminders.com/index.md) - Reminder app. Expo SDK 57 dev-build + Firebase (pop-reminders); Firestore rules/indexes, FCM, and notifee channels.
+* [therapyanimalhub.com](therapyanimalhub.com/index.md) - TAH. Affiliate/commission platform on Turso; production writes via maintenance scripts.
 
 # Deliberately excluded
 

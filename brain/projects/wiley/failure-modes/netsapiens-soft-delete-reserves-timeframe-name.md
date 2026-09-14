@@ -1,13 +1,12 @@
 ---
-type: Observation
+type: Failure Mode
 title: NetSapiens soft-deletes reserve a timeframe name that no endpoint can free
 description: A deleted answering rule / timeframe persists flagged "Deleted" and keeps its name reserved, so createTimeframe collides forever and only a vendor backend purge clears it.
 kind: failure-mode
-proposed_layer: project
-proposed_project: wiley
 tags: [netsapiens, altaworx, quiet-hours, third-party-api, soft-delete]
 generated: { by: claude/opus-4.8, at: 2026-08-22T11:34:17Z }
-status: draft
+status: stable
+stale_after: 2027-09-14
 sources:
   - id: code
     resource: projects/wiley/web/app/actions/settings.ts
@@ -30,7 +29,7 @@ not:
     instead: "Run repair-orphan-quiet-hours-resave.ts --apply to classify FIXED vs RESERVED; RESERVED accounts need the vendor purge."
 ---
 
-# Observation
+# Failure Mode
 
 In the Wiley NetSapiens partition (Altaworx, nsb1.unifiedsolutions.cloud), answering rules and timeframes are **soft-deleted**. A deleted answering rule remains visible in the Manager Portal (Users → 1001 → Answering Rules) carrying a "Deleted" badge, and it keeps its associated timeframe name reserved.
 
