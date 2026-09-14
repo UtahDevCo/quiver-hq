@@ -5,6 +5,10 @@ title: Brain bundle history
 
 # Bundle history
 
+## 2026-09-14
+
+- **Opened the `3d-printing` project layer with seven verified concepts from a setup research pass.** Chris runs a QIDI Plus 4, a SUNLU dryer, and Magigoo, printing PLA+/PETG/PETG-CF/TPU. Two web-research agents gathered the facts; the seven observations became three `Module` references (hardware profile, per-material slicer settings, SUNLU drying schedule) and four `Practice` rules (chamber heat off for PLA/TPU, dedicated hardened nozzle for CF, dry the hygroscopic filaments and feed from the dryer, Magigoo as a PETG release barrier). The project is a standalone folder under `projects/3d-printing`, not a submodule, so `brain/projects/index.md` gained a note that a project layer need not map to a submodule. All seven carry a `verified` entry: Chris approved the batch and chose to verify all of it, including the two `Module` tables whose numbers are community-sourced rather than from QIDI/SUNLU datasheets. Those two keep a `# Caveats` section naming the uncertainty, so a later audit can see what was signed off on trust versus a spec sheet. Nothing reached `meta`: the whole batch is specific to this hardware.
+
 ## 2026-08-18
 
 - **Opened the `quiver-photos-v2` project layer with one verified workflow.** [release-auto-publishes-on-tag](projects/quiver-photos-v2/workflows/release-auto-publishes-on-tag.md) records that pushing a `v3.*` tag is the entire release: the V3 Release workflow builds every platform, notarizes macOS, and publishes the GitHub release with `draft: false`. The reason it earned a concept rather than a note is that `bin/release-v3.ts` still told you to "publish the draft release," which has been false since the workflow flipped to `draft: false`, so the stale instruction was costing a wait after every release. Carries a `verified` entry: Chris asked for the promotion by name after watching the v3.0.86 run publish on its own. The `not:` names the wait-for-the-draft habit. The other five inbox observations (wiley, k1, therapyanimalhub) were left in place, four of them proposing `meta` off single-repo evidence, pending a per-item call.
