@@ -1,0 +1,85 @@
+{
+  "_note": "Single source of truth for the allen-key stand. Hole diameter is derived in code as key_mm + clearance_mm; do not pre-add clearance here. Depth is the drilled bore depth for that slot. Edit sizes/depths freely and re-run allen-stand.",
+
+  "params": {
+    "clearance_mm": 0.35,
+    "pitch_mm": 16.0,
+    "row_depth_mm": 25.0,
+    "row_gap_mm": 8.0,
+    "floor_mm": 5.0,
+    "back_tier_rise_mm": 20.0,
+    "chamfer_mm": 0.8,
+    "min_wall_mm": 3.0
+  },
+
+  "tiers": [
+    {
+      "name": "metric_front",
+      "rise_mm": 0.0,
+      "holes": [
+        { "label": "1.5",  "key_mm": 1.50,  "depth_mm": 15 },
+        { "label": "2",    "key_mm": 2.00,  "depth_mm": 18 },
+        { "label": "2.5",  "key_mm": 2.50,  "depth_mm": 20 },
+        { "label": "3",    "key_mm": 3.00,  "depth_mm": 25 },
+        { "label": "4",    "key_mm": 4.00,  "depth_mm": 30 },
+        { "label": "4.5",  "key_mm": 4.50,  "depth_mm": 32 },
+        { "label": "5",    "key_mm": 5.00,  "depth_mm": 35 },
+        { "label": "5.5",  "key_mm": 5.50,  "depth_mm": 35 },
+        { "label": "6",    "key_mm": 6.00,  "depth_mm": 38 },
+        { "label": "7",    "key_mm": 7.00,  "depth_mm": 40 },
+        { "label": "8",    "key_mm": 8.00,  "depth_mm": 42 },
+        { "label": "9",    "key_mm": 9.00,  "depth_mm": 45 },
+        { "label": "10",   "key_mm": 10.00, "depth_mm": 48 }
+      ]
+    },
+    {
+      "name": "sae_back",
+      "rise_mm": 20.0,
+      "holes": [
+        { "label": "1/16",  "key_mm": 1.59, "depth_mm": 15 },
+        { "label": "5/64",  "key_mm": 1.98, "depth_mm": 18 },
+        { "label": "3/32",  "key_mm": 2.38, "depth_mm": 20 },
+        { "label": "1/8",   "key_mm": 3.18, "depth_mm": 25 },
+        { "label": "5/32",  "key_mm": 3.97, "depth_mm": 30 },
+        { "label": "3/16",  "key_mm": 4.76, "depth_mm": 35 },
+        { "label": "1/4",   "key_mm": 6.35, "depth_mm": 40 },
+        { "label": "5/16",  "key_mm": 7.94, "depth_mm": 42, "reserved": true },
+        { "label": "3/8",   "key_mm": 9.53, "depth_mm": 45, "reserved": true }
+      ]
+    }
+  ],
+
+  "tray": {
+    "_note": "Slide-in tray. Long arm slides down a roofed channel; short arm pokes out the front face through a guide slot that stops it rotating. Works mounted vertically or lying flat.",
+    "pitch_mm": 16.0,
+    "channel_len_mm": 42.0,
+    "slot_len_mm": 15.0,
+    "floor_mm": 2.5,
+    "channel_gap_mm": 1.0,
+    "roof_mm": 2.5,
+    "long_clearance_mm": 0.35,
+    "short_clearance_mm": 0.6,
+    "border_mm": 6.0,
+    "back_lip_mm": 3.0,
+    "mount": {
+      "_note": "Two vendor-clip sockets on the back, spaced a whole multiple of the board slot pitch so both land on clips in adjacent slot columns. Socket profile cloned from the vendor rack leg.",
+      "board_pitch_mm": 32.5,
+      "edge_margin_mm": 14.0,
+      "clearance_mm": 0.35,
+      "wall_mm": 2.5,
+      "standoff_mm": 8.0
+    }
+  },
+
+  "spares": {
+    "_note": "Overflow bin for duplicate working sizes. Generous bores, shallow, one column per size with count holes.",
+    "depth_mm": 22,
+    "extra_clearance_mm": 0.15,
+    "groups": [
+      { "label": "3",    "key_mm": 3.00, "count": 5 },
+      { "label": "4",    "key_mm": 4.00, "count": 2 },
+      { "label": "5",    "key_mm": 5.00, "count": 2 },
+      { "label": "3/32", "key_mm": 2.38, "count": 4 }
+    ]
+  }
+}
