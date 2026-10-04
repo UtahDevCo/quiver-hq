@@ -99,8 +99,9 @@
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-manager
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-ide
     inputs.codex-desktop.packages.${pkgs.stdenv.hostPlatform.system}.codex-desktop
+    inputs.claude-desktop.packages.${pkgs.stdenv.hostPlatform.system}.claude-desktop
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.investing-screener
-    inputs.agent-of-empires.packages.${pkgs.stdenv.hostPlatform.system}.aoe-with-web
+    inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   environment.variables = {

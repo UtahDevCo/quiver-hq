@@ -97,7 +97,6 @@ in
     alpaca-cli
     stripe-cli
     (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-secrets or null)
-    (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.multica or null)
     (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-sleep or null)
     (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.controller or null)
     (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.interactive-mission or null)
@@ -204,6 +203,36 @@ in
       mimeType = [ "text/html" ];
     };
 
+    # Override the packaged entry so Electron uses the libsecret backend.
+    # Niri isn't recognized as GNOME/KDE, so Electron otherwise falls back to
+    # plaintext storage and refuses to persist the sign-in.
+    claude-desktop = {
+      name = "Claude";
+      genericName = "AI Assistant";
+      comment = "Desktop application for Claude.ai";
+      exec = "claude-desktop --password-store=gnome-libsecret %U";
+      icon = "claude-desktop";
+      terminal = false;
+      categories = [ "Utility" "Development" ];
+      mimeType = [ "x-scheme-handler/claude" ];
+      startupNotify = true;
+      actions = {
+        NewChat = {
+          name = "New chat";
+          exec = "claude-desktop --password-store=gnome-libsecret claude://claude.ai/new";
+        };
+        NewCode = {
+          name = "New Claude Code session";
+          exec = "claude-desktop --password-store=gnome-libsecret claude://code/new";
+        };
+      };
+      settings = {
+        StartupWMClass = "claude-desktop";
+        SingleMainWindow = "true";
+        Keywords = "AI;Chat;Assistant;Claude;Code;LLM;";
+      };
+    };
+
     vibetyper = {
       name = "VibeTyper";
       exec = "env NO_DESKTOP_ENTRY=1 PASSWORD_STORE_BACKEND=gnome-libsecret appimage-run /home/chris/bin/VibeTyper.AppImage --password-store=gnome-libsecret %u";
@@ -270,8 +299,6 @@ in
       alias agide='antigravity-ide'
       alias upgrade-agy='cd ~/dev/quiver-hq && bun ~/.gemini/config/skills/antigravity-upgrade/scripts/upgrade.js --auto --rebuild && cd -'
       alias opsignin='eval $(op signin)'
-      alias mlogs='journalctl --user -u multica-daemon -f'
-      alias mrestart='systemctl --user restart multica-daemon'
       alias copilot='copilot'
       alias zed='zeditor'
       alias taildrop='tailscale file get /home/chris/Downloads'
@@ -399,27 +426,6 @@ in
       # Clean up orphaned dev processes on shell exit
       quiver-monitor kill >/dev/null 2>&1
     '';
-  };
-
-  systemd.user.services.multica-daemon = lib.mkIf pkgs.stdenv.isLinux {
-    Unit = {
-      Description = "Multica local agent runtime";
-      After = [ "network-online.target" ];
-      Wants = [ "network-online.target" ];
-    };
-    Service = {
-      Type = "simple";
-      ExecCondition = "${pkgs.jq}/bin/jq -e '.token | strings | length > 0' %h/.multica/config.json";
-      ExecStart = "${inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.multica}/bin/multica daemon start --foreground --no-auto-update";
-      Restart = "on-failure";
-      RestartSec = 10;
-      Environment = [
-        "HOME=%h"
-        "MULTICA_WORKSPACES_ROOT=%h/multica_workspaces"
-        "PATH=%h/.nix-profile/bin:/etc/profiles/per-user/chris/bin:/run/current-system/sw/bin:%h/.local/bin:%h/.npm-global/bin:%h/.bun/bin:%h/go/bin"
-      ];
-    };
-    Install.WantedBy = [ "default.target" ];
   };
 
   systemd.user.services.cli-pinger = lib.mkIf pkgs.stdenv.isLinux {
