@@ -57,7 +57,7 @@ from .cord_brace import (
     _to_local,
     _wedge,
 )
-from .outer_brace import _reference_outer_profile
+from .sleeve_profile import _reference_outer_profile
 
 
 CHAIN = ["anchor"] + [f"segment-{i + 1}" for i in range(SEGMENT_COUNT)] + ["dial-pod"]

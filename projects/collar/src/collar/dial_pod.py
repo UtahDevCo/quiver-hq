@@ -44,7 +44,7 @@ from .cord_brace import (
     _to_local,
     pod_build_frame,
 )
-from .outer_brace import _reference_outer_profile
+from .sleeve_profile import _reference_outer_profile
 
 
 BASE_DIAMETER_MM = 37.37

@@ -17,7 +17,6 @@ collar-scan-info = "collar.scan:main"
 collar-fit-gauges = "collar.fit_gauges:main"
 collar-full-sleeve = "collar.full_sleeve:main"
 collar-fit-scene = "collar.fit_scene:main"
-collar-outer-brace = "collar.outer_brace:main"
 
 [build-system]
 requires = ["hatchling"]

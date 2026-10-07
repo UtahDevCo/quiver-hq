@@ -14,7 +14,6 @@ from collar.full_sleeve import (
     _plane_basis,
     _smooth_containing_envelope,
 )
-from collar.outer_brace import _segment_ranges
 
 
 class SymmetryTests(unittest.TestCase):
@@ -122,14 +121,6 @@ class SymmetryTests(unittest.TestCase):
         self.assertTrue(smoothed.is_valid)
         self.assertTrue(envelope.buffer(1e-6).covers(lumpy))
         self.assertGreaterEqual(expansion, 0.0)
-
-    def test_segment_ranges_leave_rear_opening_and_even_cells(self) -> None:
-        ranges = _segment_ranges(8, rear_opening_deg=34.0, gap_deg=3.0)
-
-        self.assertEqual(len(ranges), 8)
-        self.assertAlmostEqual(ranges[0][0], -71.5)
-        self.assertAlmostEqual(ranges[-1][1], 251.5)
-        self.assertTrue(all(end > start for start, end in ranges))
 
 
 if __name__ == "__main__":

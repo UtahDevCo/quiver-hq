@@ -1,17 +1,11 @@
-"""Cord-strung brace concept around the fitted sleeve (look study).
+"""Shared layout and shape helpers for the cord-strung brace, plus its look study.
 
-Four domed segments, a long dial pod at the back that swells to 42 mm at the dial
-and tapers to band height at its ends, and a lace-anchor piece sit on the
-sleeve's smooth 38 mm waist.  The seam sits beside the pod, over the sleeve's
-rear opening.  In the intended build two low-stretch cords run
-through every part just inside the outer surface, so the chain opens by
-pivoting about its outer edge without changing cord length, and the inner end
-faces meet at the designed ring shape as the minimum-circumference stop.  The
-BOA closes the single seam between the dial pod and the anchor piece.
-
-This module renders the look only: no cord tunnels, slot cartridge, or lace
-anchor yet.  Geometry is built in the sleeve's local frame (profile in x/z,
-neck axis along y, anterior +z), the same frame `outer_brace.py` uses.
+`brace_parts` and `dial_pod` build the printable parts from these helpers: the
+arc-length layout of anchor, segments and dial pod around the sleeve, the domed
+segment and tapered pod shapes, and the fillet fallback.  Running this module
+writes the look study (no tunnels or hardware) to `build/cord-brace/`, including
+`sleeve-local.stl`, which `assembly_viz` reads.  Geometry is in the sleeve's
+local frame: profile in x/z, neck axis along y, anterior +z.
 """
 
 from __future__ import annotations
@@ -27,7 +21,7 @@ from shapely.geometry import LineString, Polygon
 
 from .config import DEFAULT_CONFIG, PROJECT_ROOT, load_config
 from .full_sleeve import _build_full_sleeve_shapes
-from .outer_brace import _reference_outer_profile
+from .sleeve_profile import _reference_outer_profile
 
 
 SLEEVE_CLEARANCE_MM = 0.8

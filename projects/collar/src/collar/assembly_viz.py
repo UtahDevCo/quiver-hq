@@ -21,7 +21,7 @@ from . import brace_parts as bp
 from .config import DEFAULT_CONFIG, PROJECT_ROOT, load_config
 from .cord_brace import SLEEVE_CLEARANCE_MM, WALL_MM, _layout, _ray_hit
 from .dial_pod import SeatFrame, SEAT_SHIFT_MM
-from .outer_brace import _reference_outer_profile
+from .sleeve_profile import _reference_outer_profile
 
 
 CHAIN = bp.CHAIN
