@@ -272,6 +272,9 @@ in
     };
   };
 
+  # .zshenv, so non-interactive SSH commands (herdr machine add) find ~/.local/bin.
+  home.sessionPath = [ "$HOME/.local/bin" ];
+
   # Configure Zsh
   programs.zsh = {
     enable = true;
