@@ -86,8 +86,9 @@ POD_KNOT_FROM_END_MM = 5.5
 LACE_FACE_V_MM = 12.5  # where the strands leave the pod's windows
 LACE_SLOT_U_MM = (-3.0,)  # straight slot starts past the seam face
 LACE_SLOT_NECK_MM = 1.4  # opening: one 1.16 mm strand at a time
-LACE_SLOT_BASE_MM = 3.0  # both strands side by side underneath
-LACE_SLOT_BASE_DEPTH_MM = 2.3
+LACE_SLOT_NECK_HEIGHT_MM = 3.7  # above the floor, below the outer surface everywhere
+LACE_SLOT_LIP_MM = 1.2  # lower lip thickness
+LACE_SLOT_POCKET_MM = 2.5  # how far the pocket reaches down behind the lip
 LACE_SLOT_FLOOR_OFFSET = OUTER_EDGE - 4.0
 KNOT_CENTRE_U_MM = 12.5
 KNOT_NECK_MM = 4.0  # the knot squeezes through
@@ -340,11 +341,16 @@ def build(config: dict) -> dict:
         xDir=cq.Vector(0, 0, flip),
         normal=cq.Vector(float(t0[0]), float(t0[1]), 0),
     )
-    neck, base, base_h = LACE_SLOT_NECK_MM / 2, LACE_SLOT_BASE_MM / 2, LACE_SLOT_BASE_DEPTH_MM
-    roof = base - neck  # 45 degree roof from the base's top edge to the neck
-    section = [  # (v, height above the floor)
-        (-base, 0.0), (base, 0.0), (base, base_h - roof), (neck, base_h),
-        (neck, rise), (-neck, rise), (-neck, base_h), (-base, base_h),
+    # Upright, any lip over an open-ended slot starts printing in mid-air, so
+    # the upper side is one 45 degree face with no lip.  The trap is a hook:
+    # the lace presses in past the lower lip and drops into a pocket behind it.
+    neck, neck_h = LACE_SLOT_NECK_MM / 2, LACE_SLOT_NECK_HEIGHT_MM
+    lip_h = neck_h - LACE_SLOT_LIP_MM
+    bottom = -neck - LACE_SLOT_POCKET_MM
+    upper = lambda h: neck + (h - neck_h)  # the 45 degree upper face
+    assert upper(0.0) >= bottom, "the 45 degree face must reach the floor inside the pocket"
+    section = [  # (v, height above the floor), v up in the print
+        (bottom, 0.0), (upper(0.0), 0.0), (upper(rise), rise), (-neck, rise), (-neck, lip_h), (bottom, lip_h),
     ]
     lace_catch = cq.Workplane(slot_plane).polyline([(flip * v, h) for v, h in section]).close().extrude(slot_len)
 

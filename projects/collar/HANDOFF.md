@@ -51,20 +51,27 @@ back and the seam sits between pod and anchor.
   16 mm. Walls: lid at least 1.62 mm over the flange, lap 1.2 mm, floor
   3.0 mm, 2.73 mm behind the inserts, and only 1.0 mm under the cord tunnel in
   the pod.
-- **Lace catch (anchor v3):** a straight slot from the seam face, 1.4 mm wide at
-  the surface and 3.0 mm underneath (2.3 mm deep base), runs into a round knot
-  pocket at u = 12.5 mm that is 4.0 mm across at the surface and 7.0 mm
-  underneath. Both cavities have 45 degree roofs on their upper side, so the
-  anchor prints upright without supports. A figure-eight tied in the doubled
-  lace loop presses into the pocket. With the dial popped, it pulls back out and
-  the brace opens fully. This replaced a screw post, because the 254 mm of lace
-  the popped dial pays out could not clear Melissa's head.
+- **Lace catch (anchor v3):** a straight slot from the seam face runs into a
+  round knot pocket at u = 12.5 mm (4.0 mm across at the surface, 7.0 mm
+  underneath, 45 degree cone). The slot is a hook: a 1.4 mm opening, a 45
+  degree upper face with no lip, and a 1.2 mm lower lip with a pocket reaching
+  2.5 mm down behind it. A lip on the upper side made a floating region when
+  printed upright, because the slot is open at both ends (24 mm2 with a flat
+  underside, still 4 mm2 with 45 degree faces). The layer-by-layer island check
+  now finds none. A figure-eight in the doubled lace presses into the knot
+  pocket. With the dial popped it pulls back out and the brace opens fully.
+  This replaced a screw post, because the 254 mm of lace the popped dial pays
+  out could not clear Melissa's head.
 - **Meshes:** all eight print STLs are watertight single bodies (checked
   2026-10-07; the pod's STL used to carry 12 bad edges).
 
 Segment chords between joint lines: 1 = 44.7, 2 = 46.6, 3 = 46.3, 4 = 44.1,
 5 = 46.1 mm. Segments 1 and 4 are the curved pair, and 2, 3 and 5 are
 interchangeable. The first prints have no labels.
+
+Iterating: `python -m collar.brace_parts --skip-check` takes about 40 s.
+The joint and seam checks take about 19 minutes more, so run them before
+committing a change to joints, cords or the seam.
 
 ## Dial and hardware
 
@@ -82,7 +89,8 @@ interchangeable. The first prints have no labels.
 - Whether a figure-eight in the doubled lace pushes through the 4 mm knot
   opening by thumb. Go to 4.5 mm if not, or 3.5 mm if it pulls out under
   tension.
-- Whether the strands press through the 1.4 mm slot. Next step is 1.6 mm.
+- Whether the strands press through the 1.4 mm slot opening and stay behind
+  the lower lip. Next step is 1.6 mm.
 
 ## Safety constraints
 
