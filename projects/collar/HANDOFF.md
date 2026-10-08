@@ -55,9 +55,13 @@ back and the seam sits between pod and anchor.
   3.2 mm side by side and the figure-eight in it is 8.45 mm across. A straight
   slot from the seam face slopes into the part at 45 degrees (3.8 mm tall at the
   surface, 3.0 mm deep, both long faces at 45 degrees), swept along the domed
-  outer face so its depth stays constant. It ends in a 10 mm teardrop knot
-  pocket at u = 13.5 mm, about 7 mm deep (2 mm floor above the inner face),
-  with its point up so the roof prints upright. The knot bears on the slot's
+  outer face so its depth stays constant. It opens into a covered knot cave
+  (u = 2.5 to 13.5 mm, 10 mm tall plus a 45 degree gable, about 5.4 mm deep,
+  1.6 mm floor, about 1.8 mm of skin over it) that ends at a 10 mm teardrop
+  window at u = 13.5 mm. The knot drops into the window and lace tension
+  slides it under the skin, so loosening the dial to adjust does not free it.
+  The knot must lie flat (8.45 mm width vertical) to fit the 5.4 mm depth. It
+  bears on the cave's
   end. About 1.6 mm of wall separates the pocket from the square-knot channel;
   the knot pulls the other way. Earlier versions were sized for a single
   1.16 mm strand and a 4 mm knot opening and did not fit the real lace. Any lip
@@ -88,7 +92,8 @@ committing a change to joints, cords or the seam.
 
 ## Open questions
 
-- Fit of the 8.45 mm knot in the 10 mm pocket and the doubled lace in the
+- Whether the knot lies flat enough for the 5.4 mm cave and stays put when
+  the dial is loosened; fit of the 8.45 mm knot in the 10 mm window and the doubled lace in the
   3.8 mm slot on the printed v3 anchor.
 
 ## Safety constraints

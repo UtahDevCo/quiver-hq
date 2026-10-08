@@ -90,7 +90,11 @@ LACE_SLOT_HEIGHT_MM = 3.8  # doubled lace is 3.2 mm side by side, plus clearance
 LACE_SLOT_DEPTH_MM = 3.0  # along the outward normal; the strands sit one behind the other
 KNOT_CENTRE_U_MM = 13.5
 KNOT_POCKET_DIA_MM = 10.0  # the knot in the doubled lace measures 8.45 mm
-KNOT_FLOOR_OFFSET = SLEEVE_CLEARANCE_MM + 2.0  # 2 mm floor under the knot, about 7 mm deep
+KNOT_FLOOR_OFFSET = SLEEVE_CLEARANCE_MM + 1.4  # floor under the window and cave
+KNOT_CAVE_U_MM = 2.5  # covered cave runs from here to the window, toward the seam
+KNOT_CAVE_HEIGHT_MM = 10.0  # the knot lies flat, its 8.45 mm width vertical
+KNOT_CAVE_SKIN_MM = 1.4  # plastic over the knot
+LACE_SLOT_END_U_MM = KNOT_CAVE_U_MM + 1.0  # the slot opens into the cave's end
 
 
 def _rot(v: np.ndarray, degrees: float) -> np.ndarray:
@@ -222,6 +226,40 @@ def _arc_angle(profile, angle: float, arc_mm: float, offset: float) -> float:
     return angle + math.degrees(arc_mm / radius)
 
 
+def _outer_surface(profile, anchor: cq.Shape, u_angle, u: float, z: float = 0.0) -> float:
+    """Offset of the anchor's outer face at arc position u, found by bisection."""
+    lo, hi = JOINT_OFFSET, OUTER_EDGE + SEGMENT_DOME_WALL_MM
+    for _ in range(30):
+        mid = (lo + hi) / 2
+        q = _ray_hit(profile, mid, u_angle(u))
+        lo, hi = (mid, hi) if anchor.isInside(cq.Vector(float(q[0]), float(q[1]), z)) else (lo, mid)
+    return lo
+
+
+def _knot_cave(profile, anchor: cq.Shape, u_angle) -> cq.Workplane:
+    """Covered cave from the knot window toward the seam.
+
+    Lace tension slides the knot out of the window and under a skin of
+    plastic, so it stays put if the dial is loosened to adjust.  Its top is a
+    45 degree gable so it prints upright; the floor faces up.
+    """
+    u0, u1 = KNOT_CAVE_U_MM, KNOT_CENTRE_U_MM
+    surface = min(_outer_surface(profile, anchor, u_angle, u) for u in np.linspace(u0, u1, 8))
+    depth = surface - KNOT_CAVE_SKIN_MM - KNOT_FLOOR_OFFSET
+    mid = (u0 + u1) / 2
+    c, n, t = _surface_point(profile, KNOT_FLOOR_OFFSET, u_angle(mid))
+    up = np.array([0.0, 0.0, 1.0])
+    flip = 1.0 if np.cross([t[0], t[1], 0.0], up) @ [n[0], n[1], 0.0] > 0 else -1.0
+    plane = cq.Plane(
+        origin=cq.Vector(float(c[0]), float(c[1]), 0),
+        xDir=cq.Vector(0, 0, flip),
+        normal=cq.Vector(float(t[0]), float(t[1]), 0),
+    )
+    half = KNOT_CAVE_HEIGHT_MM / 2
+    section = [(-half, 0.0), (half, 0.0), (half + depth / 2, depth / 2), (half, depth), (-half, depth)]
+    return cq.Workplane(plane).polyline([(flip * v, d) for v, d in section]).close().extrude((u1 - u0) / 2, both=True)
+
+
 def _lace_slot(profile, anchor: cq.Shape, u_angle) -> cq.Workplane:
     """Lace slot along the anchor's outer face, from past the seam face to the
     knot pocket.
@@ -233,16 +271,10 @@ def _lace_slot(profile, anchor: cq.Shape, u_angle) -> cq.Workplane:
     follows the domed outer face so its depth stays constant.
     """
 
-    def surface(u: float) -> float:
-        lo, hi = JOINT_OFFSET, OUTER_EDGE + SEGMENT_DOME_WALL_MM
-        for _ in range(30):
-            mid = (lo + hi) / 2
-            q = _ray_hit(profile, mid, u_angle(u))
-            lo, hi = (mid, hi) if anchor.isInside(cq.Vector(float(q[0]), float(q[1]), 0.0)) else (lo, mid)
-        return lo
+    surface = lambda u: _outer_surface(profile, anchor, u_angle, u)
 
     first = 1.0  # sample inside the part, then carry the depth out past the seam face
-    us = np.linspace(LACE_SLOT_U_MM[0], KNOT_CENTRE_U_MM, 12)
+    us = np.linspace(LACE_SLOT_U_MM[0], LACE_SLOT_END_U_MM, 8)
     pts = []
     for u in us:
         q = _ray_hit(profile, surface(max(u, first)), u_angle(u))
@@ -390,7 +422,11 @@ def build(config: dict) -> dict:
         part = _rounded(shape_ends(raw, name), EDGE_ROUND_MM, name)
         part = part.cut(cords)
         if name == "anchor":
-            part = part.cut(anchor_pockets).cut(knot_catch).cut(_lace_slot(profile, part.val(), u_angle))
+            body = part.val()
+            part = (
+                part.cut(anchor_pockets).cut(knot_catch)
+                .cut(_knot_cave(profile, body, u_angle)).cut(_lace_slot(profile, body, u_angle))
+            )
         label_at = (
             u_angle(LABEL_U_MM[name]) if name in LABEL_U_MM else (start + end) / 2
         )
