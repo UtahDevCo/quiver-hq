@@ -75,7 +75,7 @@ CORD_TUNNEL_MM = 4.6  # 4 mm paracord
 KNOT_POCKET_MM = 7.0  # pocket width
 KNOT_POCKET_PAST_CORD_MM = 2.5  # pocket reaches |z| = 14.5, 1 mm inside the edge round
 KNOT_POCKET_INNER_Z_MM = 5.0  # and runs toward mid-height down to |z| = 5
-ANCHOR_KNOT_FROM_JOINT_MM = 12.0
+ANCHOR_KNOT_FROM_JOINT_MM = 8.0  # cord ends sit near the joint end, leaving room for the lace knot cave
 ANCHOR_KNOT_CHANNEL_MM = 1.5 * KNOT_POCKET_MM  # one channel for a square knot joining both cords
 LABEL_DEPTH_MM = 0.6  # engraved into the inner face
 LABEL_SIZE_MM = 7.0
@@ -88,7 +88,7 @@ LACE_FACE_V_MM = 12.5  # where the strands leave the pod's windows
 LACE_SLOT_U_MM = (-3.0,)  # straight slot starts past the seam face
 LACE_SLOT_HEIGHT_MM = 3.8  # doubled lace is 3.2 mm side by side, plus clearance and sag
 LACE_SLOT_DEPTH_MM = 3.0  # along the outward normal; the strands sit one behind the other
-KNOT_CENTRE_U_MM = 13.5
+KNOT_CENTRE_U_MM = 18.0  # window centre; the cave covers the knot from here back to KNOT_CAVE_U_MM
 KNOT_POCKET_DIA_MM = 10.0  # the knot in the doubled lace measures 8.45 mm
 KNOT_FLOOR_OFFSET = SLEEVE_CLEARANCE_MM + 1.4  # floor under the window and cave
 KNOT_CAVE_U_MM = 2.5  # covered cave runs from here to the window, toward the seam
@@ -246,18 +246,22 @@ def _knot_cave(profile, anchor: cq.Shape, u_angle) -> cq.Workplane:
     u0, u1 = KNOT_CAVE_U_MM, KNOT_CENTRE_U_MM
     surface = min(_outer_surface(profile, anchor, u_angle, u) for u in np.linspace(u0, u1, 8))
     depth = surface - KNOT_CAVE_SKIN_MM - KNOT_FLOOR_OFFSET
-    mid = (u0 + u1) / 2
-    c, n, t = _surface_point(profile, KNOT_FLOOR_OFFSET, u_angle(mid))
+    # Swept along the floor's offset curve: a straight cave this long would
+    # thin the skin at its ends, because the outer face curves away from it.
+    pts = []
+    for u in np.linspace(u0, u1, 10):
+        q = _ray_hit(profile, KNOT_FLOOR_OFFSET, u_angle(u))
+        pts.append(cq.Vector(float(q[0]), float(q[1]), 0.0))
+    path = cq.Wire.assembleEdges([cq.Edge.makeSpline(pts)])
+    tangent = (pts[1] - pts[0]).normalized()
+    _, n, _ = _surface_point(profile, KNOT_FLOOR_OFFSET, u_angle(u0))
     up = np.array([0.0, 0.0, 1.0])
-    flip = 1.0 if np.cross([t[0], t[1], 0.0], up) @ [n[0], n[1], 0.0] > 0 else -1.0
-    plane = cq.Plane(
-        origin=cq.Vector(float(c[0]), float(c[1]), 0),
-        xDir=cq.Vector(0, 0, flip),
-        normal=cq.Vector(float(t[0]), float(t[1]), 0),
-    )
+    flip = 1.0 if np.cross([tangent.x, tangent.y, 0.0], up) @ [n[0], n[1], 0.0] > 0 else -1.0
+    plane = cq.Plane(origin=pts[0], xDir=cq.Vector(0, 0, flip), normal=tangent)
     half = KNOT_CAVE_HEIGHT_MM / 2
     section = [(-half, 0.0), (half, 0.0), (half + depth / 2, depth / 2), (half, depth), (-half, depth)]
-    return cq.Workplane(plane).polyline([(flip * v, d) for v, d in section]).close().extrude((u1 - u0) / 2, both=True)
+    profile_wp = cq.Workplane(plane).polyline([(flip * v, d) for v, d in section]).close()
+    return profile_wp.sweep(cq.Workplane().add(path), isFrenet=False)
 
 
 def _lace_slot(profile, anchor: cq.Shape, u_angle) -> cq.Workplane:

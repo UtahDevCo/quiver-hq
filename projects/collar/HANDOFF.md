@@ -26,9 +26,9 @@ back and the seam sits between pod and anchor.
   the outer edge. In the pod each ends in its own figure-eight pocket (7 mm
   stadium on the inner face from |z| 14.5 to 5 mm, 5.5 mm from the pod's end).
   In the anchor both ends meet in one 10.5 mm wide channel from z = -14.5 to
-  +14.5 mm and are tied together with a square knot. The channel keeps the old
-  pockets' edge nearest the joint (12 mm + 3.5 mm from the joint end) and grows
-  into the body. Pockets must stop 1 mm inside the 2.5 mm edge round, or the
+  +14.5 mm (u = 24.5 to 35.5 mm, 4.5 mm from the joint end) and are tied
+  together with a square knot. It sits 8 mm from the joint end to make room for
+  the lace knot cave; about 1.6 mm of wall separates the two. Pockets must stop 1 mm inside the 2.5 mm edge round, or the
   inner face becomes unmeshable.
 - **Labels:** engraved 0.6 mm into the inner face, 7 mm text, readable from
   inside the ring: A (anchor, 6.5 mm from its seam face), 1 to 5 (segments,
@@ -56,9 +56,10 @@ back and the seam sits between pod and anchor.
   slot from the seam face slopes into the part at 45 degrees (3.8 mm tall at the
   surface, 3.0 mm deep, both long faces at 45 degrees), swept along the domed
   outer face so its depth stays constant. It opens into a covered knot cave
-  (u = 2.5 to 13.5 mm, 10 mm tall plus a 45 degree gable, about 5.4 mm deep,
-  1.6 mm floor, about 1.8 mm of skin over it) that ends at a 10 mm teardrop
-  window at u = 13.5 mm. The knot drops into the window and lace tension
+  (u = 2.5 to 18 mm, 10 mm tall plus a 45 degree gable, about 5.4 mm deep,
+  1.6 mm floor, at least 1.4 mm of skin), swept along the floor's offset curve
+  so the skin does not thin at the ends. It ends at a 10 mm teardrop window
+  centred at u = 18 mm, which leaves about 11 mm of the knot's path covered. The knot drops into the window and lace tension
   slides it under the skin, so loosening the dial to adjust does not free it.
   The lace slot runs on through the skin to the window, so the lace presses
   in from outside along its whole length (no threading); the slit is about
@@ -67,8 +68,7 @@ back and the seam sits between pod and anchor.
   overhang, and the island check finds a 0.2 mm2 sliver there.
   The knot must lie flat (8.45 mm width vertical) to fit the 5.4 mm depth. It
   bears on the cave's
-  end. About 1.6 mm of wall separates the pocket from the square-knot channel;
-  the knot pulls the other way. Earlier versions were sized for a single
+  end, pulling away from the square-knot channel. Earlier versions were sized for a single
   1.16 mm strand and a 4 mm knot opening and did not fit the real lace. Any lip
   over this open-ended slot prints in mid-air, so there is no trap on the slot.
   Layer check (three slice offsets): no floating regions. The A label moved to
