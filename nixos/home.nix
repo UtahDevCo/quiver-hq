@@ -140,7 +140,8 @@ in
     (if pkgs.stdenv.isLinux then (warp-terminal.override { waylandSupport = true; }) else null)
     (if pkgs.stdenv.isLinux then noto-fonts else null)
     (if pkgs.stdenv.isLinux then noto-fonts-color-emoji else null)
-    (if pkgs.stdenv.isLinux then signal-desktop else null)
+    # signal-desktop is provided system-wide via the flake's latest upstream
+    # build (see pn54 configuration.nix / flake.nix signalDesktopPackage).
   ];
 
   programs.yt-dlp = {

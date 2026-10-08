@@ -65,6 +65,21 @@
   networking.wireless.enable = false;
   services.openssh.enable = true;
 
+  # ---------------------------------------------------------------------------
+  # Tailscale (daemon enabled in common.nix)
+  # ---------------------------------------------------------------------------
+  # authKeyFile re-authenticates automatically after a logout or reboot, so the
+  # node stays joined without a manual `tailscale up`. The file holds a reusable
+  # auth key from the admin console (Settings → Keys); keep it out of git.
+  # extraUpFlags must list every non-default pref or autoconnect's `up` errors.
+  # useRoutingFeatures = "both" turns on IP forwarding, required to actually
+  # serve as the advertised exit node.
+  services.tailscale = {
+    authKeyFile = "/var/lib/tailscale/authkey";
+    useRoutingFeatures = "both";
+    extraUpFlags = [ "--advertise-exit-node" "--operator=chris" ];
+  };
+
   # Mountain Time – adjust if the machine moves.
   time.timeZone = lib.mkForce "America/Denver";
 
@@ -87,10 +102,14 @@
     packages = [ pkgs.terminus_font ];
   };
 
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = (with pkgs; [
     wpa_supplicant
     iw
     iwd
+    jq
+  ]) ++ [
+    # Latest upstream Signal Desktop (see flake.nix signalDesktopPackage).
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.signal-desktop
   ];
 
   boot.loader.systemd-boot.enable = true;
