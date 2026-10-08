@@ -81,19 +81,16 @@ LABEL_DEPTH_MM = 0.6  # engraved into the inner face
 LABEL_SIZE_MM = 7.0
 LABELS = {"anchor": "A", **{f"segment-{i + 1}": str(i + 1) for i in range(SEGMENT_COUNT)}, "dial-pod": "P"}
 LABEL_U_MM = {"anchor": 6.5}  # from the seam face; other parts are labelled mid-arc
+LABEL_Z_MM = {"anchor": -11.0}  # below the knot pocket; others at mid-height
 POD_KNOT_FROM_END_MM = 5.5
 
 LACE_FACE_V_MM = 12.5  # where the strands leave the pod's windows
 LACE_SLOT_U_MM = (-3.0,)  # straight slot starts past the seam face
-LACE_SLOT_NECK_MM = 1.6  # narrowest point: one 1.16 mm strand at a time
-LACE_SLOT_NECK_DEPTH_MM = 0.6  # below the outer surface; both sides flare 45 degrees above it
-LACE_SLOT_LIP_MM = 1.2  # lower lip thickness
-LACE_SLOT_POCKET_MM = 1.6  # pocket drop behind the lower lip
-KNOT_CENTRE_U_MM = 12.5
-KNOT_NECK_MM = 4.0  # the knot squeezes through
-KNOT_BASE_MM = 7.0
-KNOT_BASE_DEPTH_MM = 2.5
-KNOT_FLOOR_OFFSET = SLEEVE_CLEARANCE_MM + 3.0  # 3 mm floor under the knot
+LACE_SLOT_HEIGHT_MM = 3.8  # doubled lace is 3.2 mm side by side, plus clearance and sag
+LACE_SLOT_DEPTH_MM = 3.0  # along the outward normal; the strands sit one behind the other
+KNOT_CENTRE_U_MM = 13.5
+KNOT_POCKET_DIA_MM = 10.0  # the knot in the doubled lace measures 8.45 mm
+KNOT_FLOOR_OFFSET = SLEEVE_CLEARANCE_MM + 2.0  # 2 mm floor under the knot, about 7 mm deep
 
 
 def _rot(v: np.ndarray, degrees: float) -> np.ndarray:
@@ -226,14 +223,14 @@ def _arc_angle(profile, angle: float, arc_mm: float, offset: float) -> float:
 
 
 def _lace_slot(profile, anchor: cq.Shape, u_angle) -> cq.Workplane:
-    """Hook-shaped lace slot along the anchor's outer face, from past the seam
-    face to the knot pocket.
+    """Lace slot along the anchor's outer face, from past the seam face to the
+    knot pocket.
 
-    The anchor prints upright, so any lip over this open-ended slot would start
-    in mid-air.  The upper side is one 45 degree face; the lace presses in
-    through the opening and drops behind the lower lip.  The outer face is
-    domed, so the slot follows it to keep the opening the same depth below
-    the surface along its length.
+    The anchor prints upright and the slot is open at both ends, so a flat
+    ceiling would print in mid-air.  The slot is a straight channel sloping
+    down into the part at 45 degrees: both faces print without support, and
+    the doubled lace sits one strand behind the other along the diagonal.  It
+    follows the domed outer face so its depth stays constant.
     """
 
     def surface(u: float) -> float:
@@ -248,7 +245,7 @@ def _lace_slot(profile, anchor: cq.Shape, u_angle) -> cq.Workplane:
     us = np.linspace(LACE_SLOT_U_MM[0], KNOT_CENTRE_U_MM, 12)
     pts = []
     for u in us:
-        q = _ray_hit(profile, surface(max(u, first)) - LACE_SLOT_NECK_DEPTH_MM, u_angle(u))
+        q = _ray_hit(profile, surface(max(u, first)), u_angle(u))
         pts.append(cq.Vector(float(q[0]), float(q[1]), 0.0))
     path = cq.Wire.assembleEdges([cq.Edge.makeSpline(pts)])
 
@@ -257,25 +254,21 @@ def _lace_slot(profile, anchor: cq.Shape, u_angle) -> cq.Workplane:
     up = np.array([0.0, 0.0, 1.0])
     flip = 1.0 if np.cross([tangent.x, tangent.y, 0.0], up) @ [n0[0], n0[1], 0.0] > 0 else -1.0
     plane = cq.Plane(origin=pts[0], xDir=cq.Vector(0, 0, flip), normal=tangent)
-    neck = LACE_SLOT_NECK_MM / 2
-    lip = -LACE_SLOT_LIP_MM
-    bottom = -neck - LACE_SLOT_POCKET_MM
-    back = bottom - neck  # the 45 degree face reaches the pocket floor here
-    mouth = SEGMENT_DOME_WALL_MM  # well past the surface
-    section = [  # (v up in the print, outward from the opening)
-        (bottom, back), (neck, 0.0), (neck + mouth, mouth), (-neck - mouth, mouth), (-neck, 0.0), (-neck, lip),
-        (bottom, lip),
+    half, depth = LACE_SLOT_HEIGHT_MM / 2, LACE_SLOT_DEPTH_MM
+    out = SEGMENT_DOME_WALL_MM  # well past the surface
+    section = [  # (v up in the print, outward from the surface); both long faces at 45 degrees
+        (-half - depth, -depth), (half - depth, -depth), (half + out, out), (-half + out, out),
     ]
     profile_wp = cq.Workplane(plane).polyline([(flip * v, d) for v, d in section]).close()
     return profile_wp.sweep(cq.Workplane().add(path), isFrenet=False)
 
 
-def _label(profile, angle: float, inner_offset: float, text: str) -> cq.Workplane:
+def _label(profile, angle: float, inner_offset: float, text: str, z: float = 0.0) -> cq.Workplane:
     """Text engraved into an inner face, upright and readable from inside the ring."""
     p, n, _ = _surface_point(profile, inner_offset + LABEL_DEPTH_MM, angle)
     inward = cq.Vector(float(-n[0]), float(-n[1]), 0)
     right = cq.Vector(float(n[0]), float(n[1]), 0).cross(cq.Vector(0, 0, 1))
-    plane = cq.Plane(origin=cq.Vector(float(p[0]), float(p[1]), 0), xDir=right, normal=inward)
+    plane = cq.Plane(origin=cq.Vector(float(p[0]), float(p[1]), z), xDir=right, normal=inward)
     return cq.Workplane(plane).text(text, LABEL_SIZE_MM, LABEL_DEPTH_MM + 1.0, combine=False, kind="bold")
 
 
@@ -373,17 +366,20 @@ def build(config: dict) -> dict:
     u_angle = lambda u: _arc_angle(profile, seam_face_angle, u, JOINT_OFFSET)
     rise = SEGMENT_DOME_WALL_MM + 4.0  # well past the outer surface
 
+    # Knot pocket: a teardrop (round, with a 45 degree point on top) so its
+    # roof prints upright without sagging.  The knot bears on the slot's end.
     k, kn, _ = _surface_point(profile, KNOT_FLOOR_OFFSET, u_angle(KNOT_CENTRE_U_MM))
-    axis = cq.Vector(float(kn[0]), float(kn[1]), 0)
-    at = lambda h: cq.Vector(float(k[0] + kn[0] * h), float(k[1] + kn[1] * h), 0)
-    r_base, r_neck = KNOT_BASE_MM / 2, KNOT_NECK_MM / 2
-    cone_h = r_base - r_neck  # 45 degrees
-    knot = (
-        cq.Solid.makeCylinder(r_base, KNOT_BASE_DEPTH_MM, at(0), axis)
-        .fuse(cq.Solid.makeCone(r_base, r_neck, cone_h, at(KNOT_BASE_DEPTH_MM), axis))
-        .fuse(cq.Solid.makeCylinder(r_neck, rise, at(KNOT_BASE_DEPTH_MM + cone_h), axis))
+    knot_plane = cq.Plane(
+        origin=cq.Vector(float(k[0]), float(k[1]), 0),
+        xDir=cq.Vector(0, 0, 1),
+        normal=cq.Vector(float(kn[0]), float(kn[1]), 0),
     )
-    knot_catch = cq.Workplane().add(knot)
+    r = KNOT_POCKET_DIA_MM / 2
+    tip = [(r / math.sqrt(2), r / math.sqrt(2)), (r * math.sqrt(2), 0.0), (r / math.sqrt(2), -r / math.sqrt(2))]
+    knot_catch = (
+        cq.Workplane(knot_plane).circle(r).extrude(rise)
+        .union(cq.Workplane(knot_plane).polyline(tip).close().extrude(rise))
+    )
 
     parts: dict[str, cq.Shape] = {}
     band = _ring(profile, SLEEVE_CLEARANCE_MM, SLEEVE_CLEARANCE_MM + SEGMENT_DOME_WALL_MM + 1.0, BAND_HEIGHT_MM)
@@ -398,7 +394,7 @@ def build(config: dict) -> dict:
         label_at = (
             u_angle(LABEL_U_MM[name]) if name in LABEL_U_MM else (start + end) / 2
         )
-        part = part.cut(_label(profile, label_at, SLEEVE_CLEARANCE_MM, LABELS[name]))
+        part = part.cut(_label(profile, label_at, SLEEVE_CLEARANCE_MM, LABELS[name], LABEL_Z_MM.get(name, 0.0)))
         parts[name] = part.val()
 
     pod_result = dial_pod.build(

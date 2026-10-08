@@ -51,20 +51,19 @@ back and the seam sits between pod and anchor.
   16 mm. Walls: lid at least 1.62 mm over the flange, lap 1.2 mm, floor
   3.0 mm, 2.73 mm behind the inserts, and only 1.0 mm under the cord tunnel in
   the pod.
-- **Lace catch (anchor v3):** a straight slot from the seam face runs into a
-  round knot pocket at u = 12.5 mm (4.0 mm across at the surface, 7.0 mm
-  underneath, 45 degree cone). The slot is a compact hook, about 3 x 3 mm: a
-  1.6 mm neck 0.6 mm below the outer surface, flaring at 45 degrees on both
-  sides to about 2.5 mm at the surface, one 45 degree upper face, and a 1.2 mm
-  lower lip with a 1.6 mm pocket behind it. It is swept along the
-  domed outer face so the opening stays at the same depth. Earlier versions
-  either had a lip on the upper side, which started printing in mid-air because
-  the slot is open at both ends (24 mm2, then 4 mm2), or a 45 degree face run
-  down from a planar floor that cut a 5 mm gash. The layer-by-layer island check
-  finds none now. A figure-eight in the doubled lace presses into the knot
-  pocket. With the dial popped it pulls back out and the brace opens fully.
-  This replaced a screw post, because the 254 mm of lace the popped dial pays
-  out could not clear Melissa's head.
+- **Lace catch (anchor v3):** sized to the measured lace: the doubled lace is
+  3.2 mm side by side and the figure-eight in it is 8.45 mm across. A straight
+  slot from the seam face slopes into the part at 45 degrees (3.8 mm tall at the
+  surface, 3.0 mm deep, both long faces at 45 degrees), swept along the domed
+  outer face so its depth stays constant. It ends in a 10 mm teardrop knot
+  pocket at u = 13.5 mm, about 7 mm deep (2 mm floor above the inner face),
+  with its point up so the roof prints upright. The knot bears on the slot's
+  end. About 1.6 mm of wall separates the pocket from the square-knot channel;
+  the knot pulls the other way. Earlier versions were sized for a single
+  1.16 mm strand and a 4 mm knot opening and did not fit the real lace. Any lip
+  over this open-ended slot prints in mid-air, so there is no trap on the slot.
+  Layer check (three slice offsets): no floating regions. The A label moved to
+  z = -11 mm, below the pocket.
 - **Meshes:** all eight print STLs are watertight single bodies (checked
   2026-10-07; the pod's STL used to carry 12 bad edges).
 
@@ -89,11 +88,8 @@ committing a change to joints, cords or the seam.
 
 ## Open questions
 
-- Whether a figure-eight in the doubled lace pushes through the 4 mm knot
-  opening by thumb. Go to 4.5 mm if not, or 3.5 mm if it pulls out under
-  tension.
-- Whether the strands press through the 1.6 mm slot neck and stay behind
-  the lower lip.
+- Fit of the 8.45 mm knot in the 10 mm pocket and the doubled lace in the
+  3.8 mm slot on the printed v3 anchor.
 
 ## Safety constraints
 
