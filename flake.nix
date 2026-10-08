@@ -285,6 +285,120 @@
         else
           { };
 
+      signalDesktopPackage = system:
+        let
+          pkgs_ = pkgs.${system};
+        in
+        if system == "x86_64-linux" then
+          {
+            # Official upstream Signal Desktop .deb, extracted and wrapped.
+            # We package the upstream build rather than nixpkgs' `signal-desktop`
+            # because nixpkgs-unstable lags several releases behind, and Signal
+            # hard-expires builds ~90 days after release (refusing to connect).
+            signal-desktop = pkgs_.stdenv.mkDerivation (finalAttrs: {
+              pname = "signal-desktop";
+              version = "8.29.0";
+
+              src = pkgs_.fetchurl {
+                url = "https://updates.signal.org/desktop/apt/pool/s/signal-desktop/signal-desktop_${finalAttrs.version}_amd64.deb";
+                hash = "sha256-PJdeB/6M2KLYW3T+wiuUTHi2042Wh/rL9Iq8VmET1VA=";
+              };
+
+              nativeBuildInputs = with pkgs_; [
+                dpkg
+                autoPatchelfHook
+                makeWrapper
+                wrapGAppsHook3
+              ];
+
+              buildInputs = with pkgs_; [
+                alsa-lib
+                at-spi2-atk
+                at-spi2-core
+                atk
+                cairo
+                cups
+                dbus
+                expat
+                fontconfig
+                freetype
+                glib
+                gtk3
+                libdrm
+                libgbm
+                libglvnd
+                libkrb5
+                libnotify
+                libpulseaudio
+                libsecret
+                libuuid
+                libxkbcommon
+                mesa
+                nspr
+                nss
+                pango
+                pciutils
+                stdenv.cc.cc
+                systemd
+                wayland
+                libx11
+                libxcomposite
+                libxcursor
+                libxdamage
+                libxext
+                libxfixes
+                libxi
+                libxrandr
+                libxrender
+                libxscrnsaver
+                libxtst
+                libxcb
+                libxshmfence
+                zlib
+              ];
+
+              unpackPhase = ''
+                runHook preUnpack
+                dpkg-deb -x $src .
+                runHook postUnpack
+              '';
+
+              dontConfigure = true;
+              dontBuild = true;
+              dontWrapGApps = true; # wrapped manually below to inject gappsWrapperArgs
+
+              installPhase = ''
+                runHook preInstall
+
+                mkdir -p $out/bin $out/libexec $out/share/applications
+                cp -R opt/Signal $out/libexec/signal-desktop
+
+                if [ -d usr/share/icons ]; then
+                  cp -R usr/share/icons $out/share/icons
+                fi
+                cp usr/share/applications/signal-desktop.desktop $out/share/applications/
+
+                makeWrapper $out/libexec/signal-desktop/signal-desktop $out/bin/signal-desktop \
+                  --prefix LD_LIBRARY_PATH : "${pkgs_.lib.makeLibraryPath finalAttrs.buildInputs}" \
+                  "''${gappsWrapperArgs[@]}"
+
+                substituteInPlace $out/share/applications/signal-desktop.desktop \
+                  --replace-quiet "/opt/Signal/signal-desktop" "$out/bin/signal-desktop"
+
+                runHook postInstall
+              '';
+
+              meta = {
+                description = "Private, simple, and secure messenger (official upstream build)";
+                homepage = "https://signal.org/";
+                mainProgram = "signal-desktop";
+                platforms = [ "x86_64-linux" ];
+              };
+            });
+          }
+        else
+          { };
+
       investingScreenerPackage = system:
         let
           pkgs_ = pkgs.${system};
@@ -312,6 +426,7 @@
       packages = forAllSystems (system:
         (allCmdPackages system)
         // (antigravityPackages system)
+        // (signalDesktopPackage system)
         // (investingScreenerPackage system)
       );
 
@@ -368,6 +483,7 @@
                 self.packages.${system}.antigravity-cli
                 self.packages.${system}.antigravity-manager
                 self.packages.${system}.antigravity-ide
+                self.packages.${system}.signal-desktop
                 inputs.codex-desktop.packages.${system}.codex-desktop
              ];
           shellHook = ''
