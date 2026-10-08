@@ -86,10 +86,9 @@ POD_KNOT_FROM_END_MM = 5.5
 LACE_FACE_V_MM = 12.5  # where the strands leave the pod's windows
 LACE_SLOT_U_MM = (-3.0,)  # straight slot starts past the seam face
 LACE_SLOT_NECK_MM = 1.4  # opening: one 1.16 mm strand at a time
-LACE_SLOT_NECK_HEIGHT_MM = 3.7  # above the floor, below the outer surface everywhere
+LACE_SLOT_NECK_DEPTH_MM = 0.3  # opening sits this far below the outer surface
 LACE_SLOT_LIP_MM = 1.2  # lower lip thickness
-LACE_SLOT_POCKET_MM = 2.5  # how far the pocket reaches down behind the lip
-LACE_SLOT_FLOOR_OFFSET = OUTER_EDGE - 4.0
+LACE_SLOT_POCKET_MM = 1.6  # pocket drop behind the lower lip
 KNOT_CENTRE_U_MM = 12.5
 KNOT_NECK_MM = 4.0  # the knot squeezes through
 KNOT_BASE_MM = 7.0
@@ -226,6 +225,50 @@ def _arc_angle(profile, angle: float, arc_mm: float, offset: float) -> float:
     return angle + math.degrees(arc_mm / radius)
 
 
+def _lace_slot(profile, anchor: cq.Shape, u_angle) -> cq.Workplane:
+    """Hook-shaped lace slot along the anchor's outer face, from past the seam
+    face to the knot pocket.
+
+    The anchor prints upright, so any lip over this open-ended slot would start
+    in mid-air.  The upper side is one 45 degree face; the lace presses in
+    through the opening and drops behind the lower lip.  The outer face is
+    domed, so the slot follows it to keep the opening the same depth below
+    the surface along its length.
+    """
+
+    def surface(u: float) -> float:
+        lo, hi = JOINT_OFFSET, OUTER_EDGE + SEGMENT_DOME_WALL_MM
+        for _ in range(30):
+            mid = (lo + hi) / 2
+            q = _ray_hit(profile, mid, u_angle(u))
+            lo, hi = (mid, hi) if anchor.isInside(cq.Vector(float(q[0]), float(q[1]), 0.0)) else (lo, mid)
+        return lo
+
+    first = 1.0  # sample inside the part, then carry the depth out past the seam face
+    us = np.linspace(LACE_SLOT_U_MM[0], KNOT_CENTRE_U_MM, 12)
+    pts = []
+    for u in us:
+        q = _ray_hit(profile, surface(max(u, first)) - LACE_SLOT_NECK_DEPTH_MM, u_angle(u))
+        pts.append(cq.Vector(float(q[0]), float(q[1]), 0.0))
+    path = cq.Wire.assembleEdges([cq.Edge.makeSpline(pts)])
+
+    tangent = (pts[1] - pts[0]).normalized()
+    _, n0, _ = _surface_point(profile, JOINT_OFFSET, u_angle(us[0]))
+    up = np.array([0.0, 0.0, 1.0])
+    flip = 1.0 if np.cross([tangent.x, tangent.y, 0.0], up) @ [n0[0], n0[1], 0.0] > 0 else -1.0
+    plane = cq.Plane(origin=pts[0], xDir=cq.Vector(0, 0, flip), normal=tangent)
+    neck = LACE_SLOT_NECK_MM / 2
+    lip = -LACE_SLOT_LIP_MM
+    bottom = -neck - LACE_SLOT_POCKET_MM
+    back = bottom - neck  # the 45 degree face reaches the pocket floor here
+    mouth = SEGMENT_DOME_WALL_MM  # well past the surface
+    section = [  # (v up in the print, outward from the opening)
+        (bottom, back), (neck, 0.0), (neck + mouth, mouth), (-neck, mouth), (-neck, lip), (bottom, lip),
+    ]
+    profile_wp = cq.Workplane(plane).polyline([(flip * v, d) for v, d in section]).close()
+    return profile_wp.sweep(cq.Workplane().add(path), isFrenet=False)
+
+
 def _label(profile, angle: float, inner_offset: float, text: str) -> cq.Workplane:
     """Text engraved into an inner face, upright and readable from inside the ring."""
     p, n, _ = _surface_point(profile, inner_offset + LABEL_DEPTH_MM, angle)
@@ -329,31 +372,6 @@ def build(config: dict) -> dict:
     u_angle = lambda u: _arc_angle(profile, seam_face_angle, u, JOINT_OFFSET)
     rise = SEGMENT_DOME_WALL_MM + 4.0  # well past the outer surface
 
-    slot_mid = (LACE_SLOT_U_MM[0] + KNOT_CENTRE_U_MM) / 2
-    slot_len = KNOT_CENTRE_U_MM - LACE_SLOT_U_MM[0]
-    c0, n0, t0 = _surface_point(profile, LACE_SLOT_FLOOR_OFFSET, u_angle(slot_mid))
-    up = np.array([0.0, 0.0, 1.0])
-    t3, n3 = np.array([t0[0], t0[1], 0.0]), np.array([n0[0], n0[1], 0.0])
-    flip = 1.0 if np.cross(t3, up) @ n3 > 0 else -1.0  # local y must point outward
-    start = c0 - t0 * slot_len / 2
-    slot_plane = cq.Plane(
-        origin=cq.Vector(float(start[0]), float(start[1]), 0),
-        xDir=cq.Vector(0, 0, flip),
-        normal=cq.Vector(float(t0[0]), float(t0[1]), 0),
-    )
-    # Upright, any lip over an open-ended slot starts printing in mid-air, so
-    # the upper side is one 45 degree face with no lip.  The trap is a hook:
-    # the lace presses in past the lower lip and drops into a pocket behind it.
-    neck, neck_h = LACE_SLOT_NECK_MM / 2, LACE_SLOT_NECK_HEIGHT_MM
-    lip_h = neck_h - LACE_SLOT_LIP_MM
-    bottom = -neck - LACE_SLOT_POCKET_MM
-    upper = lambda h: neck + (h - neck_h)  # the 45 degree upper face
-    assert upper(0.0) >= bottom, "the 45 degree face must reach the floor inside the pocket"
-    section = [  # (v, height above the floor), v up in the print
-        (bottom, 0.0), (upper(0.0), 0.0), (upper(rise), rise), (-neck, rise), (-neck, lip_h), (bottom, lip_h),
-    ]
-    lace_catch = cq.Workplane(slot_plane).polyline([(flip * v, h) for v, h in section]).close().extrude(slot_len)
-
     k, kn, _ = _surface_point(profile, KNOT_FLOOR_OFFSET, u_angle(KNOT_CENTRE_U_MM))
     axis = cq.Vector(float(kn[0]), float(kn[1]), 0)
     at = lambda h: cq.Vector(float(k[0] + kn[0] * h), float(k[1] + kn[1] * h), 0)
@@ -364,7 +382,7 @@ def build(config: dict) -> dict:
         .fuse(cq.Solid.makeCone(r_base, r_neck, cone_h, at(KNOT_BASE_DEPTH_MM), axis))
         .fuse(cq.Solid.makeCylinder(r_neck, rise, at(KNOT_BASE_DEPTH_MM + cone_h), axis))
     )
-    lace_catch = lace_catch.union(cq.Workplane().add(knot))
+    knot_catch = cq.Workplane().add(knot)
 
     parts: dict[str, cq.Shape] = {}
     band = _ring(profile, SLEEVE_CLEARANCE_MM, SLEEVE_CLEARANCE_MM + SEGMENT_DOME_WALL_MM + 1.0, BAND_HEIGHT_MM)
@@ -375,7 +393,7 @@ def build(config: dict) -> dict:
         part = _rounded(shape_ends(raw, name), EDGE_ROUND_MM, name)
         part = part.cut(cords)
         if name == "anchor":
-            part = part.cut(anchor_pockets).cut(lace_catch)
+            part = part.cut(anchor_pockets).cut(knot_catch).cut(_lace_slot(profile, part.val(), u_angle))
         label_at = (
             u_angle(LABEL_U_MM[name]) if name in LABEL_U_MM else (start + end) / 2
         )

@@ -53,12 +53,14 @@ back and the seam sits between pod and anchor.
   the pod.
 - **Lace catch (anchor v3):** a straight slot from the seam face runs into a
   round knot pocket at u = 12.5 mm (4.0 mm across at the surface, 7.0 mm
-  underneath, 45 degree cone). The slot is a hook: a 1.4 mm opening, a 45
-  degree upper face with no lip, and a 1.2 mm lower lip with a pocket reaching
-  2.5 mm down behind it. A lip on the upper side made a floating region when
-  printed upright, because the slot is open at both ends (24 mm2 with a flat
-  underside, still 4 mm2 with 45 degree faces). The layer-by-layer island check
-  now finds none. A figure-eight in the doubled lace presses into the knot
+  underneath, 45 degree cone). The slot is a compact hook, about 3 x 3 mm: a
+  1.4 mm opening 0.3 mm below the outer surface, one 45 degree upper face, and
+  a 1.2 mm lower lip with a 1.6 mm pocket behind it. It is swept along the
+  domed outer face so the opening stays at the same depth. Earlier versions
+  either had a lip on the upper side, which started printing in mid-air because
+  the slot is open at both ends (24 mm2, then 4 mm2), or a 45 degree face run
+  down from a planar floor that cut a 5 mm gash. The layer-by-layer island check
+  finds none now. A figure-eight in the doubled lace presses into the knot
   pocket. With the dial popped it pulls back out and the brace opens fully.
   This replaced a screw post, because the 254 mm of lace the popped dial pays
   out could not clear Melissa's head.

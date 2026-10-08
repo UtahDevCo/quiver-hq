@@ -115,7 +115,7 @@ def main() -> None:
             strand.append({"p": _local(o, sign * bp.LACE_FACE_V_MM), "part": "dial-pod"})
         p = _ray_hit(profile, outer - 1.6, pod_end - 0.5)
         strand.append({"p": _local(p, sign * bp.LACE_FACE_V_MM), "part": "dial-pod"})
-        lace_depth = bp.LACE_SLOT_FLOOR_OFFSET + 1.0
+        lace_depth = bp.OUTER_EDGE - 1.5
         for u, v in ((0.0, 0.8), (6.0, 0.6), (bp.KNOT_CENTRE_U_MM - 2.0, 0.4)):
             p = _ray_hit(profile, lace_depth, arc_angle(seam_face, u, bp.JOINT_OFFSET))
             strand.append({"p": _local(p, sign * v), "part": "anchor"})
