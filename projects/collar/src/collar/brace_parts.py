@@ -94,7 +94,7 @@ KNOT_FLOOR_OFFSET = SLEEVE_CLEARANCE_MM + 1.4  # floor under the window and cave
 KNOT_CAVE_U_MM = 2.5  # covered cave runs from here to the window, toward the seam
 KNOT_CAVE_HEIGHT_MM = 10.0  # the knot lies flat, its 8.45 mm width vertical
 KNOT_CAVE_SKIN_MM = 1.4  # plastic over the knot
-LACE_SLOT_END_U_MM = KNOT_CAVE_U_MM + 1.0  # the slot opens into the cave's end
+LACE_SLOT_END_U_MM = KNOT_CENTRE_U_MM  # through the cave's skin to the window, so the lace presses in
 
 
 def _rot(v: np.ndarray, degrees: float) -> np.ndarray:

@@ -60,6 +60,11 @@ back and the seam sits between pod and anchor.
   1.6 mm floor, about 1.8 mm of skin over it) that ends at a 10 mm teardrop
   window at u = 13.5 mm. The knot drops into the window and lace tension
   slides it under the skin, so loosening the dial to adjust does not free it.
+  The lace slot runs on through the skin to the window, so the lace presses
+  in from outside along its whole length (no threading); the slit is about
+  2.7 mm across square to the slot, far too narrow for the knot. The skin's
+  lower edge over the slit is held only at its seam end, about a 6 mm one-sided
+  overhang, and the island check finds a 0.2 mm2 sliver there.
   The knot must lie flat (8.45 mm width vertical) to fit the 5.4 mm depth. It
   bears on the cave's
   end. About 1.6 mm of wall separates the pocket from the square-knot channel;
