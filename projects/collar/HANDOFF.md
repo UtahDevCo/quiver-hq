@@ -11,9 +11,9 @@ file.
   `full_sleeve` block of `config/melissa.json` as the validated baseline.
   Printed upright on the lower flare, 0.20 mm layers, 5 mm brim, no supports.
 - **Outer brace:** every part printed in PETG on 2026-10-05 (Qidi X-Plus 4,
-  stock nozzle, probably brass). The anchor was then redesigned twice.
-  `build/print-plate-petg/anchor-print-upright.stl` (v3) needs
-  printing.
+  stock nozzle, probably brass). Since then the anchor gained the lace
+  catch and the square-knot cord channel, and every part except the lid
+  gained an engraved label. `build/print-plate-petg/` holds the current set.
 - No tensioned fitting on Melissa yet.
 
 ## Brace design
@@ -23,10 +23,18 @@ by arc length on the sleeve's smoothed outer profile. The pod is centred at the
 back and the seam sits between pod and anchor.
 
 - **Cords:** two 4 mm paracords in 4.6 mm tunnels at z = ±12 mm, 3.5 mm inside
-  the outer edge, from knot pockets in the anchor (12 mm from its joint end)
-  to knot pockets in the pod (5.5 mm in). Each pocket is a 7 mm stadium
-  opening on the inner face from |z| 14.5 to 5 mm. It must stop 1 mm inside
-  the 2.5 mm edge round, or the anchor's inner face becomes unmeshable.
+  the outer edge. In the pod each ends in its own figure-eight pocket (7 mm
+  stadium on the inner face from |z| 14.5 to 5 mm, 5.5 mm from the pod's end).
+  In the anchor both ends meet in one 10.5 mm wide channel from z = -14.5 to
+  +14.5 mm and are tied together with a square knot. The channel keeps the old
+  pockets' edge nearest the joint (12 mm + 3.5 mm from the joint end) and grows
+  into the body. Pockets must stop 1 mm inside the 2.5 mm edge round, or the
+  inner face becomes unmeshable.
+- **Labels:** engraved 0.6 mm into the inner face, 7 mm text, readable from
+  inside the ring: A (anchor, 6.5 mm from its seam face), 1 to 5 (segments,
+  mid-arc) and P (pod, between its knot pockets). The lid has none: it is
+  1.62 mm thick at its thinnest. Wall left behind a label: anchor 3.4 mm,
+  pod 7.1 mm, segments 9.1 mm.
 - **Joints:** two planes meeting on the cord line. The inner wedge face is the
   stop and the outer relief opens 30 degrees.
 - **Seam stop:** wrapped loosely the seam is 13.9 mm open; about 5 mm brings the
@@ -51,12 +59,12 @@ back and the seam sits between pod and anchor.
   lace loop presses into the pocket. With the dial popped, it pulls back out and
   the brace opens fully. This replaced a screw post, because the 254 mm of lace
   the popped dial pays out could not clear Melissa's head.
-- **Pod mesh:** the pod STL keeps 12 bad edges where its taper meets the end
-  faces. The solid is valid, so slice the pod from its STEP.
+- **Meshes:** all eight print STLs are watertight single bodies (checked
+  2026-10-07; the pod's STL used to carry 12 bad edges).
 
 Segment chords between joint lines: 1 = 44.7, 2 = 46.6, 3 = 46.3, 4 = 44.1,
 5 = 46.1 mm. Segments 1 and 4 are the curved pair, and 2, 3 and 5 are
-interchangeable. Embossed part numbers would help.
+interchangeable. The first prints have no labels.
 
 ## Dial and hardware
 

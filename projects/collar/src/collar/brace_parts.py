@@ -76,6 +76,11 @@ KNOT_POCKET_MM = 7.0  # pocket width
 KNOT_POCKET_PAST_CORD_MM = 2.5  # pocket reaches |z| = 14.5, 1 mm inside the edge round
 KNOT_POCKET_INNER_Z_MM = 5.0  # and runs toward mid-height down to |z| = 5
 ANCHOR_KNOT_FROM_JOINT_MM = 12.0
+ANCHOR_KNOT_CHANNEL_MM = 1.5 * KNOT_POCKET_MM  # one channel for a square knot joining both cords
+LABEL_DEPTH_MM = 0.6  # engraved into the inner face
+LABEL_SIZE_MM = 7.0
+LABELS = {"anchor": "A", **{f"segment-{i + 1}": str(i + 1) for i in range(SEGMENT_COUNT)}, "dial-pod": "P"}
+LABEL_U_MM = {"anchor": 6.5}  # from the seam face; other parts are labelled mid-arc
 POD_KNOT_FROM_END_MM = 5.5
 
 LACE_FACE_V_MM = 12.5  # where the strands leave the pod's windows
@@ -178,7 +183,9 @@ def _sweep_tube(points: list[cq.Vector], diameter: float) -> cq.Workplane:
     return cq.Workplane(plane).circle(diameter / 2).sweep(cq.Workplane().add(path))
 
 
-def _knot_pockets(profile, angle: float, inner_offset: float, outer_offset: float) -> cq.Workplane:
+def _knot_pockets(
+    profile, angle: float, inner_offset: float, outer_offset: float, width: float = KNOT_POCKET_MM, joined: bool = False
+) -> cq.Workplane:
     """One pocket per cord, opening on the inner face and meeting the tunnel.
 
     Each is a short slot centred on its cord and stretched toward mid-height,
@@ -186,6 +193,14 @@ def _knot_pockets(profile, angle: float, inner_offset: float, outer_offset: floa
     """
     p, n, _ = _surface_point(profile, inner_offset - 1.0, angle)
     depth = outer_offset - inner_offset + 1.0
+    reach = max(abs(h) for h in CORD_HEIGHTS_MM) + KNOT_POCKET_PAST_CORD_MM
+    if joined:  # one channel across both cords, through mid-height
+        plane = cq.Plane(
+            origin=cq.Vector(float(p[0]), float(p[1]), 0.0),
+            xDir=cq.Vector(0, 0, 1),
+            normal=cq.Vector(float(n[0]), float(n[1]), 0),
+        )
+        return cq.Workplane(plane).slot2D(2 * reach, width).extrude(depth)
     pockets = None
     for height in CORD_HEIGHTS_MM:
         # One stadium-shaped cut per cord, from just past the cord toward
@@ -200,7 +215,7 @@ def _knot_pockets(profile, angle: float, inner_offset: float, outer_offset: floa
             xDir=cq.Vector(0, 0, 1),
             normal=cq.Vector(float(n[0]), float(n[1]), 0),
         )
-        piece = cq.Workplane(plane).slot2D(outer - inner, KNOT_POCKET_MM).extrude(depth)
+        piece = cq.Workplane(plane).slot2D(outer - inner, width).extrude(depth)
         pockets = piece if pockets is None else pockets.union(piece)
     return pockets
 
@@ -208,6 +223,15 @@ def _knot_pockets(profile, angle: float, inner_offset: float, outer_offset: floa
 def _arc_angle(profile, angle: float, arc_mm: float, offset: float) -> float:
     radius = float(np.linalg.norm(_ray_hit(profile, offset, angle)))
     return angle + math.degrees(arc_mm / radius)
+
+
+def _label(profile, angle: float, inner_offset: float, text: str) -> cq.Workplane:
+    """Text engraved into an inner face, upright and readable from inside the ring."""
+    p, n, _ = _surface_point(profile, inner_offset + LABEL_DEPTH_MM, angle)
+    inward = cq.Vector(float(-n[0]), float(-n[1]), 0)
+    right = cq.Vector(float(n[0]), float(n[1]), 0).cross(cq.Vector(0, 0, 1))
+    plane = cq.Plane(origin=cq.Vector(float(p[0]), float(p[1]), 0), xDir=right, normal=inward)
+    return cq.Workplane(plane).text(text, LABEL_SIZE_MM, LABEL_DEPTH_MM + 1.0, combine=False, kind="bold")
 
 
 def build(config: dict) -> dict:
@@ -286,7 +310,13 @@ def build(config: dict) -> dict:
         cords = tube if cords is None else cords.union(tube)
 
     pod_inner = SLEEVE_CLEARANCE_MM + POD_STANDOFF_MM
-    anchor_pockets = _knot_pockets(profile, anchor_knot, SLEEVE_CLEARANCE_MM, JOINT_OFFSET + 0.6)
+    # The channel keeps the pocket's edge nearest the joint and grows into the body.
+    channel_centre = _arc_angle(
+        profile, anchor_knot, -(ANCHOR_KNOT_CHANNEL_MM - KNOT_POCKET_MM) / 2, JOINT_OFFSET
+    )
+    anchor_pockets = _knot_pockets(
+        profile, channel_centre, SLEEVE_CLEARANCE_MM, JOINT_OFFSET + 0.6, ANCHOR_KNOT_CHANNEL_MM, joined=True
+    )
     pod_pockets = _knot_pockets(profile, pod_knot, pod_inner, JOINT_OFFSET + 0.6)
 
     # Lace catch on the anchor's outer face, measured from its seam face: a
@@ -340,6 +370,10 @@ def build(config: dict) -> dict:
         part = part.cut(cords)
         if name == "anchor":
             part = part.cut(anchor_pockets).cut(lace_catch)
+        label_at = (
+            u_angle(LABEL_U_MM[name]) if name in LABEL_U_MM else (start + end) / 2
+        )
+        part = part.cut(_label(profile, label_at, SLEEVE_CLEARANCE_MM, LABELS[name]))
         parts[name] = part.val()
 
     pod_result = dial_pod.build(
@@ -347,7 +381,10 @@ def build(config: dict) -> dict:
         prepare=lambda raw: _rounded(shape_ends(raw, "dial-pod"), POD_EDGE_ROUND_MM, "dial-pod"),
         margin_deg=MARGIN_DEG,
     )
-    parts["dial-pod"] = cq.Workplane().add(pod_result["parts"]["pod"]).cut(cords).cut(pod_pockets).val()
+    pod_label = _label(profile, pod_knot, pod_inner, LABELS["dial-pod"])  # between its two knot pockets
+    parts["dial-pod"] = (
+        cq.Workplane().add(pod_result["parts"]["pod"]).cut(cords).cut(pod_pockets).cut(pod_label).val()
+    )
     parts["lid"] = pod_result["parts"]["lid"]
 
     for name, shape in parts.items():
@@ -443,7 +480,6 @@ def main() -> None:
         cq.exporters.export(shape, str(args.output / f"{name}-print-upright.step"))
         dial_pod._export(_to_local(cq.Workplane().add(shape)), args.output / f"{name}-local.stl")
     dial_pod._export(_to_local(cq.Workplane().add(result["parts"]["lid"])), args.output / "lid-local.stl")
-    lid_flat = PROJECT_ROOT / "build" / "dial-pod" / "dial-pod-lid-print-flat.stl"
     frame, depth = result["pod"]["frame"], result["pod"]["depth"]
     n = cq.Vector(float(frame.n[0]), float(frame.n[1]), 0)
     axis = n.cross(cq.Vector(0, 0, 1))
