@@ -85,8 +85,8 @@ POD_KNOT_FROM_END_MM = 5.5
 
 LACE_FACE_V_MM = 12.5  # where the strands leave the pod's windows
 LACE_SLOT_U_MM = (-3.0,)  # straight slot starts past the seam face
-LACE_SLOT_NECK_MM = 1.4  # opening: one 1.16 mm strand at a time
-LACE_SLOT_NECK_DEPTH_MM = 0.3  # opening sits this far below the outer surface
+LACE_SLOT_NECK_MM = 1.6  # narrowest point: one 1.16 mm strand at a time
+LACE_SLOT_NECK_DEPTH_MM = 0.6  # below the outer surface; both sides flare 45 degrees above it
 LACE_SLOT_LIP_MM = 1.2  # lower lip thickness
 LACE_SLOT_POCKET_MM = 1.6  # pocket drop behind the lower lip
 KNOT_CENTRE_U_MM = 12.5
@@ -263,7 +263,8 @@ def _lace_slot(profile, anchor: cq.Shape, u_angle) -> cq.Workplane:
     back = bottom - neck  # the 45 degree face reaches the pocket floor here
     mouth = SEGMENT_DOME_WALL_MM  # well past the surface
     section = [  # (v up in the print, outward from the opening)
-        (bottom, back), (neck, 0.0), (neck + mouth, mouth), (-neck, mouth), (-neck, lip), (bottom, lip),
+        (bottom, back), (neck, 0.0), (neck + mouth, mouth), (-neck - mouth, mouth), (-neck, 0.0), (-neck, lip),
+        (bottom, lip),
     ]
     profile_wp = cq.Workplane(plane).polyline([(flip * v, d) for v, d in section]).close()
     return profile_wp.sweep(cq.Workplane().add(path), isFrenet=False)

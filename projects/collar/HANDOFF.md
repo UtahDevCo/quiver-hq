@@ -54,8 +54,9 @@ back and the seam sits between pod and anchor.
 - **Lace catch (anchor v3):** a straight slot from the seam face runs into a
   round knot pocket at u = 12.5 mm (4.0 mm across at the surface, 7.0 mm
   underneath, 45 degree cone). The slot is a compact hook, about 3 x 3 mm: a
-  1.4 mm opening 0.3 mm below the outer surface, one 45 degree upper face, and
-  a 1.2 mm lower lip with a 1.6 mm pocket behind it. It is swept along the
+  1.6 mm neck 0.6 mm below the outer surface, flaring at 45 degrees on both
+  sides to about 2.5 mm at the surface, one 45 degree upper face, and a 1.2 mm
+  lower lip with a 1.6 mm pocket behind it. It is swept along the
   domed outer face so the opening stays at the same depth. Earlier versions
   either had a lip on the upper side, which started printing in mid-air because
   the slot is open at both ends (24 mm2, then 4 mm2), or a 45 degree face run
@@ -91,8 +92,8 @@ committing a change to joints, cords or the seam.
 - Whether a figure-eight in the doubled lace pushes through the 4 mm knot
   opening by thumb. Go to 4.5 mm if not, or 3.5 mm if it pulls out under
   tension.
-- Whether the strands press through the 1.4 mm slot opening and stay behind
-  the lower lip. Next step is 1.6 mm.
+- Whether the strands press through the 1.6 mm slot neck and stay behind
+  the lower lip.
 
 ## Safety constraints
 
