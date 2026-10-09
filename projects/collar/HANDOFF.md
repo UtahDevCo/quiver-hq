@@ -99,11 +99,28 @@ committing a change to joints, cords or the seam.
   inserts 5 x 4 mm (kit hole 4.6 mm, at least 4.1 mm deep, 2 mm wall) and
   4.6 x 5.7 mm. Use the 5 x 4 mm ones, smooth end first.
 
+## Sleeve liner
+
+The printed TPU sleeve is scratchy, so it gets a glued-in liner of thin
+vegetable-tanned lambskin (Tandy Veg-Tan Lambskin, 1 oz / 0.4 mm ideal; avoid
+chrome-tanned leather, which releases chromium in sweat). `collar.sleeve_liner`
+unrolls the sleeve's skin-side surface into 5 butt-seamed panels (about 66 x 77
+mm each, P3 centred on the throat) with 6 mm fold allowances over the rims and
+the rear-opening ends, and optional 1.6 mm perforations (Craftool punch size
+00) on an 8 mm staggered grid. Seam edges stretch under 2 percent; the opening
+edges about 3.7 to 3.9 percent, inside the folded allowance. Output:
+`build/sleeve-liner/sleeve-liner-pattern.pdf` (page 1 shopping list and steps,
+then 1:1 panels with a 50 mm check square). Glue: Barge All-Purpose Cement,
+TPU scuffed with 220-grit and wiped with alcohol. 0.4 mm of leather uses about
+a fifth of the 2 mm skin clearance; at 0.8 mm, regenerate the sleeve with more
+clearance first.
+
 ## Open questions
 
 - Reprint segments 1 to 5 and the pod for their engraved labels, or mark the
   printed ones by hand.
 - First tensioned fitting: rigid stand-in, then Melissa at light tension.
+- Liner: patch-test the leather, then glue it in and check the fit.
 
 ## Safety constraints
 

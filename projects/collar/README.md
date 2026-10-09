@@ -34,6 +34,14 @@ averaging the two side widths at every posterior/anterior position, which
 removes scan and pose asymmetry without flattening the throat or the back of
 the neck.
 
+Leather liner panels for the inside of the sleeve (printable PDF with a
+shopping list, 1:1 patterns and perforation marks):
+
+```sh
+nix develop -c uv run --project projects/collar python -m collar.cord_brace     # sleeve-local.stl
+nix develop -c uv run --project projects/collar python -m collar.sleeve_liner   # build/sleeve-liner/
+```
+
 Supporting tools:
 
 ```sh
