@@ -1,4 +1,4 @@
-# Collar project handoff, 2026-10-07
+# Collar project handoff, 2026-10-09
 
 Abandoned approaches (S2-S receiver coupons, slide-in slot coupons, the
 ladder-strap ratchet brace, print-in-place hinges) were removed in the cleanup
@@ -11,9 +11,13 @@ file.
   `full_sleeve` block of `config/melissa.json` as the validated baseline.
   Printed upright on the lower flare, 0.20 mm layers, 5 mm brim, no supports.
 - **Outer brace:** every part printed in PETG on 2026-10-05 (Qidi X-Plus 4,
-  stock nozzle, probably brass). Since then the anchor gained the lace
-  catch and the square-knot cord channel, and every part except the lid
-  gained an engraved label. `build/print-plate-petg/` holds the current set.
+  stock nozzle, probably brass). Anchor v3 (knot cave, slot through its skin,
+  square-knot cord channel, engraved A) printed 2026-10-08 in 52 min with
+  supports off and works: the knot drops in the window, the lace presses into
+  the slot, and tension slides the knot under the cover. The slicer warns about
+  floating regions on it; that is the slit's overhanging edge and printed fine.
+  The other parts still lack the engraved labels unless reprinted.
+  `build/print-plate-petg/` holds the current set.
 - No tensioned fitting on Melissa yet.
 
 ## Brace design
@@ -97,9 +101,9 @@ committing a change to joints, cords or the seam.
 
 ## Open questions
 
-- Whether the knot lies flat enough for the 5.4 mm cave and stays put when
-  the dial is loosened; fit of the 8.45 mm knot in the 10 mm window and the doubled lace in the
-  3.8 mm slot on the printed v3 anchor.
+- Reprint segments 1 to 5 and the pod for their engraved labels, or mark the
+  printed ones by hand.
+- First tensioned fitting: rigid stand-in, then Melissa at light tension.
 
 ## Safety constraints
 
