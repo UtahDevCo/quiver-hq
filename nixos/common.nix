@@ -102,6 +102,7 @@
     inputs.claude-desktop.packages.${pkgs.stdenv.hostPlatform.system}.claude-desktop
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.investing-screener
     inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.solo.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   environment.variables = {

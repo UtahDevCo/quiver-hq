@@ -12,7 +12,7 @@
     # Build Caddy with the Cloudflare DNS plugin
     package = (pkgs.caddy.withPlugins {
       plugins = [ "github.com/caddy-dns/cloudflare@v0.2.4" ];
-      hash = "sha256-hEHgAG0F0ozHRAPuxEqLyTATBrE+pajeXDiSNwniorg=";
+      hash = "sha256-tubXIDCJnO2mvdnPlZclwDhNGaeeYLSt7lnni3+pXDo=";
     }).overrideAttrs (old: {
       nativeBuildInputs = [ pkgs.go_1_26 ] ++ (lib.filter (p: p.pname or "" != "go") (old.nativeBuildInputs or []));
     });

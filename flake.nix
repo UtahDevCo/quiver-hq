@@ -27,6 +27,7 @@
       url = "github:herdrdev/herdr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    solo.url = "github:soloterm/nix";
   };
 
   outputs = { self, nixpkgs, nixos-wsl, home-manager, nix-darwin, ... }@inputs:
