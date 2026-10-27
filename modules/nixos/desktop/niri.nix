@@ -156,6 +156,7 @@
     file-roller        # archive manager backend for thunar-archive-plugin (no xarchiver.tap in plugin)
     loupe              # Wayland-native image viewer (HEIC/AVIF via glycin loaders)
     libheif            # heif-convert / heif-dec CLI + HEIC decode support
+    obs-studio         # screen recording and streaming; uses PipeWire capture via xdg-desktop-portal-gnome
   ];
 
   # Default image viewer associations (loupe). HEIC otherwise falls back to

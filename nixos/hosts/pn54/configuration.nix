@@ -136,6 +136,17 @@
   };
 
   # ---------------------------------------------------------------------------
+  # AppImages
+  # ---------------------------------------------------------------------------
+  # binfmt lets AppImages run as plain executables (through appimage-run).
+  # ArtCraft Launcher (~/Applications) installs the Craft apps as AppImages
+  # there and launches them, and its menu entries, by path.
+  programs.appimage = {
+    enable = true;
+    binfmt = true;
+  };
+
+  # ---------------------------------------------------------------------------
   # Docker
   # ---------------------------------------------------------------------------
   virtualisation.docker.enable = true;

@@ -24,6 +24,9 @@
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
     XCURSOR_SIZE = "16";
     _JAVA_AWT_WM_NONREPARENTING = "1";
+    # Force Qt apps (OBS, etc.) to use the Wayland backend.
+    # Without this, Qt falls back to xcb (X11) and fails silently when DISPLAY is unset.
+    QT_QPA_PLATFORM = "wayland";
   };
 
   # ---------------------------------------------------------------------------
@@ -114,6 +117,7 @@
         // Mod is Super by default in niri unless bound otherwise
         Mod+Return { spawn "alacritty"; }
         Mod+Space { spawn "fuzzel"; }
+        Mod+O { spawn "obs"; }
         Ctrl+Shift+Space { spawn "1password" "--quick-access"; }
         Ctrl+Shift+L { spawn "1password" "--lock"; }
         Mod+Q { close-window; }
