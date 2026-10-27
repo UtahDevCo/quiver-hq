@@ -21,7 +21,7 @@
     isNormalUser = true;
     description = "Chris";
     uid = 1000;
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [ "wheel" "networkmanager" "scanner" "lp" ];
   };
   users.defaultUserShell = pkgs.zsh;
 
@@ -72,6 +72,22 @@
   services.printing = {
     enable = true;
     drivers = [ pkgs.samsung-unified-linux-driver ];
+  };
+
+  # Scanning: the Samsung M2875DW has no eSCL, but sane-airscan speaks its WSD
+  # scan service. Discovery replies are dropped by the firewall, so pin it.
+  # Reserve 192.168.86.52 for the printer in the router's DHCP settings.
+  hardware.sane = {
+    enable = true;
+    # Later entries override earlier config files, so this replaces airscan.conf.
+    extraBackends = [
+      pkgs.sane-airscan
+      (pkgs.writeTextDir "etc/sane.d/airscan.conf" ''
+        [devices]
+        "Samsung M2875DW" = http://192.168.86.52:8018/wsd/scan, WSD
+      '')
+    ];
+    disabledDefaultBackends = [ "escl" ];
   };
 
   # Enable Avahi for network discovery

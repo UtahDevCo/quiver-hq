@@ -107,6 +107,7 @@
     iw
     iwd
     jq
+    simple-scan # Document Scanner; uses the SANE setup in nixos/common.nix
   ]) ++ [
     # Latest upstream Signal Desktop (see flake.nix signalDesktopPackage).
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.signal-desktop
