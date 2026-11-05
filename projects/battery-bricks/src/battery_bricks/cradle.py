@@ -6,8 +6,8 @@ import math
 import cadquery as cq
 
 from . import gridfinity as gf
-from .brick import HEIGHT, NX, POCKET_WALL, THICK, WIDTH, _compound
-from .export import export_stl, export_svg
+from .brick import BRICKS, POCKET_WALL, STACK_GAP, THICK, _compound
+from .export import export_stl
 
 # Print pose and model frame: X across the shelf, Y = distance along the sloped board
 # from its front edge toward the wall, Z = height off the board. The board meets a
@@ -15,23 +15,31 @@ from .export import export_stl, export_svg
 SHELF_DEPTH = 177.8    # 7 in along the slope
 SHELF_ANGLE = 18.0     # angle finder read 4 in of rise per 12 in
 OPENING = 305.0        # 12 in clear above the board's front edge
-STACK = 3
+STACK = ("brick-aa", "brick-18650", "brick-21700", "brick-odds")   # bottom to top
+SPLIT_AFTER = 3        # the base piece stops at the top of the third brick; the Plus 4 prints 280 mm
 
 BASE = 5.0             # slab under the bottom brick, holds its receivers
 FACE_T = 2.4           # the lattice the bricks' drawer feet lean on
 TOP_WEDGE = 4.0        # cradle depth left at the top of the stack, face included
 FIN_T = 4.0            # free-standing back strips, so stiffer than the face
 FIN_FRAME = 8.0
-FLANGE = 10.0          # fin front edge widens to this, so each column of drawer feet has a pad
+FLANGE = 12.0          # fin front edge widens to this, so each column of drawer feet has a pad
 STRUT = 6.0
 STRUT_PITCH = 60.0
 LATTICE = 5.0
 BACK_RAIL = 8.0
 CORNER_CHAMFER = 4.0   # clears a bead of caulk where the board meets the wall
+PEG = 5.0              # square pegs on the topper, one per column, into the base piece's flanges
+PEG_LEN = 8.0
+PEG_CLEAR = 0.2
 
 TAN = math.tan(math.radians(SHELF_ANGLE))
-PITCH = HEIGHT + gf.FOOT_H - gf.stacking_pocket_depth(POCKET_WALL, THICK)
-STACK_TOP = BASE + STACK * PITCH
+_BRICKS = [next(b for b in BRICKS if b.name == n) for n in STACK]
+NX = _BRICKS[0].nx
+WIDTH = _BRICKS[0].width
+LEVELS = [BASE + sum(b.height + STACK_GAP for b in _BRICKS[:i]) for i in range(len(_BRICKS) + 1)]
+STACK_TOP = LEVELS[-1]
+SPLIT = LEVELS[SPLIT_AFTER]
 FACE_Y = SHELF_DEPTH - STACK_TOP * TAN - TOP_WEDGE   # where the drawer-feet tips touch
 BRICK_FRONT = FACE_Y - THICK - gf.FOOT_H
 COLUMNS = [gf.GRID * (i - (NX - 1) / 2.0) for i in range(NX)]
@@ -104,23 +112,48 @@ def build_cradle() -> cq.Workplane:
     return body.cut(_compound([pocket.translate((x, centre_y, BASE)).val() for x in COLUMNS]))
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Shelf cradle for a stack of battery bricks")
-    parser.add_argument("--svg", action="store_true", help="also export an SVG preview")
-    args = parser.parse_args()
-    cradle = build_cradle()
-    solids = len(cradle.val().Solids())
-    bb = cradle.val().BoundingBox()
-    print(f"cradle: {bb.xlen:.1f} x {bb.ylen:.1f} x {bb.zlen:.1f} mm, {cradle.val().Volume() / 1000:.0f} cm³, {solids} solid(s)")
+def split_cradle() -> tuple[cq.Workplane, cq.Workplane]:
+    """The base piece in print pose, and the topper flipped onto its top face with pegs up."""
+    full = build_cradle()
+    big = 1000.0
+    below = cq.Workplane("XY").box(big, big, SPLIT, centered=(True, True, False))
+    above = cq.Workplane("XY").box(big, big, big, centered=(True, True, False)).translate((0, 0, SPLIT))
+    peg_y = FACE_Y + FIN_FRAME / 2.0
+    holes = [
+        cq.Solid.makeBox(PEG + 2 * PEG_CLEAR, PEG + 2 * PEG_CLEAR, PEG_LEN + 0.5 + 1.0,
+                         cq.Vector(x - PEG / 2.0 - PEG_CLEAR, peg_y - PEG / 2.0 - PEG_CLEAR, SPLIT - PEG_LEN - 0.5))
+        for x in COLUMNS
+    ]
+    pegs = [
+        cq.Solid.makeBox(PEG, PEG, PEG_LEN + 0.5, cq.Vector(x - PEG / 2.0, peg_y - PEG / 2.0, SPLIT - PEG_LEN))
+        for x in COLUMNS
+    ]
+    base = full.intersect(below).cut(_compound(holes))
+    top = full.intersect(above).union(_compound(pegs))
+    top = top.rotate((0, 0, 0), (1, 0, 0), 180).translate((0, 0, STACK_TOP))
+    return base, top
+
+
+def _report(name: str, shape: cq.Workplane) -> None:
+    solids = len(shape.val().Solids())
+    bb = shape.val().BoundingBox()
+    print(f"{name}: {bb.xlen:.1f} x {bb.ylen:.1f} x {bb.zlen:.1f} mm, {shape.val().Volume() / 1000:.0f} cm³, {solids} solid(s)")
     if solids != 1:
-        raise SystemExit(f"cradle fragmented into {solids} solids")
+        raise SystemExit(f"{name} fragmented into {solids} solids")
+    print(f"  {export_stl(shape, name)}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Shelf cradle for a stack of battery bricks, in two pieces")
+    parser.parse_args()
+    base, top = split_cradle()
+    _report("cradle-base", base)
+    _report("cradle-top", top)
     cos, sin = math.cos(math.radians(SHELF_ANGLE)), math.sin(math.radians(SHELF_ANGLE))
     top_front = STACK_TOP * cos - BRICK_FRONT * sin
-    print(f"  brick fronts {BRICK_FRONT:.1f} mm back from the shelf edge, stack top {STACK_TOP:.1f} mm off the board")
+    print(f"  split at {SPLIT:.1f} mm; brick fronts {BRICK_FRONT:.1f} mm back from the shelf edge, "
+          f"stack top {STACK_TOP:.1f} mm off the board")
     print(f"  highest corner {top_front:.1f} mm above the board's front edge ({OPENING:.0f} mm clear)")
-    print(f"  {export_stl(cradle, 'cradle')}")
-    if args.svg:
-        print(f"  {export_svg(cradle, 'cradle', direction=(1.0, -0.8, 0.5))}")
 
 
 if __name__ == "__main__":

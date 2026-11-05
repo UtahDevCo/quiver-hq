@@ -30,4 +30,41 @@ CELLS = (
     Cell("18650", 18.4, 65.5, 0.8, 0.0, 40.0),
     Cell("21700", 21.2, 70.5, 0.8, -0.2, 40.0),
 )
-BY_NAME = {c.name: c for c in CELLS}
+C_CELL = Cell("C", 26.2, 50.0, 0.6, 0.2, 33.0)   # not on the coupon; takes the AA squeeze
+
+
+@dataclass(frozen=True)
+class Block:
+    """A 9V stood on its narrow edge: `across` faces the ribs, `tall` runs up the face."""
+    name: str
+    across: float
+    tall: float
+    length: float
+    clearance: float
+    squeeze: float
+    depth: float
+
+    @property
+    def opening(self) -> tuple[float, float]:
+        return self.across + self.clearance, self.tall + self.clearance
+
+
+@dataclass(frozen=True)
+class Slot:
+    """A coin cell stood on edge in a thin slot."""
+    name: str
+    width: float
+    tall: float
+    length: float   # the coin's diameter, along the slot's depth
+    depth: float
+
+    @property
+    def opening(self) -> tuple[float, float]:
+        return self.width, self.tall
+
+
+NINE_VOLT = Block("9V", 17.5, 26.5, 48.5, 0.6, 0.2, 30.0)
+COIN = Slot("coin", 3.8, 20.6, 20.0, 14.0)    # CR2032 is 20 x 3.2; 6 mm stays out to pinch
+
+Hole = Cell | Block | Slot
+BY_NAME: dict[str, Hole] = {h.name: h for h in (*CELLS, C_CELL, NINE_VOLT, COIN)}

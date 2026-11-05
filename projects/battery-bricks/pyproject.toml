@@ -12,6 +12,7 @@ dependencies = [
 bricks-coupon = "battery_bricks.coupon:main"
 bricks = "battery_bricks.brick:main"
 bricks-cradle = "battery_bricks.cradle:main"
+bricks-plates = "battery_bricks.plates:main"
 
 [build-system]
 requires = ["hatchling"]
