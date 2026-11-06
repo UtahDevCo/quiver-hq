@@ -264,7 +264,7 @@ in
         ci = "commit";
         st = "status";
         lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
-        nuke = "!git branch | grep -v \"master\" | xargs git branch -D";
+        nuke = "!git for-each-ref --format='%(if)%(worktreepath)%(then)%(else)%(refname:short)%(end)' refs/heads | grep -vxE '|main|master' | xargs -r git branch -D";
         upstream = "!git push -u origin HEAD";
         new = "co -b";
         remove = "br -D";
