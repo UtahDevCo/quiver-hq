@@ -467,6 +467,48 @@ in
     };
   };
 
+  # Drafts Trikin's ready payments as one ACH batch in Maple Mark until Maple Mark's API exists.
+  # Credentials are systemd-creds files on this box; see projects/trikin/maple-draft/src/run.ts.
+  systemd.user.services.maple-draft = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Draft Trikin's ready payments as an ACH batch in Maple Mark";
+    };
+    Service = {
+      Type = "oneshot";
+      WorkingDirectory = "/home/chris/dev/quiver-hq/projects/trikin/maple-draft";
+      # --dry-run stops before Draft; drop it once a real batch has checked out end to end.
+      ExecStart = "${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts --dry-run";
+      LoadCredentialEncrypted = [
+        "maple-password:%h/.config/maple-draft/password.cred"
+        "maple-draft-secret:%h/.config/maple-draft/trikin-secret.cred"
+      ];
+      TimeoutStartSec = "15min";
+      Environment = [
+        "HOME=%h"
+        "TZ=America/Denver"
+        "PATH=/run/current-system/sw/bin:/etc/profiles/per-user/chris/bin"
+      ];
+    };
+  };
+
+  # 7 AM makes the bank's same-day cutoff; 1 PM catches the day's later approvals for the next business day.
+  systemd.user.timers.maple-draft = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Run the Maple Mark draft bot on weekday mornings and afternoons";
+    };
+    Timer = {
+      OnCalendar = [
+        "Mon..Fri *-*-* 07:00:00 America/Denver"
+        "Mon..Fri *-*-* 13:00:00 America/Denver"
+      ];
+      Unit = "maple-draft.service";
+      Persistent = true;
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
+  };
+
   systemd.user.services.quiver-sleep-monitor = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
       Description = "Quiver Sleep Monitor Service";
