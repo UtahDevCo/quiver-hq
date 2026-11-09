@@ -477,7 +477,7 @@ in
       Type = "oneshot";
       WorkingDirectory = "/home/chris/dev/quiver-hq/projects/trikin/maple-draft";
       # --dry-run stops before Draft; drop it once a real batch has checked out end to end.
-      ExecStart = "${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts --dry-run";
+      ExecStart = "${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts";
       LoadCredentialEncrypted = [
         "maple-password:%h/.config/maple-draft/password.cred"
         "maple-draft-secret:%h/.config/maple-draft/trikin-secret.cred"
