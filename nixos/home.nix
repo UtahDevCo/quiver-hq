@@ -546,6 +546,43 @@ in
     };
   };
 
+  # Same bot, read-only in the bank: drafted batches the Activity Center shows Processed are marked funded in Trikin.
+  systemd.user.services.maple-funding = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Mark Trikin's processed Maple Mark batches funded";
+    };
+    Service = {
+      Type = "oneshot";
+      WorkingDirectory = "/home/chris/dev/quiver-hq/projects/trikin/maple-draft";
+      ExecStart = "${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts --funding";
+      LoadCredentialEncrypted = [
+        "maple-password:%h/.config/maple-draft/password.cred"
+        "maple-draft-secret:%h/.config/maple-draft/trikin-secret.cred"
+      ];
+      TimeoutStartSec = "10min";
+      Environment = [
+        "HOME=%h"
+        "TZ=America/Denver"
+        "PATH=/run/current-system/sw/bin:/etc/profiles/per-user/chris/bin"
+      ];
+    };
+  };
+
+  # End of the business day, so the day's approvals are in; an hour clear of the statements pull.
+  systemd.user.timers.maple-funding = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Mark processed Maple Mark batches funded each weekday evening";
+    };
+    Timer = {
+      OnCalendar = [ "Mon..Fri *-*-* 17:00:00 America/Denver" ];
+      Unit = "maple-funding.service";
+      Persistent = true;
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
+  };
+
   systemd.user.services.quiver-sleep-monitor = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
       Description = "Quiver Sleep Monitor Service";
