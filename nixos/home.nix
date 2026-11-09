@@ -509,6 +509,43 @@ in
     };
   };
 
+  # Same bot, read-only in the bank: posts Receiving's and Settlement's OFX exports to Trikin.
+  systemd.user.services.maple-statements = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Pull Trikin's Maple Mark statements into Trikin";
+    };
+    Service = {
+      Type = "oneshot";
+      WorkingDirectory = "/home/chris/dev/quiver-hq/projects/trikin/maple-draft";
+      ExecStart = "${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts --statements";
+      LoadCredentialEncrypted = [
+        "maple-password:%h/.config/maple-draft/password.cred"
+        "maple-draft-secret:%h/.config/maple-draft/trikin-secret.cred"
+      ];
+      TimeoutStartSec = "10min";
+      Environment = [
+        "HOME=%h"
+        "TZ=America/Denver"
+        "PATH=/run/current-system/sw/bin:/etc/profiles/per-user/chris/bin"
+      ];
+    };
+  };
+
+  # Evenings, clear of the 7 AM / 1 PM draft runs that share the Chrome profile.
+  systemd.user.timers.maple-statements = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Pull Trikin's Maple Mark statements every evening";
+    };
+    Timer = {
+      OnCalendar = [ "*-*-* 18:00:00 America/Denver" ];
+      Unit = "maple-statements.service";
+      Persistent = true;
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
+  };
+
   systemd.user.services.quiver-sleep-monitor = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
       Description = "Quiver Sleep Monitor Service";
