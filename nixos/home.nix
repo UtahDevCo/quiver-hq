@@ -18,6 +18,29 @@ let
     '';
   };
 
+  # Upstream release binary, because nixpkgs lags well behind Stripe's releases
+  stripeCliReleases = {
+    aarch64-darwin = { asset = "mac-os_arm64"; sha256 = "62d86719984e29a2bd0ed079dd8ff731624cff9b29990acec927f5c60c5c1436"; };
+    x86_64-linux = { asset = "linux_x86_64"; sha256 = "01b4e0fcac2c7486d9f428290784f49b8ecba37339c17bc705fb2d8a1f5ed5ff"; };
+  };
+  stripeCliRelease = stripeCliReleases.${pkgs.stdenv.hostPlatform.system} or null;
+  stripe-cli =
+    if stripeCliRelease == null then pkgs.stripe-cli
+    else pkgs.stdenv.mkDerivation rec {
+      pname = "stripe-cli";
+      version = "1.55.9";
+      src = pkgs.fetchurl {
+        url = "https://github.com/stripe/stripe-cli/releases/download/v${version}/stripe_${version}_${stripeCliRelease.asset}.tar.gz";
+        sha256 = stripeCliRelease.sha256;
+      };
+      unpackPhase = "tar -xzf $src";
+      installPhase = ''
+        mkdir -p $out/bin
+        cp stripe $out/bin/stripe
+        chmod +x $out/bin/stripe
+      '';
+    };
+
   alpaca-cli = pkgs.buildGoModule {
     pname = "alpaca-cli";
     version = "0.0.11";
