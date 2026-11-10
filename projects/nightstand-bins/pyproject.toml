@@ -1,0 +1,19 @@
+[project]
+name = "nightstand-bins-cad"
+version = "0.1.0"
+description = "Gridfinity bins for the VAULT chest on the nightstand: roof toppers, stacking drawer trays, watch dish"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "cadquery>=2.6,<3",
+]
+
+[project.scripts]
+nightstand-build = "nightstand_bins.build:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nightstand_bins"]
