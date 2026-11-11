@@ -10,6 +10,7 @@ Complete guide for setting up and running all Quiver HQ projects with Caddy reve
 | Therapy Animal Hub | `projects/therapyanimalhub.com` | Next.js, TypeScript, Turso/SQLite, Stripe | 3001 | therapy.chrisesplin.com | ✅ Ready | `npm run dev` |
 | Wiley | `projects/wiley` | Next.js, TypeScript, Bun, Firebase | 3600 | wiley.chrisesplin.com | ✅ Ready | `next dev --port 3600` |
 | Trikin | `projects/trikin` | Next.js, TypeScript, Cloudflare D1 | 3700 | trikin.chrisesplin.com | ✅ Ready | `next dev --port 3700` |
+| UtahDevCo | `projects/utahdevco.com` | Next.js 14, MDX, Outstatic, Tailwind | 3800 | — | ✅ Ready | `npx next dev --port 3800` |
 | K1 | `projects/k1` | Next.js Turbo monorepo, Pnpm, Firebase | 3010* | k1.chrisesplin.com | ⚠️ Dynamic port | `pnpm dev` |
 
 *K1 uses Turbo's dynamic port management; default 3000-3009 range

@@ -35,3 +35,6 @@
 [submodule "projects/popreminders.com"]
 	path = projects/popreminders.com
 	url = git@github.com:deltaepsilon/popreminders.com.git
+[submodule "projects/utahdevco.com"]
+	path = projects/utahdevco.com
+	url = git@github.com:UtahDevCo/utahdevco.com.git
