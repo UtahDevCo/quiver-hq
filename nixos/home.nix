@@ -378,13 +378,14 @@ in
           #   3050 foundation-integrations              3100 therapyanimalhub.com
           #   3300 tools gtd       3310 tools wkt       3400 job-harvester
           #   3600 wiley           3700 trikin          3800 k1
+          #   3900 utahdevco.com
           #   4000 chrisesplin.com 5173 k1-fork / zamp-technical-success
           #   5556 zamp prisma studio                   6006/6007 storybook
           #   8000 k1-fork / zamp-technical-success backend
           #   8288 inngest         8787 stripe fwd      8788 wrangler pages
           local QUIVER_DEV_PORTS=(
               3000 3001 3002 3003 3004 3005 3007
-              3050 3100 3300 3310 3400 3600 3700 3800 4000
+              3050 3100 3300 3310 3400 3600 3700 3800 3900 4000
               5173 5556 6006 6007 8000 8288 8787 8788
           )
 
