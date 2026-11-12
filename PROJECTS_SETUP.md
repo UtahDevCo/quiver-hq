@@ -11,6 +11,7 @@ Complete guide for setting up and running all Quiver HQ projects with Caddy reve
 | Wiley | `projects/wiley` | Next.js, TypeScript, Bun, Firebase | 3600 | wiley.chrisesplin.com | ✅ Ready | `next dev --port 3600` |
 | Trikin | `projects/trikin` | Next.js, TypeScript, Cloudflare D1 | 3700 | trikin.chrisesplin.com | ✅ Ready | `next dev --port 3700` |
 | UtahDevCo | `projects/utahdevco.com` | Next.js 14, MDX, Outstatic, Tailwind | 3900 | — | ✅ Ready | `npm run dev` |
+| Calligraphy | `projects/calligraphy` | Bun + Turborepo, Next 16, Payload 3, Postgres | 3200 / 3210 | — | ✅ Ready | `bunx turbo run dev` |
 | K1 | `projects/k1` | Next.js Turbo monorepo, Pnpm, Firebase | 3010* | k1.chrisesplin.com | ⚠️ Dynamic port | `pnpm dev` |
 
 *K1 uses Turbo's dynamic port management; default 3000-3009 range
@@ -344,6 +345,45 @@ module.exports = {
 ```bash
 curl https://k1.chrisesplin.com
 ```
+
+---
+
+### 6. Calligraphy
+
+**Location**: `projects/calligraphy`  
+**Ports**: 3200 (site), 3210 (CMS), 3220 (Postgres)  
+**Subdomain**: none (local only, no Caddy entry)
+
+**Description**: Bun + Turborepo monorepo for calligraphy.org. `apps/calligraphy.org` is the public site (Next 16), which reads all content from `apps/cms.calligraphy.org`, a Payload 3 CMS on Postgres. Production runs on Fly.io.
+
+**Setup**:
+```bash
+cd projects/calligraphy
+
+bun install
+docker compose up -d                # local Postgres 16 on 3220
+quiver-secrets hydrate .            # writes both apps' .env.local from their .env.tmpl
+(cd apps/cms.calligraphy.org && bun run payload migrate)
+
+# Use turbo directly. `bun dev` opens `fly proxy 3220:5432 -a payload-db-quiver`,
+# which points local dev at the PRODUCTION database.
+bunx turbo run dev --filter=calligraphy.org --filter=@calligraphy/cms
+```
+
+A fresh database renders "Missing content" placeholders. Create the first admin user at http://localhost:3210/admin, then fill in the Landing Page global.
+
+**Access**:
+```bash
+curl http://localhost:3200                 # site
+curl http://localhost:3210/admin           # CMS admin
+```
+
+**Environment Variables** (1Password sections `calligraphy/apps/*`):
+- Site: `NEXT_PUBLIC_CMS_URL=http://localhost:3210`. If it's unset, the site reads the production CMS.
+- CMS: `DATABASE_URI` (local Postgres), `PAYLOAD_SECRET`. S3 keys are optional; uploads fall back to the local filesystem.
+
+**Gotchas**:
+- The repo pins `bun@1.3.1`. A newer Bun rewrites `bun.lock` on install; revert it with `git checkout bun.lock`.
 
 ---
 
