@@ -38,3 +38,6 @@
 [submodule "projects/calligraphy"]
 	path = projects/calligraphy
 	url = git@github.com:UtahDevCo/calligraphy.git
+[submodule "projects/calligraphy-2018"]
+	path = projects/calligraphy-2018
+	url = git@github.com:deltaepsilon/calligraphy.git
