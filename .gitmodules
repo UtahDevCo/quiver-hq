@@ -23,9 +23,6 @@
 	path = projects/k1
 	url = git@github.com:UtahDevCo/k1.git
 	branch = main
-[submodule "projects/k1-fork"]
-	path = projects/k1-fork
-	url = git@github.com:schulzgregory/tax-pe-fork.git
 [submodule "projects/zamp"]
 	path = projects/zamp
 	url = git@github.com:zamptax/zamp.git
