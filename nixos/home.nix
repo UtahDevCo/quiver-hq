@@ -493,6 +493,7 @@ in
 
   # Drafts Trikin's ready payments as one ACH batch in Maple Mark until Maple Mark's API exists.
   # Credentials are systemd-creds files on this box; see projects/trikin/maple-draft/src/run.ts.
+  # Every maple-* run shares one Chrome profile, so each takes the same flock and waits its turn.
   systemd.user.services.maple-draft = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
       Description = "Draft Trikin's ready payments as an ACH batch in Maple Mark";
@@ -501,7 +502,7 @@ in
       Type = "oneshot";
       WorkingDirectory = "/home/chris/dev/quiver-hq/projects/trikin/maple-draft";
       # --dry-run stops before Draft; drop it once a real batch has checked out end to end.
-      ExecStart = "${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts";
+      ExecStart = "${pkgs.util-linux}/bin/flock %h/.local/state/maple-draft/run.lock ${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts";
       LoadCredentialEncrypted = [
         "maple-password:%h/.config/maple-draft/password.cred"
         "maple-draft-secret:%h/.config/maple-draft/trikin-secret.cred"
@@ -518,12 +519,16 @@ in
   # 7 AM makes the bank's same-day cutoff; 1 PM catches the day's later approvals for the next business day.
   systemd.user.timers.maple-draft = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
-      Description = "Run the Maple Mark draft bot on weekday mornings and afternoons";
+      Description = "Run the Maple Mark draft bot four times each weekday";
     };
     Timer = {
       OnCalendar = [
+        # 8 AM, 12 PM, 2 PM and 4 PM Central. 4 PM Central is Maple Mark's same-day cutoff, so
+        # that batch is for Andy's evening approval and goes out the next business day.
         "Mon..Fri *-*-* 07:00:00 America/Denver"
+        "Mon..Fri *-*-* 11:00:00 America/Denver"
         "Mon..Fri *-*-* 13:00:00 America/Denver"
+        "Mon..Fri *-*-* 15:00:00 America/Denver"
       ];
       Unit = "maple-draft.service";
       Persistent = true;
@@ -541,7 +546,7 @@ in
     Service = {
       Type = "oneshot";
       WorkingDirectory = "/home/chris/dev/quiver-hq/projects/trikin/maple-draft";
-      ExecStart = "${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts --statements";
+      ExecStart = "${pkgs.util-linux}/bin/flock %h/.local/state/maple-draft/run.lock ${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts --statements";
       LoadCredentialEncrypted = [
         "maple-password:%h/.config/maple-draft/password.cred"
         "maple-draft-secret:%h/.config/maple-draft/trikin-secret.cred"
@@ -578,7 +583,7 @@ in
     Service = {
       Type = "oneshot";
       WorkingDirectory = "/home/chris/dev/quiver-hq/projects/trikin/maple-draft";
-      ExecStart = "${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts --funding";
+      ExecStart = "${pkgs.util-linux}/bin/flock %h/.local/state/maple-draft/run.lock ${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts --funding";
       LoadCredentialEncrypted = [
         "maple-password:%h/.config/maple-draft/password.cred"
         "maple-draft-secret:%h/.config/maple-draft/trikin-secret.cred"
@@ -592,14 +597,54 @@ in
     };
   };
 
-  # End of the business day, so the day's approvals are in; an hour clear of the statements pull.
+  # Hourly at :30 from 7:30 AM to 6:30 PM Central, so the dashboard shows a payment funded within
+  # about an hour of Maple Mark processing it, and the 7:30 run flags any draft lost overnight
+  # before the 8 AM draft. Quiet unless something was funded or needs a look; a run with nothing
+  # awaiting funding doesn't log in to the bank.
   systemd.user.timers.maple-funding = lib.mkIf pkgs.stdenv.isLinux {
     Unit = {
-      Description = "Mark processed Maple Mark batches funded each weekday evening";
+      Description = "Mark processed Maple Mark batches funded, hourly on weekdays";
     };
     Timer = {
-      OnCalendar = [ "Mon..Fri *-*-* 17:00:00 America/Denver" ];
+      OnCalendar = [ "Mon..Fri *-*-* 06..17:30:00 America/Denver" ];
       Unit = "maple-funding.service";
+      Persistent = true;
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
+  };
+
+  # The funding check once more at 3 PM Central, alerting about batches still waiting on approval
+  # so Andy can approve them before Maple Mark's 4 PM Central cutoff.
+  systemd.user.services.maple-funding-nudge = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Mark processed Maple Mark batches funded and nudge about unapproved ones";
+    };
+    Service = {
+      Type = "oneshot";
+      WorkingDirectory = "/home/chris/dev/quiver-hq/projects/trikin/maple-draft";
+      ExecStart = "${pkgs.util-linux}/bin/flock %h/.local/state/maple-draft/run.lock ${pkgs.xvfb-run}/bin/xvfb-run -a /etc/profiles/per-user/chris/bin/node src/run.ts --funding --nudge";
+      LoadCredentialEncrypted = [
+        "maple-password:%h/.config/maple-draft/password.cred"
+        "maple-draft-secret:%h/.config/maple-draft/trikin-secret.cred"
+      ];
+      TimeoutStartSec = "10min";
+      Environment = [
+        "HOME=%h"
+        "TZ=America/Denver"
+        "PATH=/run/current-system/sw/bin:/etc/profiles/per-user/chris/bin"
+      ];
+    };
+  };
+
+  systemd.user.timers.maple-funding-nudge = lib.mkIf pkgs.stdenv.isLinux {
+    Unit = {
+      Description = "Nudge about unapproved Maple Mark batches at 3 PM Central";
+    };
+    Timer = {
+      OnCalendar = [ "Mon..Fri *-*-* 14:00:00 America/Denver" ];
+      Unit = "maple-funding-nudge.service";
       Persistent = true;
     };
     Install = {
