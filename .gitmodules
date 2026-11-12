@@ -35,3 +35,6 @@
 [submodule "projects/utahdevco.com"]
 	path = projects/utahdevco.com
 	url = git@github.com:UtahDevCo/utahdevco.com.git
+[submodule "projects/calligraphy"]
+	path = projects/calligraphy
+	url = git@github.com:UtahDevCo/calligraphy.git
