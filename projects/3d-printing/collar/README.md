@@ -12,12 +12,12 @@ From the repository root:
 nix develop -c uv sync
 ```
 
-Generated files go under `projects/collar/build/` and are not committed.
+Generated files go under `projects/3d-printing/collar/build/` and are not committed.
 
 ## Inner sleeve
 
 ```sh
-nix develop -c uv run --project projects/collar collar-full-sleeve
+nix develop -c uv run --project projects/3d-printing/collar collar-full-sleeve
 ```
 
 Writes `build/full-sleeve/` (STL, STEP, 3MF). The sleeve uses the symmetric
@@ -38,24 +38,24 @@ Leather liner panels for the inside of the sleeve (printable PDF with a
 shopping list, 1:1 patterns and perforation marks):
 
 ```sh
-nix develop -c uv run --project projects/collar python -m collar.cord_brace     # sleeve-local.stl
-nix develop -c uv run --project projects/collar python -m collar.sleeve_liner   # build/sleeve-liner/
+nix develop -c uv run --project projects/3d-printing/collar python -m collar.cord_brace     # sleeve-local.stl
+nix develop -c uv run --project projects/3d-printing/collar python -m collar.sleeve_liner   # build/sleeve-liner/
 ```
 
 Supporting tools:
 
 ```sh
-nix develop -c uv run --project projects/collar collar-scan-info   # scan bounds and units
-nix develop -c uv run --project projects/collar collar-fit-gauges  # short C-shaped section gauges
-nix develop -c uv run --project projects/collar collar-fit-scene   # scan + sleeve GLB, no Blender
+nix develop -c uv run --project projects/3d-printing/collar collar-scan-info   # scan bounds and units
+nix develop -c uv run --project projects/3d-printing/collar collar-fit-gauges  # short C-shaped section gauges
+nix develop -c uv run --project projects/3d-printing/collar collar-fit-scene   # scan + sleeve GLB, no Blender
 ```
 
 ## Outer brace
 
 ```sh
-nix develop -c uv run --project projects/collar python -m collar.cord_brace    # sleeve-local.stl for the viewer
-nix develop -c uv run --project projects/collar python -m collar.brace_parts   # printable parts, about 20 minutes
-nix develop -c uv run --project projects/collar python -m collar.assembly_viz  # GLB + JSON for the 3D viewer
+nix develop -c uv run --project projects/3d-printing/collar python -m collar.cord_brace    # sleeve-local.stl for the viewer
+nix develop -c uv run --project projects/3d-printing/collar python -m collar.brace_parts   # printable parts, about 20 minutes
+nix develop -c uv run --project projects/3d-printing/collar python -m collar.assembly_viz  # GLB + JSON for the 3D viewer
 ```
 
 `brace_parts` writes `build/brace-parts/`: the anchor, five segments, the dial

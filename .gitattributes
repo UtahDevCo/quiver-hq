@@ -1,4 +1,4 @@
 * -text
 assets/*.AppImage filter=lfs diff=lfs merge=lfs -text
 scratch/agy filter=lfs diff=lfs merge=lfs -text
-projects/collar/stl/*.stl filter=lfs diff=lfs merge=lfs -text
+projects/3d-printing/collar/stl/*.stl filter=lfs diff=lfs merge=lfs -text

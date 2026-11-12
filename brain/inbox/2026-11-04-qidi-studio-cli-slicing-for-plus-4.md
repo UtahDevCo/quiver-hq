@@ -10,7 +10,7 @@ generated: { by: claude/opus-5.5, at: 2026-11-04T23:22:49Z }
 status: draft
 sources:
   - id: coupon-gcode
-    resource: projects/battery-bricks/build/fit-coupon.gcode
+    resource: projects/3d-printing/battery-bricks/build/fit-coupon.gcode
     title: CLI-sliced fit coupon that printed on the Plus 4 (header holds the full resolved config)
     last_modified: 2026-11-04
   - id: system-profiles

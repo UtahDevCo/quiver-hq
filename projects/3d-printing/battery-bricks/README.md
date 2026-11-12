@@ -11,13 +11,13 @@ Design page: https://claude.ai/artifact/4uiQFJz8hW4G7GopDJshP1
 
 ```sh
 # Fit coupon first: one bore per cell size at three rib squeezes (rows 1-3).
-nix develop -c uv run --project projects/battery-bricks bricks-coupon --svg
+nix develop -c uv run --project projects/3d-printing/battery-bricks bricks-coupon --svg
 # The four bricks, or name some: brick-aa brick-18650 brick-21700 brick-odds
-nix develop -c uv run --project projects/battery-bricks bricks
+nix develop -c uv run --project projects/3d-printing/battery-bricks bricks
 # Shelf cradle in two pieces: cradle-base (260 mm) and cradle-top, which pegs on
-nix develop -c uv run --project projects/battery-bricks bricks-cradle
+nix develop -c uv run --project projects/3d-printing/battery-bricks bricks-cradle
 # Each print plate's parts already placed on the 305 x 305 bed, in build/plate-N/
-nix develop -c uv run --project projects/battery-bricks bricks-plates
+nix develop -c uv run --project projects/3d-printing/battery-bricks bricks-plates
 ```
 
 Slice a plate with the slicer's arrange off (`--arrange 0`) so the placement holds.

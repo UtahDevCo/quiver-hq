@@ -10,7 +10,7 @@ generated: { by: claude/opus-5.5, at: 2026-11-05T01:31:02Z }
 status: draft
 sources:
   - id: readme
-    resource: projects/battery-bricks/README.md
+    resource: projects/3d-printing/battery-bricks/README.md
     title: battery-bricks README, Printing section (slice results)
     last_modified: 2026-11-04
 not:

@@ -4,7 +4,7 @@ Gridfinity bins for the VAULT chest (`projects/tools/3d/vault/`) on the nightsta
 grid roof and in its drawers.
 
 ```sh
-nix develop -c uv run --project projects/nightstand-bins nightstand-build [--only <part>]
+nix develop -c uv run --project projects/3d-printing/nightstand-bins nightstand-build [--only <part>]
 ```
 
 STLs land in `build/`.

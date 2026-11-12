@@ -19,17 +19,17 @@ nominal key sizes, not pre-inflated hole sizes. Edit the table and re-run.
 From the repository root:
 
 ```sh
-nix develop -c uv sync --project projects/allen-organizer
+nix develop -c uv sync --project projects/3d-printing/allen-organizer
 
 # Slide trays: metric (13) and SAE (9), one row each.
-nix develop -c uv run --project projects/allen-organizer allen-tray --tier metric_front
-nix develop -c uv run --project projects/allen-organizer allen-tray --tier sae_back
+nix develop -c uv run --project projects/3d-printing/allen-organizer allen-tray --tier metric_front
+nix develop -c uv run --project projects/3d-printing/allen-organizer allen-tray --tier sae_back
 
 # Overflow tray for duplicate working sizes (3 mm ×5, 4 mm ×2, 5 mm ×2, 3/32" ×4).
-nix develop -c uv run --project projects/allen-organizer allen-spares
+nix develop -c uv run --project projects/3d-printing/allen-organizer allen-spares
 
 # Reference-only earlier design.
-nix develop -c uv run --project projects/allen-organizer allen-stand
+nix develop -c uv run --project projects/3d-printing/allen-organizer allen-stand
 ```
 
 ## Slide tray

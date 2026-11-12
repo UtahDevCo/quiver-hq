@@ -13,6 +13,15 @@ TPU.
 - `models/` — STLs and print-ready geometry.
 - `notes/` — print logs, tuning notes, per-project settings.
 
+CAD projects, each its own uv project (`nix develop -c uv run --project projects/3d-printing/<name> ...`):
+
+- `allen-organizer/`: allen-key trays and stand.
+- `battery-bricks/`: Gridfinity battery bricks.
+- `collar/`: posture collar from a neck scan.
+- `nightstand-bins/`: Gridfinity bins for the VAULT chest.
+- `toolbox/`: tool-traced Gridfinity bins via a local Tracefinity (`docker compose up -d`, port 3900).
+- `vanity-drawer/`: bathroom vanity drawer baseplates and bins.
+
 ## Knowledge
 
 Durable engineering knowledge lives in the brain, reachable from here as

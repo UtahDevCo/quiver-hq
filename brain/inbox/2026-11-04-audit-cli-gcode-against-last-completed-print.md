@@ -10,7 +10,7 @@ generated: { by: claude/opus-5.5, at: 2026-11-04T23:22:49Z }
 status: draft
 sources:
   - id: coupon-gcode
-    resource: projects/battery-bricks/build/fit-coupon.gcode
+    resource: projects/3d-printing/battery-bricks/build/fit-coupon.gcode
     title: Audited CLI-sliced coupon (enable_arc_fitting = 0, BOX_TEMP_SET stripped)
     last_modified: 2026-11-04
   - id: printer-macros
