@@ -119,6 +119,7 @@ in
     (if pkgs.stdenv.isLinux then render-cli else null)
     alpaca-cli
     stripe-cli
+    flarectl
     (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-secrets or null)
     (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.quiver-sleep or null)
     (inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.controller or null)
@@ -352,6 +353,19 @@ in
       if [[ -z "$ANTIGRAVITY_API_KEY" && -n "$GEMINI_API_KEY" ]]; then
           export ANTIGRAVITY_API_KEY="$GEMINI_API_KEY"
       fi
+
+      # flarectl gets the Cloudflare admin token from 1Password ("Cloudflare"
+      # item, "api token" field) per call. It is never exported: projects set
+      # their own CF_API_TOKEN in .env files, and a global one would shadow them.
+      flarectl() {
+          local token="$CF_API_TOKEN"
+          [[ -z "$token" ]] && token=$(op item get 6ocb2zo2nvdovhiwk33noy7s7i --fields 'label=api token' --reveal 2>/dev/null)
+          if [[ -z "$token" ]]; then
+              echo "flarectl: no Cloudflare token (is 1Password unlocked?)" >&2
+              return 1
+          fi
+          CF_API_TOKEN="$token" command flarectl "$@"
+      }
 
       # 3.5. Setup Ghostty shell integration
       if [[ -n "$GHOSTTY_RESOURCES_DIR" ]]; then
