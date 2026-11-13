@@ -323,7 +323,7 @@ in
       alias ll="ls -al"
       alias dc="docker compose"
       alias zshrc='vim ~/dev/quiver-hq/nixos/home.nix'
-      alias reload='(cd ~/dev/quiver-hq && ${if pkgs.stdenv.isDarwin then "sudo darwin-rebuild switch --flake .#quiver-mac" else "sudo nixos-rebuild switch --flake .#$(hostname)"})'
+      alias reload='(cd ~/dev/quiver-hq && ${if pkgs.stdenv.isDarwin then "sudo darwin-rebuild switch --flake .#quiver-mac" else "sudo nixos-rebuild switch --flake .#$(hostname)"}) && exec zsh'
       alias agide='antigravity-ide'
       alias upgrade-agy='cd ~/dev/quiver-hq && bun ~/.gemini/config/skills/antigravity-upgrade/scripts/upgrade.js --auto --rebuild && cd -'
       alias opsignin='eval $(op signin)'
