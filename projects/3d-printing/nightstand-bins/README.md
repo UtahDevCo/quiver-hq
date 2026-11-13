@@ -52,8 +52,15 @@ degrees right, so the screens tip toward the bed. The iPad slot is open at the f
 iPad stands on its long edge and overhangs the front by 47 mm (about 37 mm past the roof edge);
 put it in port-forward. A cable channel runs down the right side of the block.
 
-Two cable catches sit in a 12.5 mm rail behind the channel: a 5 mm slot open to the back and the
-top for the 4 mm cable, under a 13 x 7.5 x 8 mm pocket that holds the plug's 12 x 6.5 mm molded
-head. The cables run up the back of the chest, so leave about 10 mm between the chest and the wall.
+Two cable catches sit on a ledge that hangs 21 mm (half a cell) off the back of the block, behind
+the channel: a 5 mm slot open to the back and the top for the 4 mm cable, under a 13 x 7.5 x 8 mm
+pocket that holds the plug's 12 x 6.5 mm molded head. The roof runs about 10 mm past the bin's back
+edge, flat at deck height, so a catch inside the footprint bent the cable over the roof edge (the
+first test piece); on the ledge the cable hangs about 5 mm clear of it. The ledge's underside rises
+at 45 degrees from the back wall, so it prints without support and clears the roof by about 19 mm
+at its edge. It stands 11 mm proud of the roof, so leave about 15 mm between the chest and the wall.
 
-All five fit one plate: 8.1 h, 335 g (`build/print/N2 roof 3c/`).
+`roof-slot-test-2x1-6u` is the back cell of the block on its own, slots, ledge and catches, for
+fit tests.
+
+All five fit one plate: 8.2 h, 340 g (`build/print/N2 roof 3c/`).

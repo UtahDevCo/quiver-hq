@@ -24,7 +24,13 @@ POCKET_D = 7.5           # front to back
 POCKET_DEPTH = 8.0
 POCKET_BACK_WALL = 1.75
 RAIL_DEPTH = 12.5
-CATCH_XS = (12.0, 30.0)  # from the block's centre line, inside the rail behind the channel
+CATCH_XS = (12.0, 30.0)  # from the block's centre line, behind the channel
+# The roof runs about 10 mm past the bin's back edge, so the catches sit on a ledge that hangs
+# half a cell off the back and the cable drops clear of the roof. The ledge's underside rises
+# at 45 degrees so it prints without support.
+CATCH_OVERHANG = 21.0
+LEDGE_TIP_THICKNESS = 12.0
+LEDGE_SIDE_WALL = 2.0
 
 WATCH_SLOT = 5.0
 
@@ -47,8 +53,17 @@ def _leaning_slot(x_bottom: float, width: float, z_floor: float, z_top: float,
     return prism.intersect(_box(-200, 200, y0, y1, -50, 200))
 
 
-def slot_block() -> cq.Workplane:
-    w, d = gf.outer_dims(2, 5)
+def _ledge(x0: float, x1: float, y0: float, y1: float, z_top: float) -> cq.Workplane:
+    """A shelf off the back face, LEDGE_TIP_THICKNESS thick at y1, its underside at 45 degrees."""
+    z_tip = z_top - LEDGE_TIP_THICKNESS
+    z_root = z_tip - (y1 - y0)
+    pts = [(y0, z_root), (y1, z_tip), (y1, z_top), (y0, z_top)]
+    return cq.Workplane("YZ").polyline(pts).close().extrude(x1 - x0).translate((x0, 0, 0))
+
+
+def slot_block(ny: int = 5) -> cq.Workplane:
+    """The 2 x ny slot block. ny=1 is the fit test: the back cell, with both slots and catches."""
+    w, d = gf.outer_dims(2, ny)
     z_top = 6 * gf.U - gf.FOOT_H
     z_floor = z_top - SLOT_DEPTH
     above = z_top + 1.0
@@ -61,19 +76,24 @@ def slot_block() -> cq.Workplane:
     ipad_x = phone_x + PHONE_SLOT + DIVIDER
     channel_x = ipad_x + IPAD_SLOT + SIDE_WALL
 
-    body = gf.base(2, 5).union(gf.body_slab(2, 5, z_top))
+    body = gf.base(2, ny).union(gf.body_slab(2, ny, z_top))
     phone = _leaning_slot(phone_x, PHONE_SLOT, z_floor, above, inner_front, inner_back)
     ipad = _leaning_slot(ipad_x, IPAD_SLOT, z_floor, above, front - 5.0, inner_back)
     channel = _leaning_slot(channel_x, 200.0, z_floor, above, inner_front, back - RAIL_DEPTH)
     channel = channel.intersect(_box(-200, right - SIDE_WALL, -200, 200, -50, 200))
     block = body.cut(phone).cut(ipad).cut(channel)
 
-    pocket_y1 = back - POCKET_BACK_WALL
+    tip = back + CATCH_OVERHANG
+    ledge_x0 = min(CATCH_XS) - POCKET_W / 2 - LEDGE_SIDE_WALL
+    ledge_x1 = max(CATCH_XS) + POCKET_W / 2 + LEDGE_SIDE_WALL
+    block = block.union(_ledge(ledge_x0, ledge_x1, back - 1.0, tip, z_top))
+
+    pocket_y1 = tip - POCKET_BACK_WALL
     pocket_y0 = pocket_y1 - POCKET_D
     cable_y = (pocket_y0 + pocket_y1) / 2
     for x in CATCH_XS:
         pocket = _box(x - POCKET_W / 2, x + POCKET_W / 2, pocket_y0, pocket_y1, z_top - POCKET_DEPTH, above)
-        slot = _box(x - CATCH_SLOT / 2, x + CATCH_SLOT / 2, cable_y - CATCH_SLOT / 2, back + 1.0, -gf.FOOT_H - 1.0, above)
+        slot = _box(x - CATCH_SLOT / 2, x + CATCH_SLOT / 2, cable_y - CATCH_SLOT / 2, tip + 1.0, -gf.FOOT_H - 1.0, above)
         block = block.cut(pocket.edges("|Z").fillet(1.5)).cut(slot)
     return block
 

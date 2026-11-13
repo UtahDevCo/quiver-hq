@@ -14,6 +14,7 @@ BUILD_DIR = Path(__file__).resolve().parents[2] / "build"
 PARTS: dict[str, Callable[[], cq.Workplane]] = {
     "drawer-tray-3x5-2u": lambda: gf.open_tray(3, 5, 2),
     "roof-slot-block-2x5-6u": roof.slot_block,
+    "roof-slot-test-2x1-6u": lambda: roof.slot_block(1),
     "roof-tray-3x3-2u": lambda: gf.open_tray(3, 3, 2),
     "roof-tray-2x3-2u": lambda: gf.open_tray(2, 3, 2),
     "roof-tall-3x2-6u": lambda: gf.open_tray(3, 2, 6),
