@@ -1,0 +1,16 @@
+services:
+  tracefinity:
+    image: ghcr.io/tracefinity/tracefinity:0.10.1
+    container_name: tracefinity
+    ports:
+      - "127.0.0.1:3900:3000"
+    volumes:
+      - ./data:/app/storage
+      # v0.10.1 can't write InSPyReNet's model cache as UID 1000; without this every inspyrenet trace 500s
+      - ./model-cache:/app/.transparent-background
+    environment:
+      AUTH_MODE: open
+      # birefnet-lite needs ~8GB and OOM-kills the backend on Docker Desktop's default 7.75GB VM
+      TRACERS: isnet,inspyrenet
+      STL_GENERATION_CONCURRENCY: "1"
+    restart: unless-stopped

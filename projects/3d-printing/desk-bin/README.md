@@ -12,9 +12,13 @@ STLs land in `build/`, already turned for the bed. `assembly-preview` is for loo
 
 ## Size
 
-Body 140 x 140 x 100.3 mm with 30 mm corners; 114.3 mm (4.5 in) tall with the lid on, 144.8 mm
-square at the lid. About 1.8 L inside. The first cut was 174 mm tall, which looked too big for the
-desk. The flap's keel hangs about 50 mm below the rim, so keep the body above about 70 mm. Every dimension is a constant at the top of `src/desk_bin/bin.py`.
+Body 105 x 105 x 100.3 mm with 22.5 mm corners; 114.3 mm (4.5 in) tall with the lid on, 109.8 mm
+square at the lid. About 1 L inside. Every dimension is a constant at the top of
+`src/desk_bin/bin.py`; the lid opening and flap follow `BODY_W`.
+
+The first print was 140 mm square and 114.3 mm tall (the very first cut was 174 mm, too big for
+the desk). Its height was right; this version is 75% of its width and depth. The keel hangs about
+37 mm below the rim, so keep the body above about 55 mm.
 
 ## Parts
 
@@ -22,13 +26,14 @@ desk. The flap's keel hangs about 50 mm below the rim, so keep the body above ab
 |-|-|-|
 | `body` | upright | 2 mm walls, 2.4 mm floor, 4 mm fillet at the foot |
 | `lid` | upside down | the skirt prints on the thicker upper wall, so no support |
-| `flap` | top face down | 2 mm plate, 64 g in PLA; keel and hubs point up |
+| `flap` | top face down | 2 mm plate, 37 g solid; keel and hubs point up |
 | `pin` | lying on their flats | two per plate |
 
-The flap's centre of mass sits 8.5 mm below the pivot if it prints solid, so it prints at 100%
-infill. The first flap's sat 2.3 mm below, which friction at the pins could hold about 15 degrees
-open. A 3 mm plate with a 60 x 18 x 45 mm keel fixed that at 9.2 mm but weighed 113 g; the 2 mm
-plate with a 26 x 14 x 58 mm keel gets 8.5 mm for 63 g, so the flap fits on a partial spool.
+The flap prints solid so its centre of mass lands where the model puts it: 7.0 mm below the pivot,
+with a 24 x 12 x 45 mm keel. Below about 3 mm, friction at the pins can hold the flap 10 to 15
+degrees open (keels of 30 mm or less on this flap land at 1 to 3 mm). The 140 mm print's
+26 x 14 x 58 mm keel put it 8.5 mm below and closed reliably, but looked oversized; the same keel
+on this flap would put it 13 mm below.
 
 Checked in CadQuery: the flap clears the lid ring and body at every angle from -90 to 90 degrees.
 
@@ -39,11 +44,13 @@ textured PEI plate. Folders are under `build/print/`.
 
 | Plate | Profile | Time | PLA |
 |-|-|-|-|
-| `D1 body + lid + pins` | `vault-pla` | 4.0 h | 199 g |
-| `D2 flap (solid)` | `pla-solid` (100% infill) | 1.5 h | 63 g |
+| `D1 body + lid + pins` | `vault-pla` | 2.8 h | 140 g |
+| `D2 flap (solid)` | `pla-solid` (100% infill) | 1.0 h | 36 g |
+| `D3 everything (solid)` | `pla-solid` | 4.3 h | 206 g |
 
-262 g and 5.5 h in all. The flap slices to 63 g against 64 g for the solid model, so the balance
-figure above holds.
+D1 and D2 together are 176 g and 3.8 h. D3 puts all four parts on one plate, but the slicer CLI
+can't set infill per object, so the body and lid print solid too: 30 g and half an hour more for
+one fewer plate swap.
 
 ## Assembly
 

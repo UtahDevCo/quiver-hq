@@ -6,9 +6,9 @@ import cadquery as cq
 # pins across the middle of the ring. A weight under the flap's axis pulls it back level.
 # Parts are modelled in use orientation (z up); the *_print functions turn them for the bed.
 
-BODY_W = 140.0
+BODY_W = 105.0           # 75% of the first 140 mm
 BODY_H = 100.3           # 4.5 in overall with the lid on
-BODY_R = 30.0            # vertical corner radius
+BODY_R = 22.5            # vertical corner radius
 BODY_WALL = 2.0
 BODY_FLOOR = 2.4
 BODY_FOOT_FILLET = 4.0
@@ -17,7 +17,7 @@ LID_CLEARANCE = 0.4      # per side, skirt over the body
 LID_SKIRT_WALL = 2.0
 LID_SKIRT_H = 12.0       # how far the ring hangs over the body
 LID_TOP_H = 14.0         # ring above the rim, where the flap pivots
-LID_OPENING = 132.0      # 2 mm inside the body's inner wall, so the rim is hidden
+LID_OPENING = BODY_W - 2 * BODY_WALL - 4.0   # 2 mm inside the inner wall, so the rim is hidden
 
 FLAP_GAP = 2.0           # per side, flap to opening
 FLAP_T = 2.0
@@ -25,9 +25,9 @@ FLAP_RECESS = 2.0        # flap top below the lid top when closed
 AXIS_BELOW_FLAP_TOP = 3.5
 HUB_D = 10.0
 HUB_L = 12.0
-KEEL_X = 26.0            # along the axis
-KEEL_Y = 14.0
-KEEL_DEPTH = 58.0        # below the axis
+KEEL_X = 24.0            # along the axis
+KEEL_Y = 12.0
+KEEL_DEPTH = 45.0        # below the axis
 
 PIN_D = 4.0
 PIN_HOLE_D = 4.4         # pin turns in the lid

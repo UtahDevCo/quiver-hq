@@ -1,0 +1,96 @@
+{
+  "drawer": {
+    "width_mm": 258.8,
+    "depth_mm": 508.0,
+    "top_width_mm": 298.5,
+    "clearance_h_mm": 95.25
+  },
+  "grid": {
+    "nx": 6,
+    "ny": 12
+  },
+  "baseplates": {
+    "side_pad_mm": 2.4,
+    "plates": [
+      {
+        "name": "baseplate-front",
+        "row": 0,
+        "ny": 6
+      },
+      {
+        "name": "baseplate-back",
+        "row": 6,
+        "ny": 6
+      }
+    ]
+  },
+  "bin": {
+    "wall_mm": 1.6,
+    "floor_mm": 1.2,
+    "inner_fillet_mm": 4.0
+  },
+  "bins": [
+    {
+      "name": "slot-box",
+      "kind": "shadow",
+      "shadow": "slot-box",
+      "col": 0,
+      "row": 0,
+      "nx": 4,
+      "ny": 5,
+      "height_mm": 35,
+      "holds": "comb, straight razor, knife, lighter, clippers, Feather blades, Leaf razor, DE razor"
+    },
+    {
+      "name": "brush-cradle",
+      "kind": "shadow",
+      "shadow": "brush-cradle",
+      "col": 4,
+      "row": 0,
+      "nx": 2,
+      "ny": 3,
+      "height_mm": 40,
+      "holds": "shave brush"
+    },
+    {
+      "name": "small-parts",
+      "kind": "open",
+      "col": 4,
+      "row": 3,
+      "nx": 2,
+      "ny": 2,
+      "height_mm": 40,
+      "holds": "floss picks, spare"
+    },
+    {
+      "name": "shave-foam",
+      "kind": "open",
+      "col": 0,
+      "row": 5,
+      "nx": 6,
+      "ny": 2,
+      "height_mm": 80,
+      "holds": "shave foam can (lying)"
+    },
+    {
+      "name": "meds-body",
+      "kind": "open",
+      "col": 0,
+      "row": 7,
+      "nx": 3,
+      "ny": 5,
+      "height_mm": 80,
+      "holds": "Carpe, allergy pills, pill bottle, nasal inhaler"
+    },
+    {
+      "name": "dental",
+      "kind": "open",
+      "col": 3,
+      "row": 7,
+      "nx": 3,
+      "ny": 5,
+      "height_mm": 80,
+      "holds": "floss x2, flossers, toothpaste x2, mouthwash, nail file"
+    }
+  ]
+}

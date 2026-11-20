@@ -1,0 +1,347 @@
+<title>Toolbox Caliper Sheet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a machinist's inspection sheet. One card per tool: photo of the trace on the left, caliper fields on the right; summary strip on top. */
+:root {
+  --bg: #e9edf0;
+  --sheet: #f8fafb;
+  --ink: #1c2731;
+  --muted: #5b6874;
+  --rule: #cdd5dc;
+  --brass: #9a6b12;
+  --brass-soft: #f1e3c4;
+  --ok: #2f7a4a;
+  --ok-soft: #dcefe2;
+  --warn: #a4521b;
+  --warn-soft: #f6e1d2;
+  --input-bg: #ffffff;
+  --focus: #2f6fa8;
+  --f-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12171c; --sheet: #1a2128; --ink: #e3e9ee; --muted: #93a1ad; --rule: #2d3740;
+    --brass: #d9a94a; --brass-soft: #3a2f19; --ok: #6cc28c; --ok-soft: #18301f;
+    --warn: #eb9a62; --warn-soft: #3a2416; --input-bg: #10151a; --focus: #7fb3e0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12171c; --sheet: #1a2128; --ink: #e3e9ee; --muted: #93a1ad; --rule: #2d3740;
+  --brass: #d9a94a; --brass-soft: #3a2f19; --ok: #6cc28c; --ok-soft: #18301f;
+  --warn: #eb9a62; --warn-soft: #3a2416; --input-bg: #10151a; --focus: #7fb3e0;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 22px; }
+header { display: grid; gap: 10px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(32px, 6vw, 46px); line-height: 1; margin: 0; text-wrap: balance; letter-spacing: .01em; }
+.lede { max-width: 68ch; color: var(--muted); margin: 0; }
+.lede strong { color: var(--ink); font-weight: 600; }
+
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.stat { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.stat .k { font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.stat .v { font-family: var(--f-display); font-size: 24px; font-weight: 600; line-height: 1.1; }
+.stat .s { font-size: 13px; color: var(--muted); }
+.pill { display: inline-block; font-family: var(--f-mono); font-size: 12px; padding: 1px 8px; border-radius: 99px; background: var(--rule); color: var(--ink); }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.save { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+
+section.tool { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); }
+section.tool > .pics { border-right: 1px solid var(--rule); padding: 16px; display: grid; gap: 12px; align-content: start; }
+section.tool > .body { padding: 16px 18px 18px; display: grid; gap: 14px; min-width: 0; }
+figure { margin: 0; display: grid; gap: 4px; }
+figure img { display: block; width: 100%; max-height: 300px; object-fit: contain; border-radius: 4px; background: var(--bg); }
+figcaption { font-size: 12px; color: var(--muted); font-family: var(--f-mono); }
+.th { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+h2 { font-family: var(--f-display); font-size: 26px; font-weight: 600; margin: 0; line-height: 1.1; }
+.mode { font-family: var(--f-mono); font-size: 12px; color: var(--brass); background: var(--brass-soft); padding: 1px 8px; border-radius: 3px; }
+.why { margin: 0; color: var(--muted); font-size: 14px; max-width: 68ch; }
+
+.fields { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.field { display: grid; grid-template-columns: minmax(0, 1fr) 92px 128px 76px; gap: 6px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.field label { font-weight: 600; display: block; }
+.field .how { font-size: 13px; color: var(--muted); display: block; font-weight: 400; }
+.traced { font-family: var(--f-mono); font-size: 13px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.traced b { font-weight: 400; display: block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.traced i { font-style: normal; display: block; font-size: 11px; opacity: .75; }
+.inp { display: flex; align-items: center; gap: 6px; }
+.inp input { width: 100%; min-width: 0; font-family: var(--f-mono); font-size: 16px; font-variant-numeric: tabular-nums; padding: 7px 8px; border: 1px solid var(--rule); border-radius: 4px; background: var(--input-bg); color: var(--ink); text-align: right; }
+.inp input:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
+.inp span { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.delta { font-family: var(--f-mono); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+.derived { font-size: 13px; color: var(--muted); padding: 8px 10px; background: var(--bg); border-radius: 4px; }
+.derived b { color: var(--ink); font-family: var(--f-mono); font-weight: 600; }
+textarea { width: 100%; min-height: 64px; font-family: var(--f-body); font-size: 14px; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 4px; background: var(--input-bg); color: var(--ink); resize: vertical; }
+.notes label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px; }
+.banner { padding: 10px 14px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); font-size: 14px; }
+
+@media (max-width: 760px) {
+  section.tool { grid-template-columns: minmax(0, 1fr); }
+  section.tool > .pics { border-right: 0; border-bottom: 1px solid var(--rule); grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  .field { grid-template-columns: minmax(0, 1fr) 120px; }
+  .field .traced { grid-column: 1; text-align: left; }
+  .field .traced b { display: inline; margin-right: 6px; }
+  .field .delta { grid-column: 2; }
+  .field > div:first-child { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: no-preference) { .inp input { transition: border-color .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">projects/3d-printing/toolbox · Tracefinity caliper check</div>
+    <h1>Toolbox Caliper Sheet</h1>
+    <p class="lede">Measure each tool with calipers in <strong>millimetres</strong> and type the number in. Every entry saves as you go and Claude reads it straight from here. Each row shows what the 60 cm reshoot traced, with the earlier close-up value beneath it where there is one, so the difference tells us which photos to trust. Leave a box empty if you can't measure it.</p>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <div class="strip">
+    <div class="stat"><span class="k">Filled in</span><span class="v" id="countV">0 / 0</span><span class="s save" id="saveS">Connecting…</span></div>
+    <div class="stat"><span class="k">Scale check</span><span class="v" id="scaleV">Waiting</span><span class="s" id="scaleS">Needs the dot gap or the clipper length</span></div>
+    <div class="stat"><span class="k">Average gap to trace</span><span class="v" id="avgV">–</span><span class="s" id="avgS">Across lengths you've entered</span></div>
+  </div>
+
+  <div id="tools"></div>
+</div>
+
+<script>
+const IMG = {{IMAGES}};
+
+const TOOLS = [
+  {
+    id: "scale", name: "Scale check", mode: "notebook",
+    why: "The trace scale comes from the notebook's printed dots, assumed 5 mm apart. Measuring 10 gaps confirms it directly.",
+    pics: [["dots", "Dot grid on the notebook page"]],
+    fields: [
+      { id: "dots_10", label: "10 dot gaps", how: "From one dot to the 11th dot along a row, centre to centre.", traced: 50.0, kind: "scale" },
+    ],
+  },
+  {
+    id: "clipper", name: "Nail clipper", mode: "stands on edge",
+    why: "Its overall length is the second scale check. Its flat width becomes how tall it stands in the slot.",
+    pics: [["clipper-flat", "Flat, 60 cm reshoot, 91.8 × 18.9"], ["clipper-edge", "On edge, close-up only, 96.1 × 20.1"]],
+    fields: [
+      { id: "clipper_length", label: "Overall length, closed", how: "End to end with the lever folded flat.", traced: 91.8, close: 94.0, kind: "scale" },
+      { id: "clipper_width", label: "Width lying flat", how: "Widest point side to side. Sets how tall it stands.", traced: 18.9, close: 19.5, kind: "height" },
+      { id: "clipper_thick", label: "Thickness", how: "Thickest point, lever folded. Sets the slot width.", traced: 20.1, closeOnly: true },
+    ],
+    derive: { height: "clipper_width", current: 14 },
+  },
+  {
+    id: "straight", name: "Straight razor", mode: "stands on edge",
+    why: "Stands spine-down in a narrow slot. The thickness matters most because the slot is only as wide as the trace.",
+    pics: [["straight-flat", "Flat, close-up only, 147.7 × 28.3"], ["straight-edge", "On edge, 60 cm reshoot, 149.9 × 9.5"]],
+    fields: [
+      { id: "straight_length", label: "Overall length, closed", how: "Tip of the tang to the far end of the scales.", traced: 149.9, close: 152.8 },
+      { id: "straight_width", label: "Width lying flat", how: "Widest point, spine to edge side. Sets how tall it stands.", traced: 28.3, closeOnly: true, kind: "height" },
+      { id: "straight_thick", label: "Thickness", how: "Thickest point, usually across the pivot pin.", traced: 9.5, close: 10.8 },
+    ],
+    derive: { height: "straight_width", current: 20 },
+  },
+  {
+    id: "safety", name: "Safety razor", mode: "stands on edge",
+    why: "Lies on its side with the head standing up, so the head width is its height in the bin.",
+    pics: [["safety-flat", "Flat, 60 cm reshoot, 106.5 × 45.1"], ["safety-edge", "On edge, 60 cm reshoot, 107.3 × 25.2"]],
+    fields: [
+      { id: "safety_length", label: "Overall length", how: "Bottom of the handle to the top of the head.", traced: 106.5, close: 107.5 },
+      { id: "safety_head_w", label: "Head width", how: "Across the blade, end to end. Sets how tall it stands.", traced: 45.1, close: 45.9, kind: "height" },
+      { id: "safety_head_t", label: "Head thickness", how: "Front to back of the head, the widest part seen edge-on.", traced: 25.2, close: 26.6 },
+      { id: "safety_handle_d", label: "Handle diameter", how: "Thickest part of the knurled handle.", traced: null },
+    ],
+    derive: { height: "safety_head_w", current: 30 },
+  },
+  {
+    id: "gold", name: "Gold razor", mode: "lies flat, sloped neck",
+    why: "The neck bends, so the head sits at a different height from the handle. These numbers let me cut a stepped pocket: a shallow one for the handle and a deeper one for the head.",
+    pics: [["gold-flat", "Flat, 60 cm reshoot, 154.3 × 46.0"], ["gold-side", "Side view, for the slope only"]],
+    fields: [
+      { id: "gold_length", label: "Overall length", how: "Butt of the handle to the far edge of the head.", traced: 154.3, close: 157.1 },
+      { id: "gold_head_w", label: "Head width", how: "Across the cartridge, side to side.", traced: 46.0, close: 46.8 },
+      { id: "gold_handle_h", label: "Handle height lying flat", how: "Lay it face-up like the flat photo. Table to the top of the handle.", traced: null },
+      { id: "gold_head_h", label: "Head height lying flat", how: "Same position. Table to the highest point of the head.", traced: null },
+      { id: "gold_bend", label: "Straight handle length", how: "From the butt to where the neck starts to bend.", traced: null },
+    ],
+  },
+  {
+    id: "box", name: "Where the bins go", mode: "drawer or toolbox",
+    why: "Sets the bin footprint and height limit. Gridfinity bins come in 42 mm squares and 7 mm height units.",
+    pics: [],
+    fields: [
+      { id: "box_w", label: "Inside width", how: "Wall to wall, at the narrowest point.", traced: null, kind: "box" },
+      { id: "box_d", label: "Inside depth", how: "Front to back, inside.", traced: null, kind: "box" },
+      { id: "box_h", label: "Usable height", how: "Floor to the lowest thing above, such as the drawer above or the lid.", traced: null, kind: "box" },
+      { id: "grab", label: "How much should stick up", how: "Height of tool left above the bin to grab it. 8 mm is a reasonable start.", traced: null, kind: "pref" },
+    ],
+  },
+];
+
+const ALL = TOOLS.flatMap(t => t.fields);
+const values = {};
+const notes = {};
+let db = null, readOnly = false;
+
+const $ = (s, el = document) => el.querySelector(s);
+const fmt = n => (Math.round(n * 10) / 10).toFixed(1);
+
+function render() {
+  const host = $("#tools");
+  for (const t of TOOLS) {
+    const sec = document.createElement("section");
+    sec.className = "tool";
+    sec.id = "tool-" + t.id;
+    if (!t.pics.length) sec.style.gridTemplateColumns = "minmax(0,1fr)";
+    sec.innerHTML = `
+      ${t.pics.length ? `<div class="pics">${t.pics.map(([k, c]) => `<figure><img src="${IMG[k]}" alt="${c}"><figcaption>${c}</figcaption></figure>`).join("")}</div>` : ""}
+      <div class="body">
+        <div class="th"><h2>${t.name}</h2><span class="mode">${t.mode}</span></div>
+        <p class="why">${t.why}</p>
+        <div class="fields">${t.fields.map(f => `
+          <div class="field">
+            <div><label for="f-${f.id}">${f.label}</label><span class="how">${f.how}</span></div>
+            <div class="traced"><b>${f.closeOnly ? "close-up" : "traced"}</b>${f.traced == null ? "–" : fmt(f.traced)}${f.close != null ? `<i>close-up ${fmt(f.close)}</i>` : ""}</div>
+            <div class="inp"><input id="f-${f.id}" type="number" inputmode="decimal" step="0.01" min="0" placeholder="mm" data-id="${f.id}"><span>mm</span></div>
+            <div class="delta" id="d-${f.id}"></div>
+          </div>`).join("")}
+        </div>
+        ${t.derive ? `<div class="derived" id="dv-${t.id}"></div>` : ""}
+        <div class="notes"><label for="n-${t.id}">Notes on the ${t.name.toLowerCase()}</label><textarea id="n-${t.id}" data-note="${t.id}" placeholder="Anything odd: a part that sticks out, which way it should face, a second one of these"></textarea></div>
+      </div>`;
+    host.appendChild(sec);
+  }
+  host.addEventListener("input", onInput);
+}
+
+function pctPill(v, traced) {
+  const d = (v - traced) / traced * 100;
+  const cls = Math.abs(d) <= 1 ? "ok" : Math.abs(d) <= 3 ? "" : "warn";
+  return `<span class="pill ${cls}">${d >= 0 ? "+" : ""}${d.toFixed(1)}%</span>`;
+}
+
+function refresh() {
+  let filled = 0;
+  const gaps = [];
+  for (const f of ALL) {
+    const v = values[f.id];
+    const el = $("#d-" + f.id);
+    if (v == null) { el.innerHTML = ""; continue; }
+    filled++;
+    if (f.traced != null) {
+      el.innerHTML = pctPill(v, f.traced);
+      if (f.kind !== "height" && f.kind !== "scale" && !/_t$|_thick$/.test(f.id)) gaps.push((v - f.traced) / f.traced * 100);
+    } else el.innerHTML = "";
+  }
+  $("#countV").textContent = `${filled} / ${ALL.length}`;
+
+  const scale = ["dots_10", "clipper_length"].map(id => values[id] != null ? [id, values[id] / ALL.find(f => f.id === id).traced] : null).filter(Boolean);
+  if (!scale.length) { $("#scaleV").textContent = "Waiting"; $("#scaleS").textContent = "Needs the dot gap or the clipper length"; }
+  else {
+    const worst = scale.reduce((a, b) => Math.abs(b[1] - 1) > Math.abs(a[1] - 1) ? b : a);
+    const pct = (worst[1] - 1) * 100;
+    $("#scaleV").innerHTML = Math.abs(pct) <= 1 ? `<span class="pill ok">Confirmed</span>` : `<span class="pill warn">Off ${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%</span>`;
+    $("#scaleS").textContent = scale.map(([id, r]) => `${id === "dots_10" ? "dots" : "clipper"} ${r >= 1 ? "+" : ""}${((r - 1) * 100).toFixed(1)}%`).join(" · ");
+  }
+  if (gaps.length) {
+    const avg = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+    $("#avgV").textContent = `${avg >= 0 ? "+" : ""}${avg.toFixed(1)}%`;
+    $("#avgS").textContent = `Mean of ${gaps.length} length${gaps.length > 1 ? "s" : ""}; positive means the trace came out small`;
+  } else { $("#avgV").textContent = "–"; $("#avgS").textContent = "Across lengths you've entered"; }
+
+  const grab = values.grab ?? 8;
+  for (const t of TOOLS) {
+    if (!t.derive) continue;
+    const h = values[t.derive.height];
+    const el = $("#dv-" + t.id);
+    el.innerHTML = h == null
+      ? `Pocket depth in the test bin is <b>${t.derive.current} mm</b>. Enter the flat width to size it against the grab height.`
+      : `Stands <b>${fmt(h)} mm</b> tall. With <b>${fmt(grab)} mm</b> sticking up the pocket would be <b>${fmt(Math.max(5, h - grab))} mm</b> deep (test bin: ${t.derive.current} mm).`;
+  }
+}
+
+const timers = {};
+function onInput(e) {
+  const el = e.target;
+  if (el.dataset.id) {
+    const raw = el.value.trim();
+    const v = raw === "" ? null : Number(raw);
+    if (raw !== "" && !(v > 0)) return;
+    values[el.dataset.id] = v;
+    refresh();
+    queueSave("m:" + el.dataset.id, () => ({ value: v }), "measurements/" + el.dataset.id);
+  } else if (el.dataset.note) {
+    notes[el.dataset.note] = el.value;
+    queueSave("n:" + el.dataset.note, () => ({ text: notes[el.dataset.note] }), "notes/" + el.dataset.note);
+  }
+}
+
+const writing = {};
+function queueSave(key, body, path) {
+  if (!db || readOnly) return;
+  clearTimeout(timers[key]);
+  $("#saveS").textContent = "Saving…";
+  timers[key] = setTimeout(async () => {
+    while (writing[path]) await writing[path];
+    const p = db.doc(path).set({ ...body(), updatedAt: new Date().toISOString() });
+    writing[path] = p.catch(() => {});
+    try { await p; $("#saveS").textContent = "Saved"; }
+    catch (err) {
+      if (err && err.code === "invalid_argument") { readOnly = true; lock("You can view this sheet but not change it."); }
+      else $("#saveS").textContent = "Not saved. Check your connection and edit the box again.";
+    } finally { writing[path] = null; }
+  }, 500);
+}
+
+function lock(msg) {
+  document.querySelectorAll("input, textarea").forEach(i => i.disabled = true);
+  const b = $("#banner"); b.textContent = msg; b.hidden = false;
+  $("#saveS").textContent = "Read-only";
+}
+
+function applyDoc(path, data) {
+  const [col, id] = path;
+  if (col === "measurements") {
+    const v = typeof data?.value === "number" ? data.value : null;
+    values[id] = v;
+    const el = $("#f-" + id);
+    if (el && document.activeElement !== el) el.value = v == null ? "" : String(v);
+  } else if (col === "notes") {
+    notes[id] = data?.text ?? "";
+    const el = $("#n-" + id);
+    if (el && document.activeElement !== el) el.value = notes[id];
+  }
+}
+
+async function connect() {
+  render(); refresh();
+  try { db = window.claude ? await window.claude.use("db") : null; } catch { db = null; }
+  if (!db) { lock("Saving isn't available here. Open the sheet on claude.ai, signed in, to fill it in."); return; }
+  try {
+    const user = await window.claude.use("user");
+    const can = user ? await user.can("data.write") : null;
+    if (can === false) { readOnly = true; lock("You can view this sheet but not change it."); }
+  } catch {}
+  let loaded = 0;
+  const slow = setTimeout(() => { $("#saveS").textContent = "Can't reach saved values yet. Entries may not save."; }, 10000);
+  for (const col of ["measurements", "notes"]) {
+    db.collection(col).onSnapshot(snap => {
+      for (const d of snap.docs) applyDoc([col, d.id], d.data());
+      if (!snap.metadata.fromCache && ++loaded >= 2) { clearTimeout(slow); if (!readOnly) $("#saveS").textContent = "All entries saved"; }
+      refresh();
+    }, () => { clearTimeout(slow); $("#saveS").textContent = "Lost the connection to saved values. Reload to reconnect."; });
+  }
+}
+connect();
+</script>

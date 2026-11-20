@@ -24,7 +24,7 @@ Resolve against the [meta layer](../../meta/index.md) — see
 
 # Failure modes
 
-*Things that look right here and are not. Empty.*
+* [cadquery-sequential-cuts-avoid-fragmentation](failure-modes/cadquery-sequential-cuts-avoid-fragmentation.md) - A single Compound holding two overlapping cutters (a bore and a slot that intersects it) makes the OCC boolean imprint the body into many disconnected per-feature solids. Cut each category in its own sequential .cut() pass.
 
 # Practices
 
@@ -38,6 +38,7 @@ Resolve against the [meta layer](../../meta/index.md) — see
 * [qidi-plus-4-hardware-profile](modules/qidi-plus-4-hardware-profile.md) - Enclosed CoreXY, 305×305×280 mm, direct-drive bimetal hotend to 370°C, bed to 120°C, 400W chamber heater to 65°C, dual textured PEI, Klipper + QIDI Studio.
 * [plus-4-per-material-slicer-starting-settings](modules/plus-4-per-material-slicer-starting-settings.md) - Starting nozzle/bed/chamber/speed ranges for PLA+/PETG/PETG-CF/TPU. Community starting points; QIDI Studio's built-in presets are authoritative.
 * [sunlu-dryer-schedule-per-material](modules/sunlu-dryer-schedule-per-material.md) - Drying temp/time per material. SUNLU S2/S4 cap at 70°C, which covers all four; E2's 110°C is only for high-temp engineering filaments.
+* [elfa-utility-board-clip-dovetail-interface](modules/elfa-utility-board-clip-dovetail-interface.md) - Reuse the thing:4060473 spring-clip; parts carry a female half-dovetail socket (3.3mm mouth to 6.8mm base over 6mm) that slides onto the clip's bar. Board slot pitch 32.5mm.
 
 # Invariants
 

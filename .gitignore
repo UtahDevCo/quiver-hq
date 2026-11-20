@@ -42,3 +42,11 @@ projects/foundation-web/
 # (scratch/agy predates this rule and stays tracked.)
 temp/
 scratch/
+
+# Production database backups
+projects/trikin-backups/
+
+# Agent worktrees, slicer outputs, and local debug/WIP artifacts
+.claude/worktrees/
+result.json
+*-debug.log
