@@ -41,3 +41,6 @@
 [submodule "projects/calligraphy-2018"]
 	path = projects/calligraphy-2018
 	url = git@github.com:deltaepsilon/calligraphy.git
+[submodule "projects/melissaesplin.com"]
+	path = projects/melissaesplin.com
+	url = git@github.com:deltaepsilon/melissaesplin.com.git
