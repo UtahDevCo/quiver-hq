@@ -231,7 +231,9 @@ def build_report():
             prop = item["property"].replace("sc-domain:", "")
             ov = item["overview"] or {}
             curr = ov.get("current") if isinstance(ov.get("current"), dict) else ov
-            prev = ov.get("previous") if isinstance(ov.get("previous"), dict) else {}
+            prev = ov.get("comparison") if isinstance(ov.get("comparison"), dict) else (
+                ov.get("previous") if isinstance(ov.get("previous"), dict) else {}
+            )
 
             clicks = curr.get("clicks", 0)
             impr = curr.get("impressions", 0)
