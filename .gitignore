@@ -2,6 +2,7 @@
 bin/*
 !bin/quiver-monitor
 !bin/gh-stacks
+!bin/weekly-seo-report.py
 controller
 quiver-secrets
 interactive-mission
